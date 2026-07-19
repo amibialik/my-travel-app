@@ -4064,7 +4064,7 @@ body.admin-mode .admin-pill-btn:hover {
 /* Floating GPS button on map */
 .map-gps-btn {
     position: absolute;
-    top: 20px;
+    bottom: 24px;
     left: 20px;
     width: 40px;
     height: 40px;
@@ -5056,7 +5056,7 @@ body.mobile-view-itinerary .itinerary-panel {
 /* Layout dropdown styling */
 .layout-dropdown {
     position: fixed;
-    z-index: 9999;
+    z-index: 10000 !important;
     background: rgba(30, 30, 56, 0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
