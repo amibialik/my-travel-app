@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bialik-travels-v2';
+const CACHE_NAME = 'bialik-travels-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const ASSETS = [
   './itinerary.js',
   './firebase-config.js',
   './logo.jpg',
+  './user_guide.md',
   'https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Varela+Round&family=Caveat:wght@400;700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
   'https://cdn.jsdelivr.net/npm/chart.js',
@@ -98,6 +99,8 @@ self.addEventListener('fetch', e => {
           if (e.request.mode === 'navigate') {
             return caches.match('./index.html');
           }
+          // Return a valid offline 404 Response to prevent unhandled promise rejection
+          return new Response('Not found', { status: 404, statusText: 'Not Found' });
         });
       })
   );
