@@ -2442,6 +2442,14 @@ body {
 }
 
 /* ---------- Leaflet Overrides ---------- */
+.leaflet-top {
+    margin-top: 15px !important;
+}
+
+.leaflet-control-layers {
+    z-index: 1005 !important;
+}
+
 .leaflet-control-zoom {
     border: 2px solid var(--border) !important;
     box-shadow: var(--shadow-md) !important;
@@ -3622,9 +3630,9 @@ body {
 /* ============ Map Layers Controller ============ */
 .map-layer-controller {
     position: absolute;
-    top: 20px;
+    top: 28px;
     left: 20px;
-    z-index: 1000;
+    z-index: 1005;
     direction: rtl;
 }
 
