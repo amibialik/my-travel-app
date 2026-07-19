@@ -47,7 +47,9 @@ import {
     closeGooglePlacePanel,
     escapeHtml,
     setActiveMarker,
-    renderImagePreviews
+    renderImagePreviews,
+    checkAdminMode,
+    initAdminEvents
 } from './ui.js';
 
 import {
@@ -681,6 +683,7 @@ function initHorizontalDragScroll(container) {
 
 // ============= Init Events =============
 function initEvents() {
+    initAdminEvents();
     const searchInput = document.getElementById('search-places-input');
     if (searchInput) {
         const debouncedSearch = debounce((value) => {

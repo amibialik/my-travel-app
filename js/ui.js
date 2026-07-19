@@ -1528,3 +1528,92 @@ export function updateSavedMapsList() {
     });
 }
 window.updateSavedMapsList = updateSavedMapsList;
+
+// ============= Admin Mode (מצב עריכה) =============
+const adminModePasswordHash = "1509442"; // default password: "1234"
+
+function hashPassword(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = (hash << 5) - hash + char;
+        hash = hash & hash;
+    }
+    return String(hash);
+}
+
+export function checkAdminMode() {
+    if (sessionStorage.getItem('isAdmin') === 'true') {
+        document.body.classList.add('admin-mode');
+        const lockBtn = document.getElementById('btn-admin-lock');
+        if (lockBtn) {
+            lockBtn.innerHTML = '<i class="fas fa-lock-open"></i><span class="admin-btn-text">מנהל</span>';
+            lockBtn.title = 'יציאה ממצב מנהל';
+        }
+    }
+}
+window.checkAdminMode = checkAdminMode;
+
+export function initAdminEvents() {
+    const adminLockBtn = document.getElementById('btn-admin-lock');
+    const adminModal = document.getElementById('admin-modal-overlay');
+    const adminCloseBtn = document.getElementById('admin-modal-close');
+    const adminCancelBtn = document.getElementById('btn-admin-cancel');
+    const adminSubmitBtn = document.getElementById('btn-admin-submit');
+    const adminPasswordInput = document.getElementById('admin-password');
+
+    if (adminLockBtn && adminModal) {
+        adminLockBtn.addEventListener('click', () => {
+            const isAdmin = document.body.classList.contains('admin-mode');
+            if (isAdmin) {
+                if (confirm('האם ברצונך לצאת ממצב מנהל?')) {
+                    document.body.classList.remove('admin-mode');
+                    sessionStorage.removeItem('isAdmin');
+                    adminLockBtn.innerHTML = '<i class="fas fa-lock"></i><span class="admin-btn-text">עריכה</span>';
+                    adminLockBtn.title = 'כניסת מנהל';
+                    showToast('יצאת ממצב מנהל בהצלחה', 'info');
+                    renderPlaces();
+                    renderGroupTabs();
+                }
+            } else {
+                if (adminPasswordInput) adminPasswordInput.value = '';
+                adminModal.classList.add('active');
+                if (adminPasswordInput) adminPasswordInput.focus();
+            }
+        });
+
+        const closeAdminModal = () => {
+            adminModal.classList.remove('active');
+        };
+
+        if (adminCloseBtn) adminCloseBtn.addEventListener('click', closeAdminModal);
+        if (adminCancelBtn) adminCancelBtn.addEventListener('click', closeAdminModal);
+
+        const submitAdminLogin = () => {
+            const password = adminPasswordInput ? adminPasswordInput.value : '';
+            const hash = hashPassword(password);
+            if (hash === adminModePasswordHash) {
+                document.body.classList.add('admin-mode');
+                sessionStorage.setItem('isAdmin', 'true');
+                adminLockBtn.innerHTML = '<i class="fas fa-lock-open"></i><span class="admin-btn-text">מנהל</span>';
+                adminLockBtn.title = 'יציאה ממצב מנהל';
+                showToast('ברוך הבא! נכנסת למצב מנהל', 'success');
+                closeAdminModal();
+                renderPlaces();
+                renderGroupTabs();
+            } else {
+                showToast('סיסמה שגויה!', 'error');
+            }
+        };
+
+        if (adminSubmitBtn) adminSubmitBtn.addEventListener('click', submitAdminLogin);
+        if (adminPasswordInput) {
+            adminPasswordInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    submitAdminLogin();
+                }
+            });
+        }
+    }
+}
+
