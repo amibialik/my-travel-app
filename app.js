@@ -3773,13 +3773,15 @@ function initEvents() {
 
     if (btnOpenGuide && guideModalOverlay) {
         btnOpenGuide.addEventListener('click', () => {
-            guideModalOverlay.style.display = 'block';
+            guideModalOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
         });
     }
 
     if (btnCloseGuide && guideModalOverlay) {
         btnCloseGuide.addEventListener('click', () => {
-            guideModalOverlay.style.display = 'none';
+            guideModalOverlay.classList.remove('active');
+            document.body.style.overflow = '';
         });
     }
 
@@ -3787,7 +3789,8 @@ function initEvents() {
     if (guideModalOverlay) {
         guideModalOverlay.addEventListener('click', (e) => {
             if (e.target === guideModalOverlay) {
-                guideModalOverlay.style.display = 'none';
+                guideModalOverlay.classList.remove('active');
+                document.body.style.overflow = '';
             }
         });
     }
