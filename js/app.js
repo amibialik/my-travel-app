@@ -49,7 +49,8 @@ import {
     setActiveMarker,
     renderImagePreviews,
     checkAdminMode,
-    initAdminEvents
+    initAdminEvents,
+    initOfflineEvents
 } from './ui.js';
 
 import {
@@ -684,6 +685,7 @@ function initHorizontalDragScroll(container) {
 // ============= Init Events =============
 function initEvents() {
     initAdminEvents();
+    initOfflineEvents();
     const searchInput = document.getElementById('search-places-input');
     if (searchInput) {
         const debouncedSearch = debounce((value) => {

@@ -23,7 +23,9 @@ import {
     panToPlace,
     toggleOfflineMode,
     syncLeafletView,
-    deleteSavedMap
+    deleteSavedMap,
+    getTilesForTrack,
+    downloadOfflineTiles
 } from './map.js';
 
 import {
@@ -47,28 +49,48 @@ import {
 
 // ============= Toast Notifications =============
 export function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    const toastMessage = document.getElementById('toast-message');
+    const toastIcon = document.getElementById('toast-icon');
+
+    if (toast && toastMessage && toastIcon) {
+        toastMessage.textContent = message;
+        toastIcon.className = 'fas ';
+        if (type === 'success') toastIcon.className += 'fa-check-circle';
+        else if (type === 'error') toastIcon.className += 'fa-exclamation-circle';
+        else if (type === 'warning') toastIcon.className += 'fa-exclamation-triangle';
+        else toastIcon.className += 'fa-info-circle';
+
+        toast.className = `toast toast-${type} active`;
+        if (window.toastTimeout) clearTimeout(window.toastTimeout);
+        window.toastTimeout = setTimeout(() => {
+            toast.classList.remove('active');
+        }, 3000);
+        return;
+    }
+
     const container = document.getElementById('toast-container');
     if (!container) return;
 
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
+    const toastEl = document.createElement('div');
+    toastEl.className = `toast toast-${type}`;
 
     let icon = 'fa-info-circle';
     if (type === 'success') icon = 'fa-check-circle';
     if (type === 'error') icon = 'fa-exclamation-circle';
     if (type === 'warning') icon = 'fa-exclamation-triangle';
 
-    toast.innerHTML = `<i class="fas ${icon}"></i> <span>${escapeHtml(message)}</span>`;
-    container.appendChild(toast);
+    toastEl.innerHTML = `<i class="fas ${icon}"></i> <span>${escapeHtml(message)}</span>`;
+    container.appendChild(toastEl);
 
     setTimeout(() => {
-        toast.classList.add('active');
+        toastEl.classList.add('active');
     }, 10);
 
     setTimeout(() => {
-        toast.classList.remove('active');
-        setTimeout(() => toast.remove(), 400);
-    }, 3500);
+        toastEl.classList.remove('active');
+        setTimeout(() => toastEl.remove(), 400);
+    }, 3000);
 }
 
 // ============= Helper Functions =============
@@ -1616,4 +1638,118 @@ export function initAdminEvents() {
         }
     }
 }
+
+// ============= Offline Mode Event Handlers =============
+export function initOfflineEvents() {
+    const offlineManagerBtn = document.getElementById('btn-offline-manager');
+    const offlineModal = document.getElementById('offline-modal-overlay');
+    const offlineCloseBtn = document.getElementById('offline-modal-close');
+    const offlineCloseBottomBtn = document.getElementById('btn-offline-close-bottom');
+    const downloadOfflineBtn = document.getElementById('btn-download-offline-map');
+    const simulateOfflineCheckbox = document.getElementById('toggle-simulate-offline');
+    const offlineTrekSelect = document.getElementById('offline-trek-select');
+
+    if (offlineManagerBtn && offlineModal) {
+        offlineManagerBtn.addEventListener('click', () => {
+            if (offlineTrekSelect) {
+                offlineTrekSelect.innerHTML = `<option value="all">כל המסלולים השמורים</option>` + 
+                    places.filter(p => p.gpxData && p.gpxData.length > 0)
+                        .map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`)
+                        .join('');
+            }
+            updateSavedMapsList();
+            offlineModal.classList.add('active');
+        });
+
+        if (offlineCloseBtn) {
+            offlineCloseBtn.addEventListener('click', () => {
+                offlineModal.classList.remove('active');
+            });
+        }
+
+        if (offlineCloseBottomBtn) {
+            offlineCloseBottomBtn.addEventListener('click', () => {
+                offlineModal.classList.remove('active');
+            });
+        }
+
+        if (downloadOfflineBtn) {
+            downloadOfflineBtn.addEventListener('click', async () => {
+                const layerSelect = document.getElementById('offline-layer-select');
+                const layerType = layerSelect ? layerSelect.value : 'osm';
+                const trekId = offlineTrekSelect ? offlineTrekSelect.value : 'all';
+
+                let points = [];
+                let mapName = '';
+                let mapKey = '';
+
+                if (trekId === 'all') {
+                    places.forEach(p => {
+                        if (p.gpxData) points.push(...p.gpxData);
+                    });
+                    mapName = 'כל המסלולים';
+                    mapKey = `all_${layerType}`;
+                } else {
+                    const place = places.find(p => p.id === trekId);
+                    if (place && place.gpxData) {
+                        points = place.gpxData;
+                        mapName = place.name;
+                        mapKey = `${place.id}_${layerType}`;
+                    }
+                }
+
+                if (points.length === 0) {
+                    showToast('לא נמצאו קואורדינטות מסלול GPX להורדה', 'warning');
+                    return;
+                }
+
+                showToast('מחשב אריחי מפה להורדה...', 'info');
+                const urls = getTilesForTrack(points, layerType);
+
+                if (urls.length === 0) {
+                    showToast('שגיאה בחישוב אריחי מפה', 'error');
+                    return;
+                }
+
+                if (urls.length > 2000) {
+                    if (!confirm(`שים לב: המפה שבחרת דורשת ${urls.length} אריחים. ההורדה עשויה לקחת דקה. להמשיך?`)) {
+                        return;
+                    }
+                }
+
+                await downloadOfflineTiles(urls, mapKey, mapName, layerType);
+            });
+        }
+    }
+
+    if (simulateOfflineCheckbox) {
+        simulateOfflineCheckbox.addEventListener('change', (e) => {
+            toggleOfflineMode(e.target.checked);
+            if (e.target.checked) {
+                showToast('מצב לא מקוון מדומה מופעל', 'info');
+            } else {
+                showToast('חזרת למצב מקוון (מפות גוגל)', 'info');
+            }
+        });
+    }
+
+    window.addEventListener('offline', () => {
+        showToast('החיבור לאינטרנט אבד! עובר אוטומטית למפות שטח אוף-ליין', 'warning');
+        toggleOfflineMode(true);
+        if (simulateOfflineCheckbox) simulateOfflineCheckbox.checked = true;
+    });
+
+    window.addEventListener('online', () => {
+        if (simulateOfflineCheckbox && !simulateOfflineCheckbox.checked) {
+            showToast('החיבור לאינטרנט חזר! טוען מפות גוגל מקוונות', 'success');
+            toggleOfflineMode(false);
+        }
+    });
+
+    if (!navigator.onLine) {
+        toggleOfflineMode(true);
+        if (simulateOfflineCheckbox) simulateOfflineCheckbox.checked = true;
+    }
+}
+
 
