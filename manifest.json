@@ -1,0 +1,17 @@
+{
+  "short_name": "המסעות של ביאליק",
+  "name": "המסעות של ביאליק - מפת טיולים",
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#1a1a2e",
+  "theme_color": "#0f0f23",
+  "display": "standalone",
+  "orientation": "portrait"
+}

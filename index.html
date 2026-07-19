@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <script>
+        // Force trailing slash for directory access to ensure correct relative path resolution
+        if (window.location.pathname.endsWith('/travel-site')) {
+            window.location.replace(window.location.pathname + '/' + window.location.search + window.location.hash);
+        }
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>המסעות של ביאליק | מפת טיולים אישית</title>
+    <meta name="description" content="אתר אישי לניהול ושמירת מיקומי טיולים עם מפה אינטראקטיבית בסגנון הנסיך הקטן">
+    <link rel="icon" href="logo.jpg">
+    <!-- PWA Configuration -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="המסעות של ביאליק">
+    <link rel="apple-touch-icon" href="logo.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Varela+Round&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+    <!-- ============ Splash Screen (Welcome Page) ============ -->
+    <div id="splash-screen" class="splash-overlay">
+        <div class="splash-content">
+            <img src="logo.jpg" alt="Bialik's Travels Logo" class="splash-logo">
+            <h1 class="splash-title">המסעות של ביאליק</h1>
+            <p class="splash-subtitle">מפת הטיולים והחלומות</p>
+            <button id="btn-start-app" class="splash-btn">
+                <span>בואו נתחיל</span>
+                <i class="fas fa-compass animate-spin-slow"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ============ Header ============ -->
+    <header class="header-bar">
+        <div class="header-content">
+            <div class="logo">
+                <img src="logo.jpg" alt="Bialik's Travels" class="logo-img">
+                <div class="logo-text">
+                    <span class="logo-en">Bialik's Travels</span>
+                    <span class="logo-he">המסעות של ביאליק</span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="admin-pill-btn" id="btn-admin-lock" title="כניסת מנהל">
+                    <i class="fas fa-lock"></i>
+                    <span class="admin-btn-text">עריכה</span>
+                </button>
+                <button class="header-btn" id="btn-offline-manager" title="מפות אוף-ליין">
+                    <i class="fas fa-cloud-download-alt"></i>
+                </button>
+                <button class="header-btn" id="dark-mode-toggle" title="מצב כהה">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="view-toggle">
+                    <button class="toggle-btn active" id="view-list" title="תצוגה מפוצלת">
+                        <i class="fas fa-columns"></i>
+                        <span>רשימה ומפה</span>
+                    </button>
+                    <button class="toggle-btn" id="view-map" title="מפה מלאה">
+                        <i class="fas fa-map"></i>
+                        <span>מפה מלאה</span>
+                    </button>
+                </div>
+                <button class="btn-outline" id="btn-backup" title="גיבוי ושחזור נתונים" style="border-color: rgba(255,255,255,0.3); color: white; background: rgba(255,255,255,0.07); transition: all var(--transition);">
+                    <i class="fas fa-download"></i>
+                    <span>גיבוי ושחזור</span>
+                </button>
+                <button class="header-btn" id="btn-toggle-places" title="מקומות מומלצים">
+                    <i class="fas fa-list-ul"></i>
+                </button>
+                <button class="header-btn" id="btn-toggle-itinerary" title="לוח זמנים לטיול">
+                    <i class="fas fa-calendar-alt"></i>
+                </button>
+                <div style="position: relative; display: inline-block;">
+                    <button class="header-btn" id="btn-layout-selector" title="סידור מסכים">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <!-- Layout selector dropdown -->
+                    <div class="layout-dropdown" id="layout-dropdown" style="display: none;">
+                        <div class="layout-dropdown-item active" data-layout="cols">
+                            <i class="fas fa-columns"></i>
+                            <span>שלוש עמודות (מקומות | לו"ז | מפה)</span>
+                        </div>
+                        <div class="layout-dropdown-item" data-layout="map-left">
+                            <i class="fas fa-th-list"></i>
+                            <span>מפה משמאל, פאנלים מימין</span>
+                        </div>
+                        <div class="layout-dropdown-item" data-layout="map-right">
+                            <i class="fas fa-th-list fa-flip-horizontal"></i>
+                            <span>מפה מימין, פאנלים משמאל</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-primary" id="btn-add-place">
+                    <i class="fas fa-star-and-crescent"></i>
+                    <span>הוסף מקום חדש</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============ Main App ============ -->
+    <main class="app-container">
+
+        <!-- Places Panel -->
+        <section class="places-panel" id="places-panel">
+            <div class="places-toolbar">
+                <div class="toolbar-title">
+                    <h1>מקומות מומלצים לביקור</h1>
+                </div>
+                <button class="icon-btn" id="btn-close-places-panel" title="סגור פאנל" style="display: none; border: 1.5px solid var(--border-light); width: 34px; height: 34px; border-radius: 8px; align-items: center; justify-content: center; background: transparent; cursor: pointer; color: var(--text-secondary);">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Search Places -->
+            <div class="search-places-wrapper" style="padding: 0 16px 12px 16px;">
+                <div style="position:relative;">
+                    <input type="text" id="search-places-input" placeholder="חפש מקום..." style="width:100%; padding:8px 36px 8px 12px; border:1.5px solid var(--border-light); border-radius:var(--radius-md); font-family:inherit; font-size:13px; background:var(--primary-bg); color:var(--text-primary); outline:none; transition: border-color 0.2s;">
+                    <i class="fas fa-search" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:14px; pointer-events: none;"></i>
+                </div>
+            </div>
+
+            <!-- Groups Bar -->
+            <div class="groups-bar" id="groups-bar">
+                <div class="groups-scroll">
+                    <button class="group-tab active" data-group-id="all">
+                        <i class="fas fa-globe-americas"></i> הכל
+                    </button>
+                    <!-- Group tabs rendered by JS -->
+                </div>
+                <button class="group-manage-btn" id="btn-manage-groups" title="ניהול קבוצות">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+
+            <!-- Sub-groups Bar (Hidden by default) -->
+            <div class="sub-groups-bar" id="sub-groups-bar" style="display: none;">
+                <div class="sub-groups-scroll" id="sub-groups-scroll">
+                    <!-- Sub-group tabs rendered by JS -->
+                </div>
+            </div>
+
+            <div id="places-list" class="places-list">
+                <!-- Place cards rendered by JS -->
+            </div>
+
+            <div id="empty-state" class="empty-state">
+                <div class="empty-animation">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
+                <h3>אין מקומות שמורים עדיין</h3>
+                <p>לחץ על "הוסף מקום" כדי להתחיל לבנות את מפת הטיולים שלך</p>
+                <button class="btn-primary" onclick="document.getElementById('btn-add-place').click()">
+                    <i class="fas fa-plus"></i> הוסף מקום ראשון
+                </button>
+            </div>
+        </section>
+
+        <!-- Divider 1 (Places <-> Itinerary) -->
+        <div class="resize-divider" id="places-itin-divider"></div>
+
+        <!-- Itinerary Panel -->
+        <section class="itinerary-panel" id="itinerary-panel" style="display:none;">
+            <div class="itin-panel-header">
+                <h2><i class="fas fa-calendar-alt"></i> לוח זמנים לטיול</h2>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button class="btn-primary btn-sm" id="btn-create-itinerary">
+                        <i class="fas fa-plus"></i> טיול חדש
+                    </button>
+                    <button class="icon-btn" id="btn-close-itin-panel" title="סגור פאנל" style="display: none; border: 1.5px solid var(--border-light); width: 34px; height: 34px; border-radius: 8px; align-items: center; justify-content: center; background: transparent; cursor: pointer; color: var(--text-secondary);">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="itinerary-list-wrapper">
+                <div id="itinerary-list" class="itinerary-list"></div>
+            </div>
+            <div id="gantt-container" class="gantt-container" style="display:none;"></div>
+        </section>
+
+        <!-- Divider 2 (Itinerary <-> Map) -->
+        <div class="resize-divider" id="itin-map-divider" style="display:none;"></div>
+
+        <!-- Map Panel -->
+        <aside class="map-panel" id="map-panel">
+            <div id="map" class="map-element"></div>
+            <div id="leaflet-map" class="map-element" style="display: none; width: 100%; height: 100%;"></div>
+            <button class="map-gps-btn" id="btn-map-gps" title="המיקום שלי">
+                <i class="fas fa-crosshairs"></i>
+            </button>
+            <div class="map-stats">
+                <i class="fas fa-map-pin"></i>
+                <span><strong id="places-count">0</strong> מקומות שמורים</span>
+            </div>
+            
+            <!-- Map Layers Controller -->
+            <div class="map-layer-controller" id="map-layer-controller">
+                <button class="layer-toggle-btn" id="layer-toggle-btn" title="שכבות מפה">
+                    <i class="fas fa-layer-group"></i>
+                </button>
+                <div class="layer-options-menu" id="layer-options-menu">
+
+                    <!-- ─── מפות בסיס ─── -->
+                    <div class="layer-section-label">
+                        <i class="fas fa-map"></i> מפת בסיס
+                    </div>
+
+                    <div class="layer-option active" data-layer="roadmap">
+                        <i class="fas fa-map"></i>
+                        <span>מפה רגילה</span>
+                    </div>
+                    <div class="layer-option" data-layer="terrain">
+                        <i class="fas fa-mountain"></i>
+                        <span>מפת תבליט</span>
+                    </div>
+                    <div class="layer-option" data-layer="satellite">
+                        <i class="fas fa-globe"></i>
+                        <span>לווין</span>
+                    </div>
+                    <div class="layer-option" data-layer="hybrid">
+                        <i class="fas fa-satellite"></i>
+                        <span>לווין + כבישים</span>
+                    </div>
+                    <div class="layer-option" data-layer="israel-hiking">
+                        <i class="fas fa-hiking"></i>
+                        <span>סימון שבילים (ישראל)</span>
+                    </div>
+                    <div class="layer-option" data-layer="opentopo">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>מפת גבהים טופו</span>
+                    </div>
+                    <div class="layer-option" data-layer="osm">
+                        <i class="fas fa-road"></i>
+                        <span>OpenStreetMap</span>
+                    </div>
+                    <div class="layer-option" data-layer="cyclosm">
+                        <i class="fas fa-bicycle"></i>
+                        <span>CyclOSM – אופניים ו-MTB</span>
+                    </div>
+
+                    <!-- ─── שכבות-על (toggle) ─── -->
+                    <div style="border-top: 1px solid var(--border-light); margin: 4px 0;"></div>
+                    <div class="layer-section-label">
+                        <i class="fas fa-layer-group"></i> שכבות-על
+                    </div>
+
+                    <div class="layer-option layer-overlay" data-layer="waymarked-hiking" title="מציג שבילי הליכה מסומנים על גבי המפה הנוכחית">
+                        <div>
+                            <i class="fas fa-shoe-prints"></i>
+                            <span>שבילי הליכה (Waymarked)</span>
+                        </div>
+                        <span class="overlay-toggle-label">כבוי</span>
+                    </div>
+                    <div class="layer-option layer-overlay" data-layer="slope-colors" title="צובע את המסלולים לפי שיפוע">
+                        <div>
+                            <i class="fas fa-chart-area"></i>
+                            <span>צביעת שיפועים (GPX)</span>
+                        </div>
+                        <span class="overlay-toggle-label">כבוי</span>
+                    </div>
+
+                    <!-- ─── סימוני מרחק ─── -->
+                    <div style="border-top: 1px solid var(--border-light); margin: 4px 0;"></div>
+                    <div style="padding: 6px 12px; display: flex; flex-direction: column; gap: 4px;" onclick="event.stopPropagation();">
+                        <span style="font-size: 11px; font-weight: bold; color: var(--text-secondary); display:flex; align-items:center; gap:4px;"><i class="fas fa-route"></i> סימוני מרחק (ק"מ)</span>
+                        <select id="km-marker-mode" style="width: 100%; font-size: 11.5px; padding: 4.5px 6px; border-radius: 4px; border: 1.5px solid var(--border-light); background: var(--surface); color: var(--text-primary); font-family: inherit; outline: none; cursor: pointer;">
+                            <option value="dynamic">דינמי לפי זום</option>
+                            <option value="1">כל 1 ק"מ</option>
+                            <option value="5">כל 5 ק"מ</option>
+                            <option value="10">כל 10 ק"מ</option>
+                            <option value="off">כבוי</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <nav class="mobile-nav-tabs" id="mobile-nav-tabs">
+        <button class="mobile-tab-btn active" id="mobile-tab-list">
+            <i class="fas fa-list"></i>
+            <span>מקומות</span>
+        </button>
+        <button class="mobile-tab-btn" id="mobile-tab-itinerary">
+            <i class="fas fa-calendar-alt"></i>
+            <span>לוח זמנים</span>
+        </button>
+        <button class="mobile-tab-btn" id="mobile-tab-map">
+            <i class="fas fa-map-pin"></i>
+            <span>מפה</span>
+        </button>
+    </nav>
+
+    <!-- ============ Offline Maps Manager Modal ============ -->
+    <div class="modal-overlay" id="offline-modal-overlay">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-cloud-download-alt"></i> ניהול מפות אוף-ליין</h2>
+                <button class="icon-btn" id="offline-modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+                    כדי שהמפות והמסלולים יעבדו בשטח ללא קליטה סלולרית, תוכל להוריד אריחי מפה ישירות למכשיר. 
+                    כדי לחסוך מקום, האפליקציה תוריד מפה <strong>רק ברצועה צרה לאורך קווי המסלול (GPX)</strong> שבחרת.
+                </p>
+                
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-layer-group"></i> בחר שכבת מפה להורדה:</label>
+                    <select id="offline-layer-select" style="width: 100%; padding: 10px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); font-family: inherit; font-size: 14px; background: var(--primary-bg); color: var(--text-primary); outline: none;">
+                        <option value="osm">מפת דרכים (OpenStreetMap)</option>
+                        <option value="opentopo">מפת שטח טופוגרפית (OpenTopoMap)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-route"></i> בחר מסלול GPX להורדה:</label>
+                    <select id="offline-trek-select" style="width: 100%; padding: 10px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); font-family: inherit; font-size: 14px; background: var(--primary-bg); color: var(--text-primary); outline: none;">
+                        <option value="all">כל המסלולים השמורים</option>
+                        <!-- Dynamic list of places with GPX -->
+                    </select>
+                </div>
+                
+                <button class="btn-primary" id="btn-download-offline-map" style="width: 100%; justify-content: center; height: 44px; margin-bottom: 16px;">
+                    <i class="fas fa-download"></i> הורד מפה לאוף-ליין
+                </button>
+                
+                <!-- Progress Container -->
+                <div id="offline-progress-container" style="display: none; margin-bottom: 16px; padding: 12px; background: var(--secondary-bg); border: 1px solid var(--border-light); border-radius: var(--radius-md);">
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom: 6px;">
+                        <span id="offline-progress-text" style="color: var(--text-primary);">מוריד אריחי מפה...</span>
+                        <span id="offline-progress-percent" style="color: var(--accent-gold);">0%</span>
+                    </div>
+                    <div style="width: 100%; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div id="offline-progress-bar" style="width: 0%; height: 100%; background: var(--accent-gold); transition: width 0.1s ease;"></div>
+                    </div>
+                </div>
+
+                <!-- Simulation Toggle -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-top: 1px dashed var(--border-light); margin-bottom: 16px;">
+                    <span style="font-weight: bold; font-size: 13.5px; color: var(--text-primary);"><i class="fas fa-network-wired"></i> הדמה מצב לא מקוון (Offline Map):</span>
+                    <label class="switch" style="position: relative; display: inline-block; width: 44px; height: 22px;">
+                        <input type="checkbox" id="toggle-simulate-offline" style="opacity: 0; width: 0; height: 0;">
+                        <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-light); transition: .3s; border-radius: 34px;"></span>
+                    </label>
+                </div>
+                
+                <!-- Saved Maps List -->
+                <div style="border-top: 1px solid var(--border-light); padding-top: 14px;">
+                    <h4 style="margin: 0 0 10px 0; font-size: 14px; color: var(--text-primary);"><i class="fas fa-hdd"></i> מפות שמורות במכשיר:</h4>
+                    <div id="offline-saved-list" style="max-height: 120px; overflow-y: auto; font-size: 12.5px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 8px;">
+                        <div style="text-align: center; padding: 8px; font-style: italic;">אין מפות שמורות עדיין</div>
+                    </div>
+                </div>
+                
+                <!-- Close Button at bottom for mobile usability -->
+                <button class="btn-outline" id="btn-offline-close-bottom" style="width: 100%; justify-content: center; height: 44px; margin-top: 16px; border-color: var(--border-light); color: var(--text-secondary);">
+                    <i class="fas fa-times"></i> סגור חלון
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Admin Login Modal ============ -->
+    <div class="modal-overlay" id="admin-modal-overlay">
+        <div class="modal-content" style="max-width: 360px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-shield"></i> כניסת מנהל</h2>
+                <button class="icon-btn" id="admin-modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="admin-password" style="display: block; margin-bottom: 8px; font-weight: bold; color: var(--text-secondary);">סיסמת מנהל:</label>
+                    <input type="password" id="admin-password" placeholder="הכנס סיסמה..." style="width: 100%; padding: 10px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); font-family: inherit; font-size: 14px; outline: none; background: var(--primary-bg); color: var(--text-primary); transition: border-color 0.2s;">
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button class="btn-primary" id="btn-admin-submit" style="flex: 1; justify-content: center;">התחבר</button>
+                    <button class="btn-outline" id="btn-admin-cancel" style="flex: 1; justify-content: center; border-color: var(--border-light); color: var(--text-secondary);">ביטול</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Add/Edit Modal ============ -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title"><i class="fas fa-map-pin"></i> הוסף מקום חדש</h2>
+                <button class="icon-btn modal-close-btn" id="modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <!-- Search & Import from Link -->
+                <div style="display:grid; grid-template-columns: 1fr; gap:16px; margin-bottom: 24px; border-bottom: 2px dashed var(--border-light); padding-bottom: 20px;">
+                    <div class="form-group search-group" style="margin-bottom:0;">
+                        <label><i class="fas fa-search"></i> חיפוש מקום</label>
+                        <div class="search-wrapper">
+                            <input type="text" id="place-search" placeholder="חפש מקום... (לדוגמה: פטרה, עין גדי)" autocomplete="off">
+                            <div class="search-spinner" id="search-spinner"><i class="fas fa-circle-notch fa-spin"></i></div>
+                        </div>
+                        <div id="search-results" class="search-results"></div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label><i class="fas fa-link"></i> טען מיקום מקישור שיתוף של Google Maps</label>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="place-gmaps-link" placeholder="הדבק קישור (לדוגמה: https://maps.app.goo.gl/...)" style="flex:1;">
+                            <button type="button" class="btn-primary" id="btn-load-gmaps-link" style="padding: 0 16px; height: 44px; white-space: nowrap;">
+                                <i class="fas fa-file-import"></i> <span>טען קישור</span>
+                            </button>
+                        </div>
+                        <div id="gmaps-link-status" style="font-size:12px; margin-top:5px; color:var(--text-secondary); min-height: 16px;"></div>
+                    </div>
+                </div>
+
+                <!-- Mini Map Preview -->
+                <div id="mini-map-wrapper" class="mini-map-wrapper" style="display:none;">
+                    <div id="mini-map" class="mini-map"></div>
+                </div>
+
+                <!-- Group Selector -->
+                <div class="form-group">
+                    <label><i class="fas fa-folder"></i> קבוצה / טיול</label>
+                    <div class="group-select-wrapper">
+                        <select id="place-group" class="group-select">
+                            <option value="">ללא קבוצה</option>
+                            <!-- Options rendered by JS -->
+                        </select>
+                        <button type="button" class="btn-new-group-inline" id="btn-new-group-inline" title="צור קבוצה חדשה">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Custom Label & Custom Color -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom: 24px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label><i class="fas fa-list-ol"></i> מספר / תווית הנקודה</label>
+                        <input type="text" id="place-custom-label" placeholder="לדוגמה: 1, א, A (ריק = מס' סידורי)" maxlength="10">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label><i class="fas fa-palette"></i> צבע רקע לסיכה ולמספר</label>
+                        <div style="display:flex; gap:10px; align-items:center; height:44px;">
+                            <input type="checkbox" id="place-use-custom-color" style="width:20px; height:20px; cursor:pointer;">
+                            <span style="font-size:13px; color:var(--text-secondary); white-space:nowrap;">הפעל צבע אישי</span>
+                            <input type="color" id="place-custom-color" style="padding:0; width:44px; height:38px; border:2px solid var(--border); border-radius:4px; cursor:pointer; display:none; background:transparent;" value="#E5B23A">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Place Name -->
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> שם המקום</label>
+                    <input type="text" id="place-name" placeholder="לדוגמה: עין גדי, פטרה..." required>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label><i class="fas fa-align-right"></i> תיאור</label>
+                    <textarea id="place-description" placeholder="ספר על המקום: טיפים, המלצות, חוויות..." rows="4"></textarea>
+                </div>
+
+                <!-- Tags -->
+                <div class="form-group">
+                    <label><i class="fas fa-tags"></i> תגיות (מופרדות בפסיקים)</label>
+                    <input type="text" id="place-tags" placeholder="לדוגמה: מים, צל, נוף, קשה">
+                </div>
+
+                <!-- Images -->
+                <div class="form-group">
+                    <label><i class="fas fa-images"></i> תמונות</label>
+                    <div class="upload-zone" id="upload-zone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>גרור תמונות לכאן</p>
+                        <span class="upload-or">או</span>
+                        <button type="button" class="btn-outline btn-sm" id="btn-choose-files">בחר קבצים</button>
+                        <input type="file" id="image-input" multiple accept="image/*" hidden>
+                    </div>
+                    <div id="image-previews" class="image-previews"></div>
+                </div>
+
+                <!-- GPX File Upload -->
+                <div class="form-group">
+                    <label><i class="fas fa-route"></i> קובץ מסלול (GPX)</label>
+                    <div class="gpx-upload-zone" style="display:flex; gap:12px; align-items:center; background:var(--primary-bg); padding:10px; border-radius:var(--radius-sm); border:1.5px dashed var(--primary-lighter);">
+                        <button type="button" class="btn-outline btn-sm" id="btn-choose-gpx" style="border-style:solid; background:var(--surface);"><i class="fas fa-file-upload"></i> בחר קובץ GPX</button>
+                        <input type="file" id="gpx-input" accept=".gpx" hidden>
+                        <div id="gpx-status" style="font-size:13px; color:var(--text-secondary); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">לא נבחר מסלול</div>
+                        <button type="button" class="link-remove-btn" id="btn-remove-gpx" style="display:none; width:26px; height:26px; font-size:10px; border-color:var(--accent-rose);" title="מחק מסלול"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <div class="form-group">
+                    <label><i class="fas fa-link"></i> קישורים</label>
+                    <div id="links-container" class="links-container"></div>
+                    <button type="button" class="btn-outline btn-add-link" id="btn-add-link">
+                        <i class="fas fa-plus-circle"></i> הוסף קישור
+                    </button>
+                </div>
+
+                <!-- Hidden Fields -->
+                <input type="hidden" id="place-lat">
+                <input type="hidden" id="place-lng">
+                <input type="hidden" id="place-google-url">
+                <input type="hidden" id="place-id">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-ghost" id="btn-cancel">ביטול</button>
+                <button class="btn-primary btn-save" id="btn-save">
+                    <i class="fas fa-check"></i> שמור מקום
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Delete Confirmation ============ -->
+    <div class="modal-overlay confirm-modal" id="confirm-overlay">
+        <div class="confirm-dialog">
+            <div class="confirm-icon">
+                <i class="fas fa-trash-alt"></i>
+            </div>
+            <h3>מחיקת מקום</h3>
+            <p>האם אתה בטוח שברצונך למחוק את המקום?<br>פעולה זו אינה ניתנת לביטול.</p>
+            <div class="confirm-actions">
+                <button class="btn-ghost" id="confirm-cancel">ביטול</button>
+                <button class="btn-danger" id="confirm-delete">
+                    <i class="fas fa-trash-alt"></i> מחק
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Group Management Modal ============ -->
+    <div class="modal-overlay" id="groups-modal-overlay">
+        <div class="modal-content groups-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-layer-group"></i> ניהול קבוצות</h2>
+                <button class="icon-btn modal-close-btn" id="groups-modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="new-group-form">
+                    <input type="text" id="new-group-name" placeholder="שם קבוצה חדשה...">
+                    <div style="display:flex; flex-direction:column; gap:6px; margin: 4px 0 8px 0;">
+                        <span style="font-size:12px; color:var(--text-secondary); font-weight:bold; text-align:right;">שיוך לקבוצת אם (אופציונלי):</span>
+                        <select id="new-group-parent" style="padding:10px; border:2px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font); font-size:13.5px; color:var(--text-primary); background:var(--surface); cursor:pointer;">
+                            <option value="">ללא קבוצת אם (קבוצה ראשית)</option>
+                            <!-- Parent group options rendered by JS -->
+                        </select>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:6px; margin: 4px 0 8px 0;">
+                        <span style="font-size:12px; color:var(--text-secondary); font-weight:bold; text-align:right;">תיאור כללי של הטרק/קבוצה (אופציונלי):</span>
+                        <textarea id="new-group-description" placeholder="תיאור כללי של הטרק..." style="padding:10px; border:2px solid var(--border); border-radius:var(--radius-sm); font-family:var(--font); font-size:13.5px; color:var(--text-primary); background:var(--surface); resize:vertical; min-height:60px;"></textarea>
+                    </div>
+                    <div class="color-picker" id="color-picker">
+                        <div class="color-option selected" data-color="#2C4E72" style="background:#2C4E72;"></div>
+                        <div class="color-option" data-color="#E5B23A" style="background:#E5B23A;"></div>
+                        <div class="color-option" data-color="#E06B6B" style="background:#E06B6B;"></div>
+                        <div class="color-option" data-color="#E28743" style="background:#E28743;"></div>
+                        <div class="color-option" data-color="#8AB474" style="background:#8AB474;"></div>
+                        <div class="color-option" data-color="#A2845E" style="background:#A2845E;"></div>
+                        <div class="color-option" data-color="#8E7CC3" style="background:#8E7CC3;"></div>
+                        <div class="color-option" data-color="#4A729D" style="background:#4A729D;"></div>
+                    </div>
+                    <button class="btn-primary btn-sm" id="btn-create-group">
+                        <i class="fas fa-plus"></i> צור קבוצה
+                    </button>
+                </div>
+                <div class="groups-list" id="groups-manage-list">
+                    <!-- Group items rendered by JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="groups-modal-done">סיום</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Backup & Restore Modal ============ -->
+    <div class="modal-overlay" id="backup-modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-download"></i> גיבוי ושחזור נתונים</h2>
+                <button class="icon-btn modal-close-btn" id="btn-close-backup-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 24px; text-align: center; direction: rtl;">
+                <p style="font-size: 14.5px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6;">
+                    קובץ הגיבוי מאפשר לך לשמור עותק בטוח של כל המידע שהכנסת לאתר (קבוצות, מדינות, ימי טרקים, מקומות ומסלולי GPX) במחשב המקומי שלך או להעבירו למכשירים אחרים (כמו ה-iPad).
+                </p>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+                    <button class="btn-primary" id="btn-export-backup" style="width: 100%; justify-content: center; gap: 10px; font-size: 14.5px;">
+                        <i class="fas fa-file-download"></i>
+                        <span>ייצא קובץ גיבוי (JSON)</span>
+                    </button>
+                    
+                    <button class="btn-outline" id="btn-trigger-import" style="width: 100%; justify-content: center; gap: 10px; font-size: 14.5px; border-style: solid;">
+                        <i class="fas fa-file-upload"></i>
+                        <span>ייבא קובץ גיבוי מהמחשב</span>
+                    </button>
+                    
+                    <input type="file" id="import-file-input" accept=".json" style="display: none;">
+                </div>
+                
+                <div id="import-status" style="font-size: 13.5px; color: #10B981; font-weight: bold; min-height: 20px; margin-top: 8px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Roadbook (סיפור דרך) Printable Modal ============ -->
+    <div class="modal-overlay" id="roadbook-modal">
+        <div class="modal-content roadbook-modal-content" style="max-width: 950px; width: 95%; height: 90vh; display: flex; flex-direction: column;">
+            <div class="modal-header">
+                <h2><i class="fas fa-book-open"></i> סיפור דרך וניווט מפורט</h2>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    <button class="btn-primary" id="btn-print-roadbook" style="height: 36px; padding: 0 16px; font-size: 13.5px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-print"></i> הדפס סיפור דרך
+                    </button>
+                    <button class="btn-primary" id="btn-download-pdf" style="height: 36px; padding: 0 16px; font-size: 13.5px; display: flex; align-items: center; gap: 8px; background-color: var(--accent-rose);">
+                        <i class="fas fa-file-pdf"></i> הורד PDF
+                    </button>
+                    <button class="btn-outline" id="btn-export-roadbook-csv" style="height: 36px; padding: 0 16px; font-size: 13.5px; display: flex; align-items: center; gap: 8px; border-style:solid;">
+                        <i class="fas fa-file-csv"></i> ייצוא לטבלה (CSV)
+                    </button>
+                    <button class="icon-btn modal-close-btn" id="btn-close-roadbook-modal" style="margin-right:10px;"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div class="modal-body roadbook-print-area" style="padding: 24px; overflow-y: auto; direction: rtl; flex: 1;" id="roadbook-modal-body">
+                <!-- Dynamically rendered printable roadbook content goes here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Toast ============ -->
+    <div id="toast" class="toast">
+        <i id="toast-icon" class="fas fa-check-circle"></i>
+        <span id="toast-message">פעולה בוצעה בהצלחה</span>
+    </div>
+
+    <!-- ============ Mobile Floating Action Button (FAB) ============ -->
+    <button class="mobile-add-fab" id="mobile-add-fab" title="הוסף מקום חדש">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- ============ Google Place Details Panel ============ -->
+    <div id="google-place-panel" class="details-panel">
+        <button id="google-place-close" class="details-panel-close" title="סגור"><i class="fas fa-times"></i></button>
+        <div id="google-place-content" class="details-panel-content">
+            <!-- Dynamic content loaded via JS -->
+        </div>
+    </div>
+
+    <!-- ============ Create Itinerary Modal ============ -->
+    <div class="modal-overlay" id="create-itin-modal-overlay">
+        <div class="modal-content" style="max-width: 440px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-calendar-plus"></i> צור לוח זמנים חדש</h2>
+                <button class="icon-btn" id="create-itin-modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-tag"></i> שם הטיול</label>
+                    <input type="text" id="create-itin-name" placeholder="לדוגמה: טרק בנפאל, חופשה ביוון..." style="width:100%; padding:10px; border:1.5px solid var(--border-light); border-radius:var(--radius-md); font-family:inherit; font-size:14px; background:var(--primary-bg); color:var(--text-primary); outline:none;">
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 16px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-plane-departure"></i> תאריך התחלה</label>
+                        <input type="date" id="create-itin-start" style="width:100%; padding:10px; border:1.5px solid var(--border-light); border-radius:var(--radius-md); font-family:inherit; font-size:14px; background:var(--primary-bg); color:var(--text-primary); outline:none;">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-plane-arrival"></i> תאריך סיום</label>
+                        <input type="date" id="create-itin-end" style="width:100%; padding:10px; border:1.5px solid var(--border-light); border-radius:var(--radius-md); font-family:inherit; font-size:14px; background:var(--primary-bg); color:var(--text-primary); outline:none;">
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-palette"></i> צבע הטיול</label>
+                    <div class="itin-color-picker" style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <div class="itin-color-option selected" data-color="#2C4E72" style="background:#2C4E72;"></div>
+                        <div class="itin-color-option" data-color="#E5B23A" style="background:#E5B23A;"></div>
+                        <div class="itin-color-option" data-color="#C95E6A" style="background:#C95E6A;"></div>
+                        <div class="itin-color-option" data-color="#E8834A" style="background:#E8834A;"></div>
+                        <div class="itin-color-option" data-color="#8AB474" style="background:#8AB474;"></div>
+                        <div class="itin-color-option" data-color="#7B5EA7" style="background:#7B5EA7;"></div>
+                        <div class="itin-color-option" data-color="#4A729D" style="background:#4A729D;"></div>
+                        <div class="itin-color-option" data-color="#A2845E" style="background:#A2845E;"></div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn-primary" id="create-itin-submit" style="flex: 1; justify-content: center;"><i class="fas fa-check"></i> צור לוח זמנים</button>
+                    <button class="btn-outline" id="create-itin-cancel" style="flex: 1; justify-content: center; border-color: var(--border-light); color: var(--text-secondary);">ביטול</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Day Edit Modal ============ -->
+    <div class="modal-overlay" id="day-edit-modal-overlay">
+        <div class="modal-content" style="max-width: 560px;">
+            <div class="modal-header">
+                <h2 id="day-edit-title-text"><i class="fas fa-pen"></i> עריכת יום</h2>
+                <button class="icon-btn" id="day-edit-modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 24px; max-height: 70vh; overflow-y: auto;">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-heading"></i> כותרת היום</label>
+                    <input type="text" id="day-edit-day-title" placeholder="לדוגמה: יום הליכה לבסיס הקרחון..." style="width:100%; padding:10px; border:1.5px solid var(--border-light); border-radius:var(--radius-md); font-family:inherit; font-size:14px; background:var(--primary-bg); color:var(--text-primary); outline:none;">
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-sticky-note"></i> הערות</label>
+                    <textarea id="day-edit-day-notes" placeholder="טיפים, מידע שימושי, מה לקחת..." rows="3" style="width:100%; padding:10px; border:1.5px solid var(--border-light); border-radius:var(--radius-md); font-family:inherit; font-size:14px; background:var(--primary-bg); color:var(--text-primary); outline:none; resize:vertical;"></textarea>
+                </div>
+
+                <!-- GPX Track Selector -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-route"></i> מסלול GPX ליום זה</label>
+                    <select id="day-edit-gpx-select" style="width:100%; padding:10px; border:1.5px solid var(--border-light); border-radius:var(--radius-md); font-family:inherit; font-size:14px; background:var(--primary-bg); color:var(--text-primary); outline:none;"></select>
+                    
+                    <!-- GPX Range Selector -->
+                    <div id="day-edit-gpx-range-container" style="display:none; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="display:block; margin-bottom:4px; font-size:12px; font-weight:bold; color:var(--text-secondary);">מקילומטר (ק"מ)</label>
+                            <input type="number" id="day-edit-gpx-start-km" placeholder="התחלה (למשל: 0)" step="0.1" min="0" style="width:100%; padding:8px; border:1.5px solid var(--border-light); border-radius:var(--radius-sm); font-family:inherit; font-size:13px; background:var(--primary-bg); color:var(--text-primary); outline:none;">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="display:block; margin-bottom:4px; font-size:12px; font-weight:bold; color:var(--text-secondary);">עד קילומטר (ק"מ)</label>
+                            <input type="number" id="day-edit-gpx-end-km" placeholder="סיום (למשל: 15)" step="0.1" min="0" style="width:100%; padding:8px; border:1.5px solid var(--border-light); border-radius:var(--radius-sm); font-family:inherit; font-size:13px; background:var(--primary-bg); color:var(--text-primary); outline:none;">
+                        </div>
+                    </div>
+                    <div id="day-edit-gpx-info-text" style="display:none; font-size:11.5px; color:var(--text-muted); margin-top:6px; font-weight: 600;"></div>
+                </div>
+
+                <!-- Places Selector -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-map-marker-alt"></i> מקומות משויכים</label>
+                    <div id="day-edit-places-list" class="day-edit-places-list" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 8px;"></div>
+                    <button type="button" class="btn-outline btn-sm" id="btn-toggle-quick-add-place" style="margin-top: 8px; width: 100%; border-style: dashed; justify-content: center;">
+                        <i class="fas fa-plus-circle"></i> צור מקום חדש ושייך ליום זה
+                    </button>
+                    <!-- Quick Add Place Section -->
+                    <div id="quick-add-place-section" style="display: none; border: 1.5px dashed var(--border-light); border-radius: var(--radius-md); padding: 14px; margin-top: 10px; background: rgba(var(--primary-rgb), 0.05);">
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label style="display:block; margin-bottom:4px; font-size:12.5px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-search"></i> חיפוש מקום בגוגל</label>
+                            <input type="text" id="day-edit-quick-search" placeholder="חפש מקום או נקודת עניין..." style="width:100%; padding:8px; border:1.5px solid var(--border-light); border-radius:var(--radius-sm); font-family:inherit; font-size:13px; background:var(--primary-bg); color:var(--text-primary); outline:none;">
+                        </div>
+                        <div style="text-align: center; margin: 8px 0; font-size: 11px; color: var(--text-muted); font-weight: 800;">— או —</div>
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label style="display:block; margin-bottom:4px; font-size:12.5px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-link"></i> קישור שיתוף של Google Maps</label>
+                            <div style="display:flex; gap:8px;">
+                                <input type="text" id="day-edit-quick-link" placeholder="הדבק קישור שיתוף (maps.app.goo.gl/...)" style="flex:1; padding:8px; border:1.5px solid var(--border-light); border-radius:var(--radius-sm); font-family:inherit; font-size:13px; background:var(--primary-bg); color:var(--text-primary); outline:none;">
+                                <button type="button" class="btn-primary" id="btn-day-edit-quick-load-link" style="padding: 0 12px; height: 35px; font-size: 12.5px; white-space: nowrap;">טען</button>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <label style="display:block; margin-bottom:4px; font-size:12.5px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-tag"></i> שם המקום המיועד (לעריכה)</label>
+                            <input type="text" id="day-edit-quick-name" placeholder="שם המקום שיווצר..." style="width:100%; padding:8px; border:1.5px solid var(--border-light); border-radius:var(--radius-sm); font-family:inherit; font-size:13px; background:var(--primary-bg); color:var(--text-primary); outline:none;">
+                            <input type="hidden" id="day-edit-quick-lat">
+                            <input type="hidden" id="day-edit-quick-lng">
+                            <input type="hidden" id="day-edit-quick-url">
+                        </div>
+                        <button type="button" class="btn-primary" id="btn-day-edit-quick-add-submit" style="width: 100%; justify-content: center; height: 38px; font-size: 13.5px;">
+                            <i class="fas fa-check-circle"></i> צור ושייך לטיול
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Links -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-link"></i> קישורים (לינה, מסעדות, אתרים...)</label>
+                    <div id="day-edit-links-container" class="day-edit-links-container"></div>
+                    <button type="button" class="btn-outline btn-sm" id="day-edit-add-link" style="margin-top:8px; border-style:solid;">
+                        <i class="fas fa-plus-circle"></i> הוסף קישור
+                    </button>
+                </div>
+
+                <!-- Advanced Day Actions -->
+                <div class="form-group" style="margin-top: 20px; padding-top: 16px; border-top: 1.5px dashed var(--border-light);">
+                    <label style="display:block; margin-bottom:8px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-tools"></i> פעולות ימים מתקדמות</label>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                        <!-- Shift Days -->
+                        <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between; background: rgba(var(--primary-rgb), 0.03); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); flex-wrap: wrap;">
+                            <span style="font-size: 13px; color: var(--text-primary); font-weight: 700;">דחה יום זה והלאה קדימה:</span>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <input type="number" id="day-edit-shift-count" value="1" min="1" max="14" style="width: 55px; padding: 6px; border: 1px solid var(--border-light); border-radius: var(--radius-sm); text-align: center; font-family: inherit; font-size: 13px; background: var(--primary-bg); color: var(--text-primary); outline: none;">
+                                <span style="font-size: 12.5px; color: var(--text-secondary);">ימים</span>
+                                <button type="button" class="btn-primary" id="btn-day-edit-shift-submit" style="padding: 0 12px; height: 32px; font-size: 12px; white-space: nowrap;">בצע דחייה</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Swap Days -->
+                        <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between; background: rgba(var(--primary-rgb), 0.03); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); flex-wrap: wrap;">
+                            <span style="font-size: 13px; color: var(--text-primary); font-weight: 700;">החלף תוכן של יום זה עם:</span>
+                            <div style="display: flex; gap: 6px; align-items: center;">
+                                <select id="day-edit-swap-target" style="padding: 6px; border: 1px solid var(--border-light); border-radius: var(--radius-sm); font-family: inherit; font-size: 13px; background: var(--primary-bg); color: var(--text-primary); outline: none; min-width: 90px;"></select>
+                                <button type="button" class="btn-primary" id="btn-day-edit-swap-submit" style="padding: 0 12px; height: 32px; font-size: 12px; white-space: nowrap;">בצע החלפה</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button class="btn-primary" id="day-edit-save" style="flex: 1; justify-content: center;"><i class="fas fa-check"></i> שמור</button>
+                    <button class="btn-outline" id="day-edit-cancel" style="flex: 1; justify-content: center; border-color: var(--border-light); color: var(--text-secondary);">ביטול</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Edit Itinerary Dates Modal ============ -->
+    <div class="modal-overlay" id="edit-itin-dates-modal-overlay">
+        <div class="modal-content" style="max-width: 440px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-calendar-alt"></i> עריכת תאריכי טיול</h2>
+                <button class="icon-btn" id="edit-itin-dates-modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 16px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-plane-departure"></i> תאריך התחלה חדש</label>
+                        <input type="date" id="edit-itin-start" style="width:100%; padding:10px; border:1.5px solid var(--border-light); border-radius:var(--radius-md); font-family:inherit; font-size:14px; background:var(--primary-bg); color:var(--text-primary); outline:none;">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-plane-arrival"></i> תאריך סיום חדש</label>
+                        <input type="date" id="edit-itin-end" style="width:100%; padding:10px; border:1.5px solid var(--border-light); border-radius:var(--radius-md); font-family:inherit; font-size:14px; background:var(--primary-bg); color:var(--text-primary); outline:none;">
+                    </div>
+                </div>
+                
+                <div id="edit-itin-warning" style="display:none; margin-bottom:16px; padding:12px; background:var(--accent-rose-bg); border:1px solid var(--accent-rose); border-radius:var(--radius-md); font-size:12.5px; color:var(--accent-rose); line-height:1.5; text-align:right;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span><strong>אזהרה:</strong> קיצור הטיול יביא למחיקת הימים האחרונים שהוסרו מהלו"ז, כולל כל המידע והמסלולים שבהם!</span>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button class="btn-primary" id="edit-itin-dates-submit" style="flex: 1; justify-content: center;"><i class="fas fa-check"></i> שמור שינויים</button>
+                    <button class="btn-outline" id="edit-itin-dates-cancel" style="flex: 1; justify-content: center; border-color: var(--border-light); color: var(--text-secondary);">ביטול</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ Scripts ============ -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCAuBUvFpo3eTmujgaD9NfnFcnhT-N3bWU&libraries=places&language=he&region=IL"></script>
+    <!-- Firebase SDK (v10 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js" crossorigin="anonymous"></script>
+    
+    <script src="firebase-config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+    <script src="app.js"></script>
+    <script src="itinerary.js"></script>
+</body>
+</html>
