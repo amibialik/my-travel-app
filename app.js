@@ -3766,6 +3766,32 @@ function initEvents() {
         });
     }
 
+    // User Guide Modal Toggle
+    const btnOpenGuide = document.getElementById('btn-open-guide');
+    const btnCloseGuide = document.getElementById('user-guide-modal-close');
+    const guideModalOverlay = document.getElementById('user-guide-modal-overlay');
+
+    if (btnOpenGuide && guideModalOverlay) {
+        btnOpenGuide.addEventListener('click', () => {
+            guideModalOverlay.style.display = 'block';
+        });
+    }
+
+    if (btnCloseGuide && guideModalOverlay) {
+        btnCloseGuide.addEventListener('click', () => {
+            guideModalOverlay.style.display = 'none';
+        });
+    }
+
+    // Close guide on outside click
+    if (guideModalOverlay) {
+        guideModalOverlay.addEventListener('click', (e) => {
+            if (e.target === guideModalOverlay) {
+                guideModalOverlay.style.display = 'none';
+            }
+        });
+    }
+
     // Toggle Places Panel
     const btnTogglePlaces = document.getElementById('btn-toggle-places');
     const btnClosePlaces = document.getElementById('btn-close-places-panel');

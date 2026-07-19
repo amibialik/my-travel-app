@@ -59,6 +59,9 @@
                 <button class="header-btn" id="dark-mode-toggle" title="מצב כהה">
                     <i class="fas fa-moon"></i>
                 </button>
+                <button class="header-btn" id="btn-open-guide" title="מדריך למשתמש">
+                    <i class="fas fa-question-circle"></i>
+                </button>
                 <div class="view-toggle">
                     <button class="toggle-btn active" id="view-list" title="תצוגה מפוצלת">
                         <i class="fas fa-columns"></i>
@@ -839,6 +842,90 @@
                 <div style="display: flex; gap: 12px; margin-top: 20px;">
                     <button class="btn-primary" id="edit-itin-dates-submit" style="flex: 1; justify-content: center;"><i class="fas fa-check"></i> שמור שינויים</button>
                     <button class="btn-outline" id="edit-itin-dates-cancel" style="flex: 1; justify-content: center; border-color: var(--border-light); color: var(--text-secondary);">ביטול</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ User Guide Modal ============ -->
+    <div class="modal-overlay" id="user-guide-modal-overlay" style="display: none; z-index: 3100;">
+        <div class="modal-content" style="max-width: 750px; width: 95%;">
+            <div class="modal-header">
+                <h2><i class="fas fa-book-open"></i> מדריך שימוש ועזרה למשתמש</h2>
+                <button class="icon-btn" id="user-guide-modal-close"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 20px; max-height: 70vh; overflow-y: auto; direction: rtl; text-align: right;">
+                <div class="guide-welcome" style="margin-bottom: 20px; padding: 12px; background: rgba(229, 178, 58, 0.05); border-radius: var(--radius-md); border-right: 4px solid var(--primary); font-size: 13.5px; line-height: 1.6;">
+                    <strong>ברוך הבא לאפליקציית הטיולים שלך! 🗺️🥾</strong><br>
+                    האתר מאפשר לך לתכנן את מסלולי הטיול, לנהל מקומות לביקור, לחלק מסלולי הליכה (GPX) לימים ספציפיים ולנווט בשטח גם ללא קליטה (אופליין) ישירות מהאייפון.
+                </div>
+
+                <div class="guide-sections">
+                    <!-- Section 1 -->
+                    <div class="guide-card" style="margin-bottom: 16px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 14px; background: var(--surface);">
+                        <h3 style="margin-top: 0; color: var(--primary-dark); font-size: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 6px;"><i class="fas fa-mobile-alt"></i> 1. התקנה כאפליקציה בטלפון (PWA)</h3>
+                        <p style="font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); margin: 6px 0;">תוכל להתקין את האתר כאפליקציה עצמאית לחלוטין על מסך הבית בטלפון:</p>
+                        <ul style="margin: 0; padding-right: 18px; font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); list-style-type: disc;">
+                            <li><strong>באייפון (iOS):</strong> פתח את הקישור בדפדפן <strong>Safari</strong>, לחץ על כפתור השיתוף (ריבוע עם חץ למעלה) ובחר ב-<strong>"הוסף למסך הבית" (Add to Home Screen)</strong>.</li>
+                            <li><strong>באנדרואיד:</strong> פתח ב-Chrome ובחר ב-<strong>"התקן אפליקציה"</strong> או <strong>"הוסף למסך הבית"</strong>.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Section 2 -->
+                    <div class="guide-card" style="margin-bottom: 16px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 14px; background: var(--surface);">
+                        <h3 style="margin-top: 0; color: var(--primary-dark); font-size: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 6px;"><i class="fas fa-map-marked-alt"></i> 2. ניהול מקומות ושינוי סדר</h3>
+                         <ul style="margin: 0; padding-right: 18px; font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); list-style-type: disc;">
+                            <li><strong>הוספת מקום:</strong> לחץ על "הוסף מקום חדש" בבר העליון. תוכל להקליק על המפה כדי לחלץ קואורדינטות או להדביק קישור Google Maps.</li>
+                            <li><strong>שינוי סדר בגרירה (Sort):</strong> לחץ לחיצה ממושכת על ידית הגרירה (`⋮⋮`) בכרטיס המקום וגרור אותו למעלה או למטה כדי לקבוע את סדר המקומות והמרקרים.</li>
+                            <li><strong>סינון וקבוצות:</strong> השתמש בבר הקבוצות או בתיבת החיפוש לסינון מהיר.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Section 3 -->
+                    <div class="guide-card" style="margin-bottom: 16px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 14px; background: var(--surface);">
+                        <h3 style="margin-top: 0; color: var(--primary-dark); font-size: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 6px;"><i class="fas fa-calendar-alt"></i> 3. לוח זמנים (ציר זמן ולוח שנה)</h3>
+                        <ul style="margin: 0; padding-right: 18px; font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); list-style-type: disc;">
+                            <li><strong>תצוגות לו"ז:</strong> עבור בין <strong>ציר זמן</strong> (אנכי מפורט), <strong>קומפקטי</strong> (מהיר) או <strong>לוח שנה</strong> (תצוגת חודש קלאסית).</li>
+                            <li><strong>לחיצה למפה:</strong> לחיצה על מיקום בלו"ז תמרכז מיד את המפה עליו ותפתח את חלונית המידע. במובייל, זה יעביר אותך אוטומטית לטאב המפה התחתון!</li>
+                        </ul>
+                    </div>
+
+                    <!-- Section 4 -->
+                    <div class="guide-card" style="margin-bottom: 16px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 14px; background: var(--surface);">
+                        <h3 style="margin-top: 0; color: var(--primary-dark); font-size: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 6px;"><i class="fas fa-route"></i> 4. חלוקת קילומטרים של מסלול GPX</h3>
+                        <ul style="margin: 0; padding-right: 18px; font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); list-style-type: disc;">
+                            <li>בעריכת יום, בחר קובץ GPX והזן <strong>"מקילומטר"</strong> ו-<strong>"עד קילומטר"</strong> כדי להקצות מקטע הליכה יומי.</li>
+                            <li><strong>בקרת חלוקה:</strong> המודאל יציג לך אילו קילומטרים כבר שויכו לימים אחרים בטיול זה כדי למנוע כפילויות או שכחה.</li>
+                            <li><strong>במפה:</strong> המקטע היומי ייצבע כקו עבה ומודגש בצבע הטיול מעל המסלול הכללי.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Section 5 -->
+                    <div class="guide-card" style="margin-bottom: 16px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 14px; background: var(--surface);">
+                        <h3 style="margin-top: 0; color: var(--primary-dark); font-size: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 6px;"><i class="fas fa-exchange-alt"></i> 5. פעולות ימים מתקדמות (Swap & Shift)</h3>
+                        <ul style="margin: 0; padding-right: 18px; font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); list-style-type: disc;">
+                            <li><strong>דחיית ימים (Shift):</strong> בתחתית עריכת יום, בחר מספר ימים ולחץ "בצע דחייה". כל הימים מהתאריך הנוכחי והלאה יידחפו קדימה ללא אובדן מידע, ותאריך סיום הטיול יתארך.</li>
+                            <li><strong>החלפת ימים (Swap):</strong> בחר יום אחר ולחץ "בצע החלפה" כדי להחליף את התוכן של שני הימים בלחיצת כפתור אחת.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Section 6 -->
+                    <div class="guide-card" style="margin-bottom: 16px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 14px; background: var(--surface);">
+                        <h3 style="margin-top: 0; color: var(--primary-dark); font-size: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 6px;"><i class="fas fa-globe"></i> 6. מפה דו-מצבית (אונליין / אופליין)</h3>
+                        <ul style="margin: 0; padding-right: 18px; font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); list-style-type: disc;">
+                            <li><strong>מפת אונליין (Google Maps):</strong> מציגה שיפועים בצבעים (Slope Coloring) וסימוני קילומטרים (Km Markers) לאורך ה-GPX הפעיל.</li>
+                            <li><strong>מפת אופליין (Leaflet Maps):</strong> לחץ על כפתור הגלובוס ב-Header למעבר אופליין. המפה תהפוך למפת OpenStreetMap שתשמור את המידע ותאפשר לך לראות את מיקום ה-GPS שלך גם ללא קליטה בשטח.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Section 7 -->
+                    <div class="guide-card" style="margin-bottom: 16px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); padding: 14px; background: var(--surface);">
+                        <h3 style="margin-top: 0; color: var(--primary-dark); font-size: 15px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 6px;"><i class="fas fa-file-export"></i> 7. ייצוא ליומן וגיבוי נתונים</h3>
+                        <ul style="margin: 0; padding-right: 18px; font-size: 12.5px; line-height: 1.6; color: var(--text-secondary); list-style-type: disc;">
+                            <li><strong>ייצוא ליומן (.ics):</strong> בראש הטיול הפתוח, לחץ "ייצוא ליומן (.ics)" כדי לייבא את כל ימי הטיול ופרטיהם ישירות ליומן הטלפון.</li>
+                            <li><strong>גיבוי (JSON):</strong> לחץ על לחצן הגיבוי בענן בבר העליון לייצוא או ייבוא של כל המידע שלך.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
