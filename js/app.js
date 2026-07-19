@@ -6,21 +6,24 @@ import {
     deleteTargetId, setDeleteTargetId,
     pendingGpxData, setPendingGpxData,
     searchQuery, setSearchQuery,
-    loadPlaces, loadGroups,
     savePlaces, saveGroups,
     getGroupById,
     STORAGE_KEY, GROUPS_KEY,
     DEFAULT_CENTER,
-    generateId
+    generateId,
+    isOfflineMode, setIsOfflineMode
 } from './state.js';
+
+import {
+    loadPlaces,
+    loadGroups
+} from './db.js';
 
 import {
     initMap,
     renderMarkers,
     drawAllGpxTracks,
     fitMapBounds,
-    isOfflineMode,
-    setIsOfflineMode,
     syncLeafletView,
     parseGpxFile
 } from './map.js';

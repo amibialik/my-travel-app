@@ -1194,3 +1194,103 @@ window.switchToMobileMapTab = function() {
         }
     }
 };
+
+// ============= GPX File Parsing =============
+export function parseGpxFile(file, callback) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const parser = new DOMParser();
+            const xml = parser.parseFromString(e.target.result, "text/xml");
+            
+            // Extract track points <trkpt>
+            const trackpoints = xml.querySelectorAll('trkpt');
+            const points = [];
+            
+            trackpoints.forEach(pt => {
+                const lat = parseFloat(pt.getAttribute('lat'));
+                const lng = parseFloat(pt.getAttribute('lon'));
+                const eleNode = pt.querySelector('ele');
+                const ele = eleNode ? parseFloat(eleNode.textContent) : null;
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    points.push({ lat, lng, ele });
+                }
+            });
+            
+            // If no trkpt, try route points <rtept>
+            if (points.length === 0) {
+                const routepoints = xml.querySelectorAll('rtept');
+                routepoints.forEach(pt => {
+                    const lat = parseFloat(pt.getAttribute('lat'));
+                    const lng = parseFloat(pt.getAttribute('lon'));
+                    const eleNode = pt.querySelector('ele');
+                    const ele = eleNode ? parseFloat(eleNode.textContent) : null;
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        points.push({ lat, lng, ele });
+                    }
+                });
+            }
+            
+            // If still no points, try waypoints <wpt>
+            if (points.length === 0) {
+                const waypoints = xml.querySelectorAll('wpt');
+                waypoints.forEach(pt => {
+                    const lat = parseFloat(pt.getAttribute('lat'));
+                    const lng = parseFloat(pt.getAttribute('lon'));
+                    const eleNode = pt.querySelector('ele');
+                    const ele = eleNode ? parseFloat(eleNode.textContent) : null;
+                    if (!isNaN(lat) && !isNaN(lng)) {
+                        points.push({ lat, lng, ele });
+                    }
+                });
+            }
+            
+            if (points.length === 0) {
+                callback(null, 'לא נמצאו נקודות GPS תקינות בקובץ ה-GPX');
+            } else {
+                const processed = processGpxData(points);
+                callback(processed, null);
+            }
+        } catch (error) {
+            console.error('GPX parse error:', error);
+            callback(null, 'שגיאה בפענוח קובץ ה-GPX');
+        }
+    };
+    reader.onerror = () => callback(null, 'שגיאה בקריאת הקובץ');
+    reader.readAsText(file);
+}
+
+export function processGpxData(points) {
+    if (!points || points.length === 0) return [];
+    
+    let cumulativeDist = 0;
+    const processed = [];
+    
+    for (let i = 0; i < points.length; i++) {
+        const pt = points[i];
+        if (i > 0) {
+            const prev = points[i - 1];
+            const d = getDistance(prev.lat, prev.lng, pt.lat, pt.lng);
+            cumulativeDist += d;
+        }
+        
+        let slope = 0;
+        if (i > 0 && pt.ele !== null && points[i - 1].ele !== null) {
+            const prev = points[i - 1];
+            const dEle = pt.ele - prev.ele; // in meters
+            const dDist = getDistance(prev.lat, prev.lng, pt.lat, pt.lng) * 1000; // in meters
+            if (dDist > 1) {
+                slope = Math.round((dEle / dDist) * 100);
+            }
+        }
+        
+        processed.push({
+            lat: pt.lat,
+            lng: pt.lng,
+            ele: pt.ele,
+            dist: parseFloat(cumulativeDist.toFixed(2)),
+            slope: slope
+        });
+    }
+    return processed;
+}
