@@ -1,10 +1,18 @@
-const CACHE_NAME = 'bialik-travels-v3';
+const CACHE_NAME = 'bialik-travels-v5';
 const ASSETS = [
   './',
   './index.html',
   './index.css',
-  './app.js',
-  './itinerary.js',
+  './js/state.js',
+  './js/db.js',
+  './js/map-styles.js',
+  './js/map.js',
+  './js/elevation.js',
+  './js/roadbook.js',
+  './js/animation.js',
+  './js/ui.js',
+  './js/itinerary.js',
+  './js/app.js',
   './firebase-config.js',
   './logo.jpg',
   './user_guide.md',
