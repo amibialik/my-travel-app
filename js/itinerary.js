@@ -5,7 +5,8 @@ import {
     activeTrip, setActiveTrip,
     activeGroupId, setActiveGroupId,
     activeSubGroupId, setActiveSubGroupId,
-    savePlaces
+    savePlaces,
+    isOfflineMode
 } from './state.js';
 
 import {
@@ -19,8 +20,7 @@ import {
 
 import {
     getDistance,
-    panToPlace,
-    isOfflineMode
+    panToPlace
 } from './map.js';
 
 // ============= Constants =============
