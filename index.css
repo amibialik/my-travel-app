@@ -5068,6 +5068,8 @@ body.mobile-view-itinerary .itinerary-panel {
     flex-direction: column;
     gap: 4px;
     min-width: 250px;
+    max-width: calc(100vw - 20px);
+    white-space: nowrap;
 }
 
 .layout-dropdown-item {

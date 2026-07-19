@@ -787,13 +787,29 @@ function initEvents() {
     if (btnLayout && layoutDropdown) {
         btnLayout.addEventListener('click', (e) => {
             e.stopPropagation();
-            const isVisible = layoutDropdown.style.display !== 'none';
+            const isVisible = layoutDropdown.style.display === 'flex';
             if (!isVisible) {
-                const rect = btnLayout.getBoundingClientRect();
-                layoutDropdown.style.top = `${rect.bottom + 8}px`;
-                layoutDropdown.style.right = `${window.innerWidth - rect.right}px`;
-                layoutDropdown.style.left = 'auto';
                 layoutDropdown.style.display = 'flex';
+                const rect = btnLayout.getBoundingClientRect();
+                const dropdownWidth = layoutDropdown.offsetWidth || 260;
+                const screenWidth = window.innerWidth;
+
+                layoutDropdown.style.top = `${rect.bottom + 8}px`;
+
+                // Calculate smart positioning for RTL & LTR boundaries
+                if (rect.right - dropdownWidth < 10) {
+                    // Overflowing left side of screen: align to left
+                    layoutDropdown.style.left = `${Math.max(10, rect.left)}px`;
+                    layoutDropdown.style.right = 'auto';
+                } else if (screenWidth - rect.right < 10) {
+                    // Overflowing right side of screen: align to 10px from right edge
+                    layoutDropdown.style.right = '10px';
+                    layoutDropdown.style.left = 'auto';
+                } else {
+                    // Standard alignment to button right edge
+                    layoutDropdown.style.right = `${screenWidth - rect.right}px`;
+                    layoutDropdown.style.left = 'auto';
+                }
             } else {
                 layoutDropdown.style.display = 'none';
             }
