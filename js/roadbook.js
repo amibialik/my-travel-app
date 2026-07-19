@@ -1,5 +1,5 @@
 import {
-    map,
+    map, setMap,
     places,
     activeMarkerId,
     savePlaces
@@ -49,11 +49,11 @@ export function calculateAzimuth(lat1, lng1, lat2, lng2) {
     const lat1Rad = lat1 * Math.PI / 180;
     const lat2Rad = lat2 * Math.PI / 180;
     const dLng = (lng2 - lng1) * Math.PI / 180;
-    
+
     const y = Math.sin(dLng) * Math.cos(lat2Rad);
     const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) -
               Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLng);
-              
+
     let brng = Math.atan2(y, x);
     brng = (brng * 180 / Math.PI + 360) % 360;
     return Math.round(brng);
@@ -100,10 +100,10 @@ export function openMeasurementControlBar(place, skipReset = false) {
     if (!skipReset) {
         closeMeasurementControlBar();
         if (window.closeRecordingControlBar) window.closeRecordingControlBar();
-        
+
         setMeasureActivePlace(place);
         setEditingRoadbookId(null);
-        
+
         setMeasurePoints([]);
         setMeasureMarkers([]);
         setMeasurePreviewPolylines([]);
@@ -114,15 +114,15 @@ export function openMeasurementControlBar(place, skipReset = false) {
         setIsResectionActive(false);
         setActiveResectionFromIndex(-1);
     }
-    
+
     const gpxPoints = place.gpxData || [];
     if (gpxPoints.length === 0) {
         showToast('אין נקודות מסלול למדידה', 'error');
         return;
     }
-    
+
     const placeColor = getPlaceColor(place);
-    
+
     const bar = document.createElement('div');
     bar.className = 'recording-control-bar measurement-control-bar';
     bar.id = 'measurement-control-bar';
@@ -134,7 +134,7 @@ export function openMeasurementControlBar(place, skipReset = false) {
     bar.style.alignItems = 'stretch';
     bar.style.gap = '12px';
     bar.style.padding = '16px';
-    
+
     bar.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <span class="control-title" style="font-size:15px; font-weight:bold; color:var(--primary-dark); display:flex; align-items:center; gap:8px;">
@@ -143,15 +143,15 @@ export function openMeasurementControlBar(place, skipReset = false) {
             </span>
             <button class="icon-btn" id="btn-measure-close-x" style="color:var(--text-tertiary); font-size:16px; border:none; background:transparent; cursor:pointer;"><i class="fas fa-times"></i></button>
         </div>
-        
+
         <div id="measure-instructions" style="font-size:12px; font-weight:bold; color:var(--text-secondary); background:var(--primary-bg); padding:8px 12px; border-radius:var(--radius-sm); border-right:3px solid ${placeColor}; transition: all 0.2s ease;">
             לחץ על המפה סמוך למסלול ה-GPX להוספת נקודות ציון רציפות לסיפור הדרך.
         </div>
-        
+
         <div id="measure-legs-list" style="max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 4px;">
             <div style="text-align:center; color:var(--text-tertiary); font-size:12.5px; padding:20px 0;">אין נקודות מדידה עדיין. לחץ על המפה כדי להוסיף.</div>
         </div>
-        
+
         <div id="measure-save-form" style="display:none; flex-direction:column; gap:10px; border-top:1.5px dashed var(--border-light); padding-top:12px;">
             <input type="text" id="measure-roadbook-name" placeholder="שם סיפור הדרך (למשל: סיפור דרך יום 1)" style="width:100%; height:36px; padding:6px 10px; font-size:13px; border:1.5px solid var(--border); border-radius:var(--radius-sm); font-family:inherit;">
             <div style="display:flex; gap:8px; justify-content:flex-end; width:100%;">
@@ -162,13 +162,13 @@ export function openMeasurementControlBar(place, skipReset = false) {
             </div>
         </div>
     `;
-    
+
     document.getElementById('map-panel').appendChild(bar);
-    
+
     // Bind buttons
     bar.querySelector('#btn-measure-close-x').addEventListener('click', closeMeasurementControlBar);
     bar.querySelector('#btn-measure-reset').addEventListener('click', resetMeasurementSelection);
-    
+
     // Bind map click
     const listener = map.addListener('click', (e) => {
         if (isResectionActive && activeResectionFromIndex !== -1) {
@@ -179,13 +179,13 @@ export function openMeasurementControlBar(place, skipReset = false) {
                 updateMeasureLegsList(place);
                 return;
             }
-            
+
             const ptFrom = measurePoints[activeResectionFromIndex];
             const ptTo = { lat: e.latLng.lat(), lng: e.latLng.lng() };
-            
+
             const azimuth = calculateAzimuth(ptFrom.lat, ptFrom.lng, ptTo.lat, ptTo.lng);
             const distMeters = Math.round(getDistance(ptFrom.lat, ptFrom.lng, ptTo.lat, ptTo.lng) * 1000);
-            
+
             const resectionItem = {
                 fromPointIndex: activeResectionFromIndex,
                 landmarkName: landmarkName,
@@ -194,33 +194,33 @@ export function openMeasurementControlBar(place, skipReset = false) {
                 azimuth: azimuth,
                 distanceMeters: distMeters
             };
-            
+
             measureResections.push(resectionItem);
             drawResectionOnMap(ptFrom, ptTo, resectionItem);
-            
+
             setIsResectionActive(false);
             setActiveResectionFromIndex(-1);
-            
+
             updateMeasureLegsList(place);
             showToast('נקודת הזדטרות נדגמה בהצלחה!', 'success');
             return;
         }
-        
+
         const nearestIndex = findNearestGpxPoint(e.latLng, gpxPoints);
         if (nearestIndex === -1) return;
-        
+
         const pt = gpxPoints[nearestIndex];
         const newPointIdx = measurePoints.length;
-        
+
         const newPoint = {
             lat: pt.lat,
             lng: pt.lng,
             index: nearestIndex,
             label: String(newPointIdx + 1)
         };
-        
+
         measurePoints.push(newPoint);
-        
+
         const marker = new google.maps.Marker({
             position: { lat: pt.lat, lng: pt.lng },
             map: map,
@@ -228,9 +228,9 @@ export function openMeasurementControlBar(place, skipReset = false) {
             draggable: true,
             icon: getMeasureMarkerIcon(newPoint, place)
         });
-        
+
         measureMarkers.push(marker);
-        
+
         google.maps.event.addListener(marker, 'drag', (evt) => {
             const idx = findNearestGpxPoint(evt.latLng, gpxPoints);
             if (idx !== -1) {
@@ -241,7 +241,7 @@ export function openMeasurementControlBar(place, skipReset = false) {
                 updateMeasureLegsList(place);
             }
         });
-        
+
         google.maps.event.addListener(marker, 'dragend', (evt) => {
             const idx = findNearestGpxPoint(evt.latLng, gpxPoints);
             if (idx !== -1) {
@@ -255,20 +255,20 @@ export function openMeasurementControlBar(place, skipReset = false) {
                 updateMeasureLegsList(place);
             }
         });
-        
+
         if (newPointIdx > 0) {
             measureLegsData.push({
                 description: `מקטע מנקודה ${newPointIdx} לנקודה ${newPointIdx + 1}`,
                 notes: ''
             });
         }
-        
+
         updateMeasurePreviewLines(gpxPoints);
         updateMeasureLegsList(place);
     });
-    
+
     setMeasureMapClickListener(listener);
-    
+
     const bounds = new google.maps.LatLngBounds();
     gpxPoints.forEach(pt => bounds.extend(pt));
     map.fitBounds(bounds);
@@ -278,19 +278,19 @@ export function openMeasurementControlBar(place, skipReset = false) {
 export function updateMeasurePreviewLines(gpxPoints) {
     measurePreviewPolylines.forEach(p => p.setMap(null));
     setMeasurePreviewPolylines([]);
-    
+
     if (measurePoints.length < 2) return;
     const newPolys = [];
-    
+
     for (let k = 0; k < measurePoints.length - 1; k++) {
         const ptStart = measurePoints[k];
         const ptEnd = measurePoints[k + 1];
-        
+
         const startIdx = Math.min(ptStart.index, ptEnd.index);
         const endIdx = Math.max(ptStart.index, ptEnd.index);
-        
+
         const pathPoints = gpxPoints.slice(startIdx, endIdx + 1);
-        
+
         const poly = new google.maps.Polyline({
             path: pathPoints,
             geodesic: true,
@@ -300,7 +300,7 @@ export function updateMeasurePreviewLines(gpxPoints) {
             map: map,
             zIndex: 2500
         });
-        
+
         newPolys.push(poly);
     }
     setMeasurePreviewPolylines(newPolys);
@@ -309,7 +309,7 @@ export function updateMeasurePreviewLines(gpxPoints) {
 export function startResectionLandmarkSelection(pointIdx) {
     setIsResectionActive(true);
     setActiveResectionFromIndex(pointIdx);
-    
+
     const inst = document.getElementById('measure-instructions');
     if (inst) {
         inst.innerHTML = `<i class="fas fa-crosshairs fa-spin" style="color:var(--accent-rose);"></i> <strong>מצב הזדטרות פעיל:</strong> לחץ על המפה לסימון אלמנט בולט בשטח מהסיכה ה-${pointIdx + 1}.`;
@@ -338,7 +338,7 @@ export function drawResectionOnMap(ptFrom, ptTo, resectionItem) {
         map: map,
         zIndex: 2800
     });
-    
+
     const marker = new google.maps.Marker({
         position: ptTo,
         map: map,
@@ -354,7 +354,7 @@ export function drawResectionOnMap(ptFrom, ptTo, resectionItem) {
         },
         title: resectionItem.landmarkName
     });
-    
+
     measureResectionLines.push(line);
     measureResectionMarkers.push(marker);
 }
@@ -364,7 +364,7 @@ export function redrawAllResections() {
     measureResectionMarkers.forEach(m => m.setMap(null));
     setMeasureResectionLines([]);
     setMeasureResectionMarkers([]);
-    
+
     measureResections.forEach(res => {
         const ptFrom = measurePoints[res.fromPointIndex];
         const ptTo = { lat: res.lat, lng: res.lng };
@@ -390,28 +390,28 @@ export function deleteResectionLandmark(pointIdx, resIdx) {
 export function updateMeasureLegsList(place) {
     const listDiv = document.getElementById('measure-legs-list');
     if (!listDiv) return;
-    
+
     listDiv.innerHTML = '';
-    
+
     if (measurePoints.length === 0) {
         listDiv.innerHTML = `<div style="text-align:center; color:var(--text-tertiary); font-size:12.5px; padding:20px 0;">אין נקודות מדידה עדיין. לחץ על המפה כדי להוסיף.</div>`;
         document.getElementById('measure-save-form').style.display = 'none';
         return;
     }
-    
+
     document.getElementById('measure-save-form').style.display = 'flex';
     const placeColor = getPlaceColor(place);
-    
+
     const nameInput = document.getElementById('measure-roadbook-name');
     if (nameInput && !nameInput.value.trim()) {
         nameInput.value = `סיפור דרך ${place.roadbooks ? place.roadbooks.length + 1 : 1}`;
     }
-    
+
     measurePoints.forEach((pt, idx) => {
         const ptDiv = document.createElement('div');
         ptDiv.className = 'measure-point-item';
         ptDiv.style = `border:1.5px solid var(--border-light); border-radius:var(--radius-sm); padding:10px; background:var(--surface); margin-bottom:8px; display:flex; flex-direction:column; gap:6px;`;
-        
+
         const header = document.createElement('div');
         header.style = `display:flex; justify-content:space-between; align-items:center;`;
         header.innerHTML = `
@@ -449,7 +449,7 @@ export function updateMeasureLegsList(place) {
             </button>
         `;
         ptDiv.appendChild(poiWrapper);
-        
+
         const ptResections = measureResections.filter(r => r.fromPointIndex === idx);
         if (ptResections.length > 0) {
             const resectionsList = document.createElement('div');
@@ -464,15 +464,15 @@ export function updateMeasureLegsList(place) {
             });
             ptDiv.appendChild(resectionsList);
         }
-        
+
         if (idx > 0) {
             const prevPt = measurePoints[idx - 1];
             const dist = getDistance(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
             const azimuth = calculateAzimuth(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
-            
+
             const legDiv = document.createElement('div');
             legDiv.style = `border-top:1.5px dashed var(--border-light); margin-top:6px; padding-top:8px; display:flex; flex-direction:column; gap:6px;`;
-            
+
             legDiv.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:bold; color:var(--text-secondary);">
                     <span>מקטע ${idx} (${idx} ➔ ${idx + 1})</span>
@@ -481,10 +481,10 @@ export function updateMeasureLegsList(place) {
                 <textarea class="leg-desc-input auto-expand-textarea" data-leg-idx="${idx - 1}" placeholder="תיאור המקטע (למשל: מהבית הקטן עד למעבר הנחל)" style="width:100%; min-height:36px; max-height:120px; padding:6px 10px; font-size:12.5px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:inherit; resize:none; overflow-y:hidden; line-height:1.4;">${escapeHtml(measureLegsData[idx - 1]?.description || '')}</textarea>
                 <textarea class="leg-notes-input auto-expand-textarea" data-leg-idx="${idx - 1}" placeholder="הנחיות ניווט והערות (למשל: ההתקדמות מבוססת נחל)" style="width:100%; min-height:48px; max-height:150px; padding:6px 10px; font-size:12.5px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:inherit; resize:none; overflow-y:hidden; line-height:1.4;">${escapeHtml(measureLegsData[idx - 1]?.notes || '')}</textarea>
             `;
-            
+
             ptDiv.appendChild(legDiv);
         }
-        
+
         listDiv.appendChild(ptDiv);
     });
 
@@ -499,25 +499,25 @@ function bindLegEvents(listDiv, place) {
             const ptIdx = parseInt(btn.dataset.pointIdx);
             const pt = measurePoints[ptIdx];
             if (!pt) return;
-            
+
             const choice = prompt("בחר סוג נקודת עניין:\n1 - 💧 נקודת מים / מילוי\n2 - 🏕️ חניון לילה\n3 - 🌅 נקודת תצפית / מנוחה\n4 - ⚠️ סכנה / מעבר קשה");
             if (!choice) return;
-            
+
             const typeMap = { '1': 'water', '2': 'camp', '3': 'view', '4': 'danger' };
             const selectedType = typeMap[choice.trim()];
             if (!selectedType) {
                 showToast("בחירה לא תקינה", "error");
                 return;
             }
-            
+
             const name = prompt("הזן תיאור קצר לנקודת העניין (למשל: עין עקב):");
             if (!name || !name.trim()) return;
-            
+
             pt.poi = {
                 type: selectedType,
                 name: name.trim()
             };
-            
+
             updateMeasureMarkers(place);
             updateMeasureLegsList(place);
             showToast("נקודת העניין נוספה בהצלחה!", "success");
@@ -544,20 +544,20 @@ function bindLegEvents(listDiv, place) {
             const ptIdx = parseInt(btn.dataset.pointIdx);
             const pt = measurePoints[ptIdx];
             if (!pt || !pt.poi) return;
-            
+
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.accept = 'image/*';
             fileInput.style.display = 'none';
             document.body.appendChild(fileInput);
-            
+
             fileInput.onchange = (evt) => {
                 const file = evt.target.files[0];
                 if (!file) {
                     document.body.removeChild(fileInput);
                     return;
                 }
-                
+
                 const reader = new FileReader();
                 reader.onload = (re) => {
                     if (window.compressImage) {
@@ -575,7 +575,7 @@ function bindLegEvents(listDiv, place) {
                 reader.readAsDataURL(file);
                 document.body.removeChild(fileInput);
             };
-            
+
             fileInput.click();
         };
     });
@@ -606,7 +606,7 @@ function bindLegEvents(listDiv, place) {
             e.stopPropagation();
             const ptIdx = parseInt(btn.dataset.pointIdx);
             const resIdx = parseInt(btn.dataset.resIdx);
-            
+
             const ptResections = measureResections.filter(r => r.fromPointIndex === ptIdx);
             const targetRes = ptResections[resIdx];
             if (targetRes) {
@@ -648,7 +648,7 @@ function bindLegEvents(listDiv, place) {
             adjustTextareaHeight(textarea);
         });
     });
-    
+
     const saveBtn = document.getElementById('btn-measure-save');
     if (saveBtn) {
         saveBtn.onclick = () => {
@@ -657,14 +657,14 @@ function bindLegEvents(listDiv, place) {
                 showToast('אנא הזן שם לסיפור הדרך', 'error');
                 return;
             }
-            
+
             if (measurePoints.length < 2) {
                 showToast('יש לדגום לפחות 2 נקודות ציון כדי לייצר סיפור דרך', 'error');
                 return;
             }
-            
+
             if (!place.roadbooks) place.roadbooks = [];
-            
+
             if (editingRoadbookId) {
                 const idx = place.roadbooks.findIndex(r => r.id === editingRoadbookId);
                 if (idx > -1) {
@@ -688,7 +688,7 @@ function bindLegEvents(listDiv, place) {
                 place.roadbooks.push(newRoadbook);
                 showToast(`סיפור הדרך "${name}" נשמר בהצלחה!`, 'success');
             }
-            
+
             savePlaces();
             syncPlaceToFirebase(place);
             closeMeasurementControlBar();
@@ -706,34 +706,34 @@ export function resetMeasurementSelection() {
     setMeasureResectionLines([]);
     measureResectionMarkers.forEach(m => m.setMap(null));
     setMeasureResectionMarkers([]);
-    
+
     setMeasurePoints([]);
     setMeasureResections([]);
     setMeasureLegsData([]);
     setIsResectionActive(false);
     setActiveResectionFromIndex(-1);
-    
+
     const inst = document.getElementById('measure-instructions');
     if (inst) {
         inst.style.background = 'var(--primary-bg)';
         inst.style.borderRightColor = 'var(--primary)';
         inst.innerHTML = '<i class="fas fa-mouse-pointer" style="margin-left:5px;"></i> לחץ על המפה סמוך למסלול לקביעת נקודת התחלה';
     }
-    
+
     updateMeasureLegsList(measureActivePlace);
 }
 
 export function closeMeasurementControlBar() {
     resetMeasurementSelection();
-    
+
     if (measureMapClickListener) {
         google.maps.event.removeListener(measureMapClickListener);
         setMeasureMapClickListener(null);
     }
-    
+
     const bar = document.getElementById('measurement-control-bar');
     if (bar) bar.remove();
-    
+
     setMeasureActivePlace(null);
 }
 
@@ -756,12 +756,12 @@ export function findNearestGpxPoint(latLng, gpxPoints) {
 export function getSegmentStats(place, startIdx, endIdx) {
     let gain = 0;
     let loss = 0;
-    
+
     if (!place.gpxData) return { gain, loss };
-    
+
     const start = Math.min(startIdx, endIdx);
     const end = Math.max(startIdx, endIdx);
-    
+
     for (let i = start; i < end; i++) {
         const p1 = place.gpxData[i];
         const p2 = place.gpxData[i + 1];
@@ -771,7 +771,7 @@ export function getSegmentStats(place, startIdx, endIdx) {
             else loss += Math.abs(diff);
         }
     }
-    
+
     return { gain: Math.round(gain), loss: Math.round(loss) };
 }
 
@@ -780,14 +780,14 @@ export function openRoadbookModal(place, roadbook) {
     const modal = document.getElementById('roadbook-modal');
     const body = document.getElementById('roadbook-modal-body');
     if (!modal || !body) return;
-    
+
     modal.$activeRoadbook = roadbook;
     modal.$activePlace = place;
-    
+
     let totalDist = 0;
     let totalGain = 0;
     let totalLoss = 0;
-    
+
     for (let k = 0; k < roadbook.points.length - 1; k++) {
         const p1 = roadbook.points[k];
         const p2 = roadbook.points[k+1];
@@ -796,13 +796,13 @@ export function openRoadbookModal(place, roadbook) {
         totalGain += stats.gain;
         totalLoss += stats.loss;
     }
-    
+
     let html = `
         <div style="text-align: center; margin-bottom: 20px;">
             <h1 style="font-size: 24px; color: var(--primary-dark); margin-bottom: 4px;">סיפור דרך: ${escapeHtml(roadbook.name)}</h1>
             <h3 style="font-size: 14.5px; color: var(--text-secondary); margin-bottom: 12px;">מפת הטיולים והחלומות - ${escapeHtml(place.name)}</h3>
         </div>
-        
+
         <div class="roadbook-header-card">
             <div class="roadbook-header-stat">
                 <span class="stat-label"><i class="fas fa-route"></i> מרחק כולל</span>
@@ -817,7 +817,7 @@ export function openRoadbookModal(place, roadbook) {
                 <span class="stat-value">${totalLoss} מטרים</span>
             </div>
         </div>
-        
+
         <table class="roadbook-table">
             <thead>
                 <tr>
@@ -830,16 +830,16 @@ export function openRoadbookModal(place, roadbook) {
             </thead>
             <tbody>
     `;
-    
+
     roadbook.points.forEach((pt, idx) => {
         const ptResections = roadbook.resections.filter(r => r.fromPointIndex === idx);
         let resectionText = '<em>אין נקודות תצפית</em>';
         if (ptResections.length > 0) {
-            resectionText = `<ul style="margin: 0; padding-right: 18px; line-height: 1.5;">` + 
-                ptResections.map(res => `<li>אזימוט <strong>${res.azimuth}° (${getDirectionString(res.azimuth)})</strong> ל-${escapeHtml(res.landmarkName)} (${res.distanceMeters} מ')</li>`).join('') + 
+            resectionText = `<ul style="margin: 0; padding-right: 18px; line-height: 1.5;">` +
+                ptResections.map(res => `<li>אזימוט <strong>${res.azimuth}° (${getDirectionString(res.azimuth)})</strong> ל-${escapeHtml(res.landmarkName)} (${res.distanceMeters} מ')</li>`).join('') +
                 `</ul>`;
         }
-        
+
         let poiHtml = '';
         if (pt.poi && pt.poi.type) {
             poiHtml = `<div style="margin-top: 6px; display: inline-flex; flex-direction: column; gap: 4px; background: #fef3c7; border: 1.5px solid #f59e0b; padding: 6px 8px; border-radius: var(--radius-sm); font-size: 11px; font-weight: bold; color: #b45309;">
@@ -863,7 +863,7 @@ export function openRoadbookModal(place, roadbook) {
             const dist = getDistance(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
             const azimuth = calculateAzimuth(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
             const legData = roadbook.legs[idx - 1] || {};
-            
+
             html += `
                 <tr>
                     <td><strong>מקטע ${idx}</strong> (${idx} ➔ ${idx + 1})</td>
@@ -878,16 +878,16 @@ export function openRoadbookModal(place, roadbook) {
             `;
         }
     });
-    
+
     html += `
             </tbody>
         </table>
-        
+
         <div style="margin-top: 30px; text-align: center; font-size: 11px; color: var(--text-tertiary);" class="no-print">
             סיפור הדרך מיועד להדפסה ישירה (Ctrl + P). הממשק יתאים את הטבלה לפורמט A4 שחור-לבן נקי.
         </div>
     `;
-    
+
     body.innerHTML = html;
     modal.classList.add('active');
 }
@@ -900,7 +900,7 @@ export function closeRoadbookModal() {
 export function deleteRoadbook(placeId, rbId) {
     const place = places.find(p => p.id === placeId);
     if (!place || !place.roadbooks) return;
-    
+
     place.roadbooks = place.roadbooks.filter(r => r.id !== rbId);
     savePlaces();
     syncPlaceToFirebase(place);
@@ -911,24 +911,24 @@ export function deleteRoadbook(placeId, rbId) {
 export function loadRoadbookToEditor(place, roadbook) {
     closeMeasurementControlBar();
     if (window.closeRecordingControlBar) window.closeRecordingControlBar();
-    
+
     setMeasureActivePlace(place);
     setEditingRoadbookId(roadbook.id);
-    
+
     setMeasurePoints(JSON.parse(JSON.stringify(roadbook.points || [])));
     setMeasureResections(JSON.parse(JSON.stringify(roadbook.resections || [])));
     setMeasureLegsData(JSON.parse(JSON.stringify(roadbook.legs || [])));
-    
+
     openMeasurementControlBar(place, true);
-    
+
     const nameInput = document.getElementById('measure-roadbook-name');
     if (nameInput) {
         nameInput.value = roadbook.name;
     }
-    
+
     const gpxPoints = place.gpxData || [];
     const newMarkersList = [];
-    
+
     measurePoints.forEach((pt) => {
         const marker = new google.maps.Marker({
             position: { lat: pt.lat, lng: pt.lng },
@@ -938,7 +938,7 @@ export function loadRoadbookToEditor(place, roadbook) {
             icon: getMeasureMarkerIcon(pt, place)
         });
         newMarkersList.push(marker);
-        
+
         google.maps.event.addListener(marker, 'drag', (evt) => {
             const idx = findNearestGpxPoint(evt.latLng, gpxPoints);
             if (idx !== -1) {
@@ -949,7 +949,7 @@ export function loadRoadbookToEditor(place, roadbook) {
                 updateMeasureLegsList(place);
             }
         });
-        
+
         google.maps.event.addListener(marker, 'dragend', (evt) => {
             const idx = findNearestGpxPoint(evt.latLng, gpxPoints);
             if (idx !== -1) {
@@ -965,7 +965,7 @@ export function loadRoadbookToEditor(place, roadbook) {
         });
     });
     setMeasureMarkers(newMarkersList);
-    
+
     updateMeasurePreviewLines(gpxPoints);
     redrawAllResections();
     updateMeasureLegsList(place);
@@ -975,11 +975,11 @@ export function loadRoadbookToEditor(place, roadbook) {
 export function downloadRoadbookCsv(roadbook, place) {
     let csvContent = "\uFEFF"; // UTF-8 BOM for Excel Hebrew support
     csvContent += "מספר מקטע,תיאור,מרחק (ק\"מ),אזימוט התקדמות,נקודות הזדטרות בשטח,הערות ניווט ופרטים נוספים\n";
-    
+
     roadbook.points.forEach((pt, idx) => {
         const ptResections = roadbook.resections.filter(r => r.fromPointIndex === idx);
         const resectionStr = ptResections.map(res => 'אזימוט ' + res.azimuth + ' ל-' + res.landmarkName + ' (' + res.distanceMeters + ' מ\')').join(' | ');
-        
+
         let poiStr = '';
         if (pt.poi && pt.poi.type) {
             poiStr = ` [${getPoiEmoji(pt.poi.type)} ${getPoiLabel(pt.poi.type)}: ${pt.poi.name}]`;
@@ -992,11 +992,11 @@ export function downloadRoadbookCsv(roadbook, place) {
             const dist = getDistance(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
             const azimuth = calculateAzimuth(prevPt.lat, prevPt.lng, pt.lat, pt.lng);
             const legData = roadbook.legs[idx - 1] || {};
-            
+
             csvContent += '"' + idx + '","' + (legData.description || '').replace(/"/g, '""') + poiStr.replace(/"/g, '""') + '","' + dist.toFixed(2) + '","' + azimuth + '° (' + getDirectionString(azimuth) + ')","' + resectionStr.replace(/"/g, '""') + '","' + (legData.notes || '').replace(/"/g, '""') + '"\n';
         }
     });
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const cleanName = roadbook.name.replace(/[^a-zA-Z0-9א-ת\s]/g, '').replace(/\s+/g, '_');
@@ -1017,7 +1017,7 @@ export function exportPlaceToGpx(place) {
         showToast('אין מסלול GPX לייצוא', 'error');
         return;
     }
-    
+
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="Bialik Travels Map" xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <metadata>
@@ -1094,7 +1094,7 @@ export function exportPlaceToGpx(place) {
     }
 
     xml += `</gpx>`;
-    
+
     const blob = new Blob([xml], { type: 'application/gpx+xml' });
     const url = URL.createObjectURL(blob);
     const cleanName = place.name.replace(/[^a-zA-Z0-9א-ת\s]/g, '').replace(/\s+/g, '_');

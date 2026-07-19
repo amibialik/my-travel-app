@@ -11,7 +11,11 @@ import {
     STORAGE_KEY, GROUPS_KEY,
     DEFAULT_CENTER,
     generateId,
-    isOfflineMode, setIsOfflineMode
+    isOfflineMode, setIsOfflineMode,
+    debounce,
+    itineraries,
+    map, markers,
+    pendingImages, setPendingImages
 } from './state.js';
 
 import {
@@ -43,18 +47,11 @@ import {
     closeGooglePlacePanel,
     escapeHtml,
     setActiveMarker,
-    focusMapOnSegment,
-    toggleSegmentVisibility,
-    deleteSegment,
-    sharePlace,
-    openLightbox
+    renderImagePreviews
 } from './ui.js';
 
 import {
-    initItinerary,
-    activeItineraryId,
-    renderGanttView,
-    renderItineraryList
+    initItinerary
 } from './itinerary.js';
 
 import {
@@ -72,19 +69,6 @@ import {
     customMapStyle,
     darkMapStyle
 } from './map-styles.js';
-
-// ============= Debounce Helper =============
-function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
 
 // ============= Helper: Scroll to Card =============
 function scrollToCard(placeId) {
@@ -119,13 +103,13 @@ function addGroup(name, color, parentId = '', description = '') {
     const group = { id, name, color, parentId, description };
     groups.push(group);
     saveGroups();
-    
+
     // Sync to cloud
     if (window.IS_FIREBASE_CONFIGURED && window.db) {
         window.db.collection('groups').doc(id).set(group)
             .catch(err => console.error("Error syncing group to Firebase:", err));
     }
-    
+
     renderGroupTabs();
     renderGroupSelect();
     renderGroupParentSelect();
@@ -137,21 +121,21 @@ function deleteGroup(groupId) {
     // Check if group has subgroups or places
     const hasSubgroups = groups.some(g => g.parentId === groupId);
     const hasPlaces = places.some(p => p.groupId === groupId);
-    
+
     if (hasSubgroups || hasPlaces) {
         showToast('לא ניתן למחוק קבוצה המכילה תתי-קבוצות או מיקומים שמורים', 'error');
         return;
     }
-    
+
     setGroups(groups.filter(g => g.id !== groupId));
     saveGroups();
-    
+
     // Sync to cloud
     if (window.IS_FIREBASE_CONFIGURED && window.db) {
         window.db.collection('groups').doc(groupId).delete()
             .catch(err => console.error("Error deleting group from Firebase:", err));
     }
-    
+
     renderGroupTabs();
     renderGroupSelect();
     renderGroupParentSelect();
@@ -221,16 +205,16 @@ window.closeGroupsModal = closeGroupsModal;
 // ============= Images Upload Handler (Local Previews) =============
 function handleImageUpload(files) {
     if (!files || files.length === 0) return;
-    
+
     showToast('מעבד תמונות...', 'info');
-    
+
     Array.from(files).forEach(file => {
         // Validation
         if (!file.type.startsWith('image/')) {
             showToast('ניתן להעלות קבצי תמונה בלבד', 'error');
             return;
         }
-        
+
         const reader = new FileReader();
         reader.onload = (e) => {
             // Compress image using canvas before storing (max width/height 1000px)
@@ -240,7 +224,7 @@ function handleImageUpload(files) {
                 let width = img.width;
                 let height = img.height;
                 const maxDim = 1000;
-                
+
                 if (width > maxDim || height > maxDim) {
                     if (width > height) {
                         height = Math.round((height * maxDim) / width);
@@ -250,31 +234,17 @@ function handleImageUpload(files) {
                         height = maxDim;
                     }
                 }
-                
+
                 canvas.width = width;
                 canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
-                
+
                 // Get compressed base64 data URL
                 const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75); // 75% quality
-                
-                const currentImages = [...(window.pendingImages || [])];
-                currentImages.push(compressedBase64);
-                window.pendingImages = currentImages;
-                
-                // Update dynamic UI previews inside modal
-                if (typeof window.renderImagePreviews === 'function') {
-                    window.renderImagePreviews();
-                } else {
-                    const previews = document.getElementById('image-previews');
-                    if (previews) {
-                        const div = document.createElement('div');
-                        div.style = 'position:relative; width:80px; height:60px;';
-                        div.innerHTML = `<img src="${compressedBase64}" style="width:100%; height:100%; object-fit:cover; border-radius:4px;">`;
-                        previews.appendChild(div);
-                    }
-                }
+
+                setPendingImages([...pendingImages, compressedBase64]);
+                renderImagePreviews();
             };
             img.src = e.target.result;
         };
@@ -287,42 +257,42 @@ window.handleImageUpload = handleImageUpload;
 async function handleGmapsLinkImport() {
     const linkInput = document.getElementById('place-search');
     if (!linkInput) return;
-    
+
     const urlText = linkInput.value.trim();
     if (!urlText.startsWith('http://') && !urlText.startsWith('https://')) {
         showToast('אנא הזן קישור תקין של Google Maps', 'error');
         return;
     }
-    
+
     showToast('מפענח את הקישור...', 'info');
-    
+
     try {
         let longUrl = urlText;
-        
+
         // Resolve short url
         if (urlText.includes('maps.app.goo.gl') || urlText.includes('goo.gl/maps')) {
             const apiEndpoint = `${window.location.origin}/api/resolve-link?url=${encodeURIComponent(urlText)}`;
             const res = await fetch(apiEndpoint);
             const data = await res.json();
-            
+
             if (data.success && data.resolvedUrl) {
                 longUrl = data.resolvedUrl;
             } else {
                 throw new Error(data.error || 'נכשל בפענוח הקישור המקוצר');
             }
         }
-        
+
         let lat = null;
         let lng = null;
         let queryName = null;
-        
+
         // Extract Coordinates
         const atCoordsMatch = longUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
         if (atCoordsMatch) {
             lat = parseFloat(atCoordsMatch[1]);
             lng = parseFloat(atCoordsMatch[2]);
         }
-        
+
         const placeSegmentMatch = longUrl.match(/\/place\/([^/]+)/);
         if (placeSegmentMatch) {
             try {
@@ -338,7 +308,7 @@ async function handleGmapsLinkImport() {
                 console.error("Failed to decode place segment:", err);
             }
         }
-        
+
         if (!lat || !lng) {
             const pathCoordsMatch = longUrl.match(/\/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
             if (pathCoordsMatch) {
@@ -346,13 +316,13 @@ async function handleGmapsLinkImport() {
                 lng = parseFloat(pathCoordsMatch[2]);
             }
         }
-        
+
         if (!lat && !lng && !queryName) {
             throw new Error('לא נמצאו קואורדינטות או שם מיקום בקישור המפוענח');
         }
-        
+
         document.getElementById('place-google-url').value = urlText;
-        
+
         if (queryName) {
             const service = new google.maps.places.PlacesService(document.createElement('div'));
             service.findPlaceFromQuery({
@@ -363,19 +333,19 @@ async function handleGmapsLinkImport() {
                     const place = results[0];
                     const placeLat = place.geometry.location.lat();
                     const placeLng = place.geometry.location.lng();
-                    
+
                     document.getElementById('place-name').value = place.name;
                     document.getElementById('place-description').value = place.formatted_address || '';
                     document.getElementById('place-lat').value = placeLat.toFixed(6);
                     document.getElementById('place-lng').value = placeLng.toFixed(6);
-                    
+
                     if (window.miniMap) {
                         window.miniMap.setCenter({ lat: placeLat, lng: placeLng });
                         if (window.miniMapMarker) {
                             window.miniMapMarker.setPosition({ lat: placeLat, lng: placeLng });
                         }
                     }
-                    
+
                     showToast('המיקום נטען בהצלחה!', 'success');
                     linkInput.value = '';
                 } else {
@@ -431,19 +401,19 @@ function exportBackup() {
         const jsonString = JSON.stringify(backupData, null, 2);
         const blob = new Blob([jsonString], { type: "application/json" });
         const url = URL.createObjectURL(blob);
-        
+
         const dateStr = new Date().toISOString().slice(0, 10);
         const filename = `travel_site_backup_${dateStr}.json`;
-        
+
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
         a.click();
-        
+
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         showToast("הגיבוי יוצא בהצלחה!", "success");
     } catch (e) {
         console.error("Backup export failed:", e);
@@ -463,40 +433,40 @@ function importBackup(e) {
     reader.onload = function(evt) {
         try {
             const data = JSON.parse(evt.target.result);
-            
+
             if (!data || !Array.isArray(data.places) || !Array.isArray(data.groups)) {
                 throw new Error("קובץ גיבוי לא תקין. חסרים נתוני מיקומים או קבוצות.");
             }
-            
+
             statusDiv.textContent = 'מייבא נתונים ומסנכרן לענן...';
-            
+
             setPlaces(data.places);
             setGroups(data.groups);
-            
+
             if (Array.isArray(data.itineraries)) {
                 localStorage.setItem('mytravel-itineraries', JSON.stringify(data.itineraries));
             }
-            
+
             localStorage.setItem(STORAGE_KEY, JSON.stringify(places));
             localStorage.setItem(GROUPS_KEY, JSON.stringify(groups));
-            
+
             if (window.IS_FIREBASE_CONFIGURED && window.db) {
                 const promises = [];
-                
+
                 groups.forEach(g => {
                     promises.push(window.db.collection('groups').doc(g.id).set(g));
                 });
-                
+
                 places.forEach(p => {
                     promises.push(window.db.collection('places').doc(p.id).set(p));
                 });
-                
+
                 if (Array.isArray(data.itineraries)) {
                     data.itineraries.forEach(it => {
                         promises.push(window.db.collection('itineraries').doc(it.id).set(it));
                     });
                 }
-                
+
                 Promise.all(promises).then(() => {
                     finalizeImport(statusDiv);
                 }).catch(err => {
@@ -521,13 +491,13 @@ function importBackup(e) {
 function finalizeImport(statusDiv) {
     statusDiv.style.color = '#10B981';
     statusDiv.textContent = 'הגיבוי יובא וסונכרן בהצלחה!';
-    
+
     renderGroupTabs();
     renderGroupSelect();
     renderPlaces();
     renderMarkers();
     drawAllGpxTracks();
-    
+
     showToast("הנתונים יובאו ושוחזרו בהצלחה!", "success");
     setTimeout(closeBackupModal, 1500);
 }
@@ -575,8 +545,8 @@ function initAutocomplete() {
         // Add Google Place Photo if exists
         if (place.photos && place.photos.length > 0) {
             const photoUrl = place.photos[0].getUrl({ maxWidth: 600, maxHeight: 400 });
-            window.pendingImages = [photoUrl];
-            window.renderImagePreviews();
+            setPendingImages([photoUrl]);
+            renderImagePreviews();
         }
 
         if (window.miniMap) {
@@ -610,13 +580,13 @@ function initResizablePanels() {
         if (!isResizing) return;
         const containerWidth = document.querySelector('.app-container').getBoundingClientRect().width;
         let percentage = (e.clientX / containerWidth) * 100;
-        
+
         // Boundaries
         if (percentage < 15) percentage = 15;
         if (percentage > 70) percentage = 70;
 
         placesPanel.style.width = `${percentage}%`;
-        
+
         // If itinerary panel is visible, share remaining space
         const itinVisible = itineraryPanel && itineraryPanel.style.display !== 'none';
         if (itinVisible) {
@@ -627,8 +597,8 @@ function initResizablePanels() {
             mapPanel.style.width = `${100 - percentage}%`;
         }
 
-        if (typeof google !== 'undefined' && google.maps && window.map) {
-            google.maps.event.trigger(window.map, 'resize');
+        if (typeof google !== 'undefined' && google.maps && map) {
+            google.maps.event.trigger(map, 'resize');
         }
     });
 
@@ -652,11 +622,11 @@ function initResizablePanels() {
         document.addEventListener('mousemove', (e) => {
             if (!isItinResizing) return;
             const containerWidth = document.querySelector('.app-container').getBoundingClientRect().width;
-            
+
             // Calculate width of places panel (fixed)
             const placesWidthPx = placesPanel.getBoundingClientRect().width;
             const remainingWidthPx = containerWidth - placesWidthPx;
-            
+
             const mouseOffsetFromLeft = e.clientX - placesWidthPx;
             let mapPercentageOfRemaining = (mouseOffsetFromLeft / remainingWidthPx) * 100;
 
@@ -666,8 +636,8 @@ function initResizablePanels() {
             mapPanel.style.width = `${(mapPercentageOfRemaining / 100) * (remainingWidthPx / containerWidth) * 100}%`;
             itineraryPanel.style.width = `${((100 - mapPercentageOfRemaining) / 100) * (remainingWidthPx / containerWidth) * 100}%`;
 
-            if (typeof google !== 'undefined' && google.maps && window.map) {
-                google.maps.event.trigger(window.map, 'resize');
+            if (typeof google !== 'undefined' && google.maps && map) {
+                google.maps.event.trigger(map, 'resize');
             }
         });
 
@@ -729,11 +699,11 @@ function initEvents() {
             if (isDark) {
                 document.documentElement.removeAttribute('data-theme');
                 localStorage.setItem('theme', 'light');
-                if (window.map) window.map.setOptions({ styles: customMapStyle });
+                if (map) map.setOptions({ styles: customMapStyle });
             } else {
                 document.documentElement.setAttribute('data-theme', 'dark');
                 localStorage.setItem('theme', 'dark');
-                if (window.map) window.map.setOptions({ styles: darkMapStyle });
+                if (map) map.setOptions({ styles: darkMapStyle });
             }
         });
     }
@@ -787,9 +757,9 @@ function initEvents() {
             container?.classList.remove('places-hidden');
             localStorage.setItem('places-panel-visible', 'true');
         }
-        if (typeof window.map !== 'undefined' && window.map) {
+        if (map) {
             setTimeout(() => {
-                google.maps.event.trigger(window.map, 'resize');
+                google.maps.event.trigger(map, 'resize');
             }, 50);
         }
     };
@@ -844,7 +814,7 @@ function initEvents() {
     function setLayout(layout) {
         const container = document.querySelector('.app-container');
         if (!container) return;
-        
+
         container.classList.remove('layout-cols', 'layout-map-left', 'layout-map-right');
         container.classList.add(`layout-${layout}`);
         localStorage.setItem('mytravel-app-layout', layout);
@@ -857,9 +827,9 @@ function initEvents() {
             }
         });
 
-        if (typeof window.map !== 'undefined' && window.map) {
+        if (map) {
             setTimeout(() => {
-                google.maps.event.trigger(window.map, 'resize');
+                google.maps.event.trigger(map, 'resize');
             }, 100);
         }
     }
@@ -897,13 +867,13 @@ function initEvents() {
                 return;
             }
             setPendingGpxData(points);
-            
+
             const hasEle = points && points.length > 0 && points.some(pt => pt.ele !== undefined && pt.ele !== null);
             const eleMsg = hasEle ? "מכיל נתוני גובה" : "ללא נתוני גובה";
-            
+
             document.getElementById('gpx-status').textContent = `טעון: ${file.name.substring(0, 15)}${file.name.length > 15 ? '...' : ''} (${points.length} נק', ${eleMsg})`;
             document.getElementById('btn-remove-gpx').style.display = 'block';
-            
+
             if (hasEle) {
                 showToast(`קובץ GPX נטען בהצלחה! (${eleMsg})`, 'success');
             } else {
@@ -967,35 +937,35 @@ function initEvents() {
     document.getElementById('view-list').addEventListener('click', function() {
         document.getElementById('view-list').classList.add('active');
         document.getElementById('view-map').classList.remove('active');
-        
+
         const pPanel = document.getElementById('places-panel');
         const d = document.getElementById('resize-divider');
         const mPanel = document.getElementById('map-panel');
-        
+
         pPanel.style.display = '';
         d.style.display = '';
         mPanel.style.width = mPanel.dataset.prevWidth || '55%';
-        
-        if (typeof google !== 'undefined' && google.maps && window.map) {
-            setTimeout(() => google.maps.event.trigger(window.map, 'resize'), 50);
+
+        if (typeof google !== 'undefined' && google.maps && map) {
+            setTimeout(() => google.maps.event.trigger(map, 'resize'), 50);
         }
     });
 
     document.getElementById('view-map').addEventListener('click', function() {
         document.getElementById('view-map').classList.add('active');
         document.getElementById('view-list').classList.remove('active');
-        
+
         const pPanel = document.getElementById('places-panel');
         const d = document.getElementById('resize-divider');
         const mPanel = document.getElementById('map-panel');
-        
+
         pPanel.style.display = 'none';
         d.style.display = 'none';
         mPanel.dataset.prevWidth = mPanel.style.width || '55%';
         mPanel.style.width = '100%';
-        
-        if (typeof google !== 'undefined' && google.maps && window.map) {
-            setTimeout(() => google.maps.event.trigger(window.map, 'resize'), 50);
+
+        if (typeof google !== 'undefined' && google.maps && map) {
+            setTimeout(() => google.maps.event.trigger(map, 'resize'), 50);
         }
     });
 
@@ -1008,7 +978,7 @@ function initEvents() {
         if (tabList) tabList.classList.remove('active');
         if (tabMap) tabMap.classList.remove('active');
         if (tabItinerary) tabItinerary.classList.remove('active');
-        
+
         const itinPanel = document.getElementById('itinerary-panel');
 
         if (activeTab === 'list') {
@@ -1019,16 +989,16 @@ function initEvents() {
             document.body.classList.add('mobile-view-map');
             if (tabMap) tabMap.classList.add('active');
             if (itinPanel) itinPanel.style.display = 'none';
-            if (typeof google !== 'undefined' && google.maps && window.map) {
+            if (typeof google !== 'undefined' && google.maps && map) {
                 setTimeout(() => {
-                    google.maps.event.trigger(window.map, 'resize');
+                    google.maps.event.trigger(map, 'resize');
                     const activePlace = places.find(p => p.isHighlighted);
                     if (activePlace && activePlace.lat && activePlace.lng) {
-                        window.map.setCenter({ lat: activePlace.lat, lng: activePlace.lng });
+                        map.setCenter({ lat: activePlace.lat, lng: activePlace.lng });
                     } else if (places.length > 0 && places[0].lat && places[0].lng) {
-                        window.map.setCenter({ lat: places[0].lat, lng: places[0].lng });
+                        map.setCenter({ lat: places[0].lat, lng: places[0].lng });
                     } else {
-                        window.map.setCenter({ lat: DEFAULT_CENTER[0], lng: DEFAULT_CENTER[1] });
+                        map.setCenter({ lat: DEFAULT_CENTER[0], lng: DEFAULT_CENTER[1] });
                     }
                 }, 100);
             }
@@ -1120,7 +1090,7 @@ function initEvents() {
         document.getElementById('import-file-input').click();
     });
     document.getElementById('import-file-input').addEventListener('change', importBackup);
-    
+
     document.getElementById('backup-modal').addEventListener('click', (e) => {
         if (e.target === document.getElementById('backup-modal')) {
             closeBackupModal();
@@ -1133,7 +1103,7 @@ function initEvents() {
             e.stopPropagation();
             logoImg.classList.toggle('zoomed');
         });
-        
+
         document.addEventListener('click', () => {
             if (logoImg.classList.contains('zoomed')) {
                 logoImg.classList.remove('zoomed');
@@ -1163,7 +1133,7 @@ function initEvents() {
         document.getElementById('btn-print-roadbook').addEventListener('click', () => {
             window.print();
         });
-        
+
         document.getElementById('btn-export-roadbook-csv').addEventListener('click', () => {
             const activeRoadbook = roadbookModal.$activeRoadbook;
             const activePlace = roadbookModal.$activePlace;
@@ -1171,7 +1141,7 @@ function initEvents() {
                 downloadRoadbookCsv(activeRoadbook, activePlace);
             }
         });
-        
+
         roadbookModal.addEventListener('click', (e) => {
             if (e.target === roadbookModal) {
                 if (typeof closeRoadbookModal === 'function') closeRoadbookModal();
@@ -1196,7 +1166,7 @@ function init() {
             navigator.serviceWorker.register('./sw.js')
                 .then(reg => {
                     console.log('[Service Worker] Registered successfully:', reg.scope);
-                    
+
                     reg.addEventListener('updatefound', () => {
                         const newWorker = reg.installing;
                         newWorker.addEventListener('statechange', () => {
@@ -1221,7 +1191,7 @@ function init() {
     }
     loadGroups();
     loadPlaces();
-    
+
     const hasGoogle = (typeof google !== 'undefined' && google.maps);
     if (hasGoogle) {
         initMap();
@@ -1233,11 +1203,11 @@ function init() {
         const toggleOffline = document.getElementById('toggle-simulate-offline');
         if (toggleOffline) toggleOffline.checked = true;
     }
-    
+
     renderGroupTabs();
     renderGroupSelect();
     renderPlaces();
-    
+
     if (hasGoogle) {
         renderMarkers();
         drawAllGpxTracks();
@@ -1246,11 +1216,11 @@ function init() {
             syncLeafletView();
         }, 200);
     }
-    
+
     initEvents();
     initResizablePanels();
     initItinerary();
-    
+
     const groupsScroll = document.querySelector('.groups-scroll');
     const subGroupsScroll = document.getElementById('sub-groups-scroll');
     initHorizontalDragScroll(groupsScroll);
@@ -1277,9 +1247,9 @@ function init() {
                 }
                 scrollToCard(sharedPlaceId);
                 setActiveMarker(sharedPlaceId, true);
-                
-                if (hasGoogle && window.map) {
-                    const marker = window.markers?.find(m => m.placeId === sharedPlaceId);
+
+                if (hasGoogle && map) {
+                    const marker = markers?.find(m => m.placeId === sharedPlaceId);
                     if (marker) {
                         google.maps.event.trigger(marker, 'click');
                     }

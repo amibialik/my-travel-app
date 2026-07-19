@@ -204,7 +204,7 @@
                 <i class="fas fa-map-pin"></i>
                 <span><strong id="places-count">0</strong> מקומות שמורים</span>
             </div>
-            
+
             <!-- Map Layers Controller -->
             <div class="map-layer-controller" id="map-layer-controller">
                 <button class="layer-toggle-btn" id="layer-toggle-btn" title="שכבות מפה">
@@ -312,10 +312,10 @@
             </div>
             <div class="modal-body" style="padding: 20px;">
                 <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
-                    כדי שהמפות והמסלולים יעבדו בשטח ללא קליטה סלולרית, תוכל להוריד אריחי מפה ישירות למכשיר. 
+                    כדי שהמפות והמסלולים יעבדו בשטח ללא קליטה סלולרית, תוכל להוריד אריחי מפה ישירות למכשיר.
                     כדי לחסוך מקום, האפליקציה תוריד מפה <strong>רק ברצועה צרה לאורך קווי המסלול (GPX)</strong> שבחרת.
                 </p>
-                
+
                 <div class="form-group" style="margin-bottom: 12px;">
                     <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-layer-group"></i> בחר שכבת מפה להורדה:</label>
                     <select id="offline-layer-select" style="width: 100%; padding: 10px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); font-family: inherit; font-size: 14px; background: var(--primary-bg); color: var(--text-primary); outline: none;">
@@ -323,7 +323,7 @@
                         <option value="opentopo">מפת שטח טופוגרפית (OpenTopoMap)</option>
                     </select>
                 </div>
-                
+
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-route"></i> בחר מסלול GPX להורדה:</label>
                     <select id="offline-trek-select" style="width: 100%; padding: 10px; border: 1.5px solid var(--border-light); border-radius: var(--radius-md); font-family: inherit; font-size: 14px; background: var(--primary-bg); color: var(--text-primary); outline: none;">
@@ -331,11 +331,11 @@
                         <!-- Dynamic list of places with GPX -->
                     </select>
                 </div>
-                
+
                 <button class="btn-primary" id="btn-download-offline-map" style="width: 100%; justify-content: center; height: 44px; margin-bottom: 16px;">
                     <i class="fas fa-download"></i> הורד מפה לאוף-ליין
                 </button>
-                
+
                 <!-- Progress Container -->
                 <div id="offline-progress-container" style="display: none; margin-bottom: 16px; padding: 12px; background: var(--secondary-bg); border: 1px solid var(--border-light); border-radius: var(--radius-md);">
                     <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; margin-bottom: 6px;">
@@ -355,7 +355,7 @@
                         <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-light); transition: .3s; border-radius: 34px;"></span>
                     </label>
                 </div>
-                
+
                 <!-- Saved Maps List -->
                 <div style="border-top: 1px solid var(--border-light); padding-top: 14px;">
                     <h4 style="margin: 0 0 10px 0; font-size: 14px; color: var(--text-primary);"><i class="fas fa-hdd"></i> מפות שמורות במכשיר:</h4>
@@ -363,7 +363,7 @@
                         <div style="text-align: center; padding: 8px; font-style: italic;">אין מפות שמורות עדיין</div>
                     </div>
                 </div>
-                
+
                 <!-- Close Button at bottom for mobile usability -->
                 <button class="btn-outline" id="btn-offline-close-bottom" style="width: 100%; justify-content: center; height: 44px; margin-top: 16px; border-color: var(--border-light); color: var(--text-secondary);">
                     <i class="fas fa-times"></i> סגור חלון
@@ -410,7 +410,7 @@
                         </div>
                         <div id="search-results" class="search-results"></div>
                     </div>
-                    
+
                     <div class="form-group" style="margin-bottom:0;">
                         <label><i class="fas fa-link"></i> טען מיקום מקישור שיתוף של Google Maps</label>
                         <div style="display:flex; gap:10px;">
@@ -597,21 +597,21 @@
                 <p style="font-size: 14.5px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.6;">
                     קובץ הגיבוי מאפשר לך לשמור עותק בטוח של כל המידע שהכנסת לאתר (קבוצות, מדינות, ימי טרקים, מקומות ומסלולי GPX) במחשב המקומי שלך או להעבירו למכשירים אחרים (כמו ה-iPad).
                 </p>
-                
+
                 <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
                     <button class="btn-primary" id="btn-export-backup" style="width: 100%; justify-content: center; gap: 10px; font-size: 14.5px;">
                         <i class="fas fa-file-download"></i>
                         <span>ייצא קובץ גיבוי (JSON)</span>
                     </button>
-                    
+
                     <button class="btn-outline" id="btn-trigger-import" style="width: 100%; justify-content: center; gap: 10px; font-size: 14.5px; border-style: solid;">
                         <i class="fas fa-file-upload"></i>
                         <span>ייבא קובץ גיבוי מהמחשב</span>
                     </button>
-                    
+
                     <input type="file" id="import-file-input" accept=".json" style="display: none;">
                 </div>
-                
+
                 <div id="import-status" style="font-size: 13.5px; color: #10B981; font-weight: bold; min-height: 20px; margin-top: 8px;"></div>
             </div>
         </div>
@@ -724,7 +724,7 @@
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label style="display:block; margin-bottom:6px; font-weight:bold; color:var(--text-secondary);"><i class="fas fa-route"></i> מסלול GPX ליום זה</label>
                     <select id="day-edit-gpx-select" style="width:100%; padding:10px; border:1.5px solid var(--border-light); border-radius:var(--radius-md); font-family:inherit; font-size:14px; background:var(--primary-bg); color:var(--text-primary); outline:none;"></select>
-                    
+
                     <!-- GPX Range Selector -->
                     <div id="day-edit-gpx-range-container" style="display:none; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
                         <div class="form-group" style="margin-bottom:0;">
@@ -795,7 +795,7 @@
                                 <button type="button" class="btn-primary" id="btn-day-edit-shift-submit" style="padding: 0 12px; height: 32px; font-size: 12px; white-space: nowrap;">בצע דחייה</button>
                             </div>
                         </div>
-                        
+
                         <!-- Swap Days -->
                         <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between; background: rgba(var(--primary-rgb), 0.03); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); flex-wrap: wrap;">
                             <span style="font-size: 13px; color: var(--text-primary); font-weight: 700;">החלף תוכן של יום זה עם:</span>
@@ -833,7 +833,7 @@
                         <input type="date" id="edit-itin-end" style="width:100%; padding:10px; border:1.5px solid var(--border-light); border-radius:var(--radius-md); font-family:inherit; font-size:14px; background:var(--primary-bg); color:var(--text-primary); outline:none;">
                     </div>
                 </div>
-                
+
                 <div id="edit-itin-warning" style="display:none; margin-bottom:16px; padding:12px; background:var(--accent-rose-bg); border:1px solid var(--accent-rose); border-radius:var(--radius-md); font-size:12.5px; color:var(--accent-rose); line-height:1.5; text-align:right;">
                     <i class="fas fa-exclamation-triangle"></i>
                     <span><strong>אזהרה:</strong> קיצור הטיול יביא למחיקת הימים האחרונים שהוסרו מהלו"ז, כולל כל המידע והמסלולים שבהם!</span>
@@ -937,7 +937,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage-compat.js" crossorigin="anonymous"></script>
-    
+
     <script src="firebase-config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" crossorigin="anonymous"></script>
@@ -945,7 +945,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
-    <script src="app.js"></script>
-    <script src="itinerary.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>

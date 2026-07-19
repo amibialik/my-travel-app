@@ -6,7 +6,8 @@ import {
     activeGroupId, setActiveGroupId,
     activeSubGroupId, setActiveSubGroupId,
     savePlaces,
-    isOfflineMode
+    isOfflineMode,
+    map
 } from './state.js';
 
 import {
@@ -59,7 +60,7 @@ export function loadItineraries() {
                 setItineraries(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             }
             localStorage.setItem(ITINERARIES_KEY, JSON.stringify(itineraries));
-            
+
             // Restore saved active itinerary
             const savedActiveId = localStorage.getItem('mytravel-active-itinerary-id');
             if (savedActiveId && itineraries.some(it => it.id === savedActiveId)) {
@@ -67,7 +68,7 @@ export function loadItineraries() {
                 // Also set activeItineraryId on window for global scopes like map
                 window.activeItineraryId = savedActiveId;
             }
-            
+
             renderItineraryList();
             if (activeItineraryId) {
                 renderGanttView(activeItineraryId);
@@ -362,11 +363,11 @@ export function renderGanttView(itineraryId) {
         const dayNum = idx + 1;
         const hasContent = day.title || day.notes || day.links.length > 0 || day.placeIds.length > 0 || day.gpxPlaceId;
         const isToday = day.date === new Date().toISOString().split('T')[0];
-        
+
         const linkedPlaces = day.placeIds
             .map(pid => (places ? places.find(p => p.id === pid) : null))
             .filter(Boolean);
-        
+
         const gpxPlace = day.gpxPlaceId && places
             ? places.find(p => p.id === day.gpxPlaceId)
             : null;
@@ -377,7 +378,7 @@ export function renderGanttView(itineraryId) {
 
         if (isCompact) {
             return `
-                <div class="gantt-day compact ${hasContent ? 'has-content' : ''} ${isToday ? 'is-today' : ''}" 
+                <div class="gantt-day compact ${hasContent ? 'has-content' : ''} ${isToday ? 'is-today' : ''}"
                      data-date="${day.date}" data-itin-id="${itineraryId}">
                     <div class="gantt-day-marker">
                         <div class="gantt-day-dot" style="background: ${day.color || itin.color}"></div>
@@ -390,7 +391,7 @@ export function renderGanttView(itineraryId) {
                             ${holidaysHtml}
                             <span class="gantt-day-title" style="margin: 0 8px 0 0; font-size:14px; font-weight:700;">${day.title || 'יום ללא כותרת'}</span>
                             ${isToday ? '<span class="gantt-today-badge">היום!</span>' : ''}
-                            
+
                             <div style="margin-right: auto; display: flex; align-items: center; gap: 8px;">
                                 ${gpxPlace ? (() => {
                                     const hasRange = (day.gpxStartKm !== undefined && day.gpxStartKm !== null) || (day.gpxEndKm !== undefined && day.gpxEndKm !== null);
@@ -419,7 +420,7 @@ export function renderGanttView(itineraryId) {
         }
 
         return `
-            <div class="gantt-day ${hasContent ? 'has-content' : ''} ${isToday ? 'is-today' : ''}" 
+            <div class="gantt-day ${hasContent ? 'has-content' : ''} ${isToday ? 'is-today' : ''}"
                  data-date="${day.date}" data-itin-id="${itineraryId}">
                 <div class="gantt-day-marker">
                     <div class="gantt-day-dot" style="background: ${day.color || itin.color}"></div>
@@ -434,7 +435,7 @@ export function renderGanttView(itineraryId) {
                     </div>
                     ${day.title ? `<h4 class="gantt-day-title">${day.title}</h4>` : ''}
                     ${day.notes ? `<p class="gantt-day-notes">${day.notes}</p>` : ''}
-                    
+
                     ${gpxPlace ? (() => {
                         const hasRange = (day.gpxStartKm !== undefined && day.gpxStartKm !== null) || (day.gpxEndKm !== undefined && day.gpxEndKm !== null);
                         const start = (day.gpxStartKm !== undefined && day.gpxStartKm !== null) ? day.gpxStartKm : 0;
@@ -447,7 +448,7 @@ export function renderGanttView(itineraryId) {
                             </div>
                         `;
                     })() : ''}
-                    
+
                     ${linkedPlaces.length > 0 ? `
                         <div class="gantt-day-places">
                             ${linkedPlaces.map(p => `
@@ -457,7 +458,7 @@ export function renderGanttView(itineraryId) {
                             `).join('')}
                         </div>
                     ` : ''}
-                    
+
                     ${day.links.length > 0 ? `
                         <div class="gantt-day-links">
                             ${day.links.map((lnk, li) => `
@@ -467,7 +468,7 @@ export function renderGanttView(itineraryId) {
                             `).join('')}
                         </div>
                     ` : ''}
-                    
+
                     <button class="gantt-day-edit-btn" data-date="${day.date}" data-itin-id="${itineraryId}">
                         <i class="fas fa-pen"></i> ערוך יום
                     </button>
@@ -565,19 +566,19 @@ export function saveDayEdit() {
     const gpxStartKm = !isNaN(startVal) ? startVal : null;
     const gpxEndKm = !isNaN(endVal) ? endVal : null;
 
-    updateDay(itineraryId, dateStr, { 
-        title, 
-        notes, 
-        links, 
-        placeIds, 
-        gpxPlaceId, 
-        gpxStartKm, 
-        gpxEndKm 
+    updateDay(itineraryId, dateStr, {
+        title,
+        notes,
+        links,
+        placeIds,
+        gpxPlaceId,
+        gpxStartKm,
+        gpxEndKm
     });
 
     closeDayEditModal();
     renderGanttView(itineraryId);
-    
+
     // Rerender Map / Leaflet view
     if (window.drawAllGpxTracks) window.drawAllGpxTracks();
     if (isOfflineMode) syncLeafletView();
@@ -659,11 +660,11 @@ export function renderDayGpxSelector(selectedGpxId) {
 export function openCreateItineraryModal() {
     const modal = document.getElementById('create-itin-modal-overlay');
     if (!modal) return;
-    
+
     document.getElementById('create-itin-name').value = '';
     document.getElementById('create-itin-start').value = '';
     document.getElementById('create-itin-end').value = '';
-    
+
     const colorOptions = modal.querySelectorAll('.itin-color-option');
     colorOptions.forEach(opt => opt.classList.remove('selected'));
     if (colorOptions[0]) colorOptions[0].classList.add('selected');
@@ -754,12 +755,12 @@ export function renderCalendarView(itineraryId, customYear, customMonth) {
 
     const firstDayOfMonth = new Date(calendarCurrentYear, calendarCurrentMonth, 1);
     const lastDayOfMonth = new Date(calendarCurrentYear, calendarCurrentMonth + 1, 0);
-    
+
     const startOffset = firstDayOfMonth.getDay();
     const totalDaysInMonth = lastDayOfMonth.getDate();
 
     const monthsHebrew = ['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'];
-    
+
     const monthHeader = `
         <div class="calendar-month-nav">
             <button class="cal-nav-btn" id="cal-prev-month"><i class="fas fa-chevron-right"></i></button>
@@ -769,27 +770,27 @@ export function renderCalendarView(itineraryId, customYear, customMonth) {
     `;
 
     const daysOfWeekHebrew = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
-    const daysOfWeekHtml = `<div class="calendar-weekdays-row">` + 
-        daysOfWeekHebrew.map(d => `<div class="cal-weekday-cell">${d}</div>`).join('') + 
+    const daysOfWeekHtml = `<div class="calendar-weekdays-row">` +
+        daysOfWeekHebrew.map(d => `<div class="cal-weekday-cell">${d}</div>`).join('') +
         `</div>`;
 
     let gridCellsHtml = `<div class="calendar-grid-cells">`;
-    
+
     for (let i = 0; i < startOffset; i++) {
         gridCellsHtml += `<div class="cal-day-cell empty"></div>`;
     }
 
     for (let dayNum = 1; dayNum <= totalDaysInMonth; dayNum++) {
-        const dateStr = calendarCurrentYear + '-' + 
-            String(calendarCurrentMonth + 1).padStart(2, '0') + '-' + 
+        const dateStr = calendarCurrentYear + '-' +
+            String(calendarCurrentMonth + 1).padStart(2, '0') + '-' +
             String(dayNum).padStart(2, '0');
 
         const dayIdx = itin.days.findIndex(d => d.date === dateStr);
         const isItinDay = dayIdx >= 0;
         const itinDay = isItinDay ? itin.days[dayIdx] : null;
-        
+
         const holidays = jewishHolidaysMap[dateStr] || [];
-        
+
         let cellClass = 'cal-day-cell';
         let cellContent = `<span class="cal-day-number">${dayNum}</span>`;
         let style = '';
@@ -797,7 +798,7 @@ export function renderCalendarView(itineraryId, customYear, customMonth) {
         if (isItinDay) {
             cellClass += ' itin-day-active';
             style = `background-color: ${itin.color}15; border-color: ${itin.color};`;
-            
+
             const dayNumberInItin = dayIdx + 1;
             const linkedPlaces = itinDay.placeIds
                 .map(pid => (places ? places.find(p => p.id === pid) : null))
@@ -818,13 +819,13 @@ export function renderCalendarView(itineraryId, customYear, customMonth) {
                         const rangeText = hasRange ? ` [ק"מ ${start.toFixed(1)}–${end === 99999 ? 'סוף' : end.toFixed(1)}]` : '';
                         return `<span class="cal-place-link cal-gpx" data-place-id="${gpxP.id}" title="מסלול GPX: ${gpxP.name}${rangeText}"><i class="fas fa-route"></i> ${gpxP.name}${rangeText}</span>`;
                     })() : ''}
-                    
+
                     ${linkedPlaces.map(p => `
                         <span class="cal-place-link" data-place-id="${p.id}" title="${p.name}">
                             <i class="fas fa-map-pin"></i> ${p.name}
                         </span>
                     `).join('')}
-                    
+
                     ${itinDay.links.length > 0 ? `<i class="fas fa-link" title="${itinDay.links.length} קישורים חיצוניים"></i>` : ''}
                 </div>
             `;
@@ -920,7 +921,7 @@ export function bindGanttHeaderEvents(itineraryId) {
         const listWrapper = document.getElementById('itinerary-list-wrapper');
         if (listWrapper) listWrapper.style.display = '';
         renderItineraryList();
-        
+
         // Redraw route polylines to clear itinerary segments
         if (window.drawAllGpxTracks) window.drawAllGpxTracks();
         if (isOfflineMode) syncLeafletView();
@@ -986,7 +987,7 @@ export async function loadJewishHolidaysForYear(year) {
             return;
         } catch (e) {}
     }
-    
+
     try {
         const res = await fetch(`https://www.hebcal.com/hebcal?cfg=json&v=1&maj=on&min=on&mod=on&year=${year}&month=all&yt=G&lg=he`);
         if (res.ok) {
@@ -1014,7 +1015,7 @@ export async function enrichItineraryWithHolidays(itin) {
         const startYear = new Date(itin.startDate + 'T00:00:00').getFullYear();
         const endYear = new Date(itin.endDate + 'T00:00:00').getFullYear();
         const years = Array.from(new Set([startYear, endYear]));
-        
+
         const allEvents = [];
         for (const yr of years) {
             const key = `mytravel-holidays-${yr}`;
@@ -1037,7 +1038,7 @@ export async function enrichItineraryWithHolidays(itin) {
                 allEvents.push(...yearEvents);
             }
         }
-        
+
         let updated = false;
         itin.days.forEach(day => {
             const dayEvents = allEvents.filter(ev => ev.date === day.date);
@@ -1049,7 +1050,7 @@ export async function enrichItineraryWithHolidays(itin) {
                 }
             }
         });
-        
+
         if (updated) {
             saveItineraries();
             syncItineraryToFirebase(itin);
@@ -1109,7 +1110,7 @@ export function updateItineraryDates(itineraryId, newStartDate, newEndDate) {
     saveItineraries();
     syncItineraryToFirebase(itin);
     enrichItineraryWithHolidays(itin);
-    
+
     setCalendarCurrentYear(null);
     setCalendarCurrentMonth(null);
 
@@ -1156,7 +1157,7 @@ export function openEditItineraryDatesModal(itineraryId) {
                 const shiftedDateStr = shiftedDates[idx];
                 const shiftedDate = new Date(shiftedDateStr + 'T00:00:00');
                 const isOutside = shiftedDate < newStart || shiftedDate > newEnd;
-                
+
                 const hasContent = day.title || day.notes || day.links.length > 0 || day.placeIds.length > 0 || day.gpxPlaceId;
                 return isOutside && hasContent;
             });
@@ -1221,10 +1222,10 @@ export function exportItineraryToICS(itin) {
     itin.days.forEach((day, idx) => {
         const dayNum = idx + 1;
         const summary = `יום ${dayNum}: ${day.title || itin.name}`;
-        
+
         let descParts = [];
         if (day.notes) descParts.push(day.notes);
-        
+
         if (day.placeIds && day.placeIds.length > 0 && places) {
             const placesNames = day.placeIds
                 .map(pid => places.find(p => p.id === pid))
@@ -1234,17 +1235,17 @@ export function exportItineraryToICS(itin) {
                 descParts.push(`מקומות: ${placesNames.join(', ')}`);
             }
         }
-        
+
         if (day.links && day.links.length > 0) {
             descParts.push('קישורים:');
             day.links.forEach(lnk => {
                 descParts.push(`- ${lnk.label || lnk.url}: ${lnk.url}`);
             });
         }
-        
+
         const description = descParts.join('\\n').replace(/,/g, '\\,').replace(/;/g, '\\;');
         const dateRaw = day.date.replace(/-/g, '');
-        
+
         const d = new Date(day.date + 'T00:00:00');
         d.setDate(d.getDate() + 1);
         const nextDateRaw = d.toISOString().split('T')[0].replace(/-/g, '');
@@ -1260,7 +1261,7 @@ export function exportItineraryToICS(itin) {
     });
 
     icsContent.push('END:VCALENDAR');
-    
+
     const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -1276,7 +1277,7 @@ export function toggleItineraryPanel() {
     const divider = document.getElementById('itin-map-divider');
     const container = document.querySelector('.app-container');
     if (!panel) return;
-    
+
     const isVisible = panel.style.display === 'flex' || (window.innerWidth <= 900 && panel.style.display === 'block');
     if (isVisible) {
         panel.style.display = 'none';
@@ -1305,45 +1306,45 @@ export function toggleItineraryPanel() {
 export async function handleQuickGmapsLinkImport() {
     const linkInput = document.getElementById('day-edit-quick-link');
     if (!linkInput) return;
-    
+
     const urlText = linkInput.value.trim();
     if (!urlText) {
         showToast('אנא הדבק קישור תקין של Google Maps', 'error');
         return;
     }
-    
+
     if (!urlText.startsWith('http://') && !urlText.startsWith('https://')) {
         showToast('קישור לא תקין, חייב להתחיל ב-http:// או https://', 'error');
         return;
     }
-    
+
     showToast('מפענח את הקישור...', 'info');
-    
+
     try {
         let longUrl = urlText;
-        
+
         if (urlText.includes('maps.app.goo.gl') || urlText.includes('goo.gl/maps')) {
             const apiEndpoint = `${window.location.origin}/api/resolve-link?url=${encodeURIComponent(urlText)}`;
             const res = await fetch(apiEndpoint);
             const data = await res.json();
-            
+
             if (data.success && data.resolvedUrl) {
                 longUrl = data.resolvedUrl;
             } else {
                 throw new Error(data.error || 'נכשל בפענוח הקישור המקוצר');
             }
         }
-        
+
         let lat = null;
         let lng = null;
         let queryName = null;
-        
+
         const atCoordsMatch = longUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
         if (atCoordsMatch) {
             lat = parseFloat(atCoordsMatch[1]);
             lng = parseFloat(atCoordsMatch[2]);
         }
-        
+
         const placeSegmentMatch = longUrl.match(/\/place\/([^/]+)/);
         if (placeSegmentMatch) {
             try {
@@ -1359,7 +1360,7 @@ export async function handleQuickGmapsLinkImport() {
                 console.error("Failed to decode place segment:", err);
             }
         }
-        
+
         if (!lat || !lng) {
             const pathCoordsMatch = longUrl.match(/\/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
             if (pathCoordsMatch) {
@@ -1367,13 +1368,13 @@ export async function handleQuickGmapsLinkImport() {
                 lng = parseFloat(pathCoordsMatch[2]);
             }
         }
-        
+
         if (!lat && !lng && !queryName) {
             throw new Error('לא נמצאו קואורדינטות או שם מיקום בקישור המפוענח');
         }
-        
+
         document.getElementById('day-edit-quick-url').value = urlText;
-        
+
         if (queryName) {
             const service = new google.maps.places.PlacesService(document.createElement('div'));
             service.findPlaceFromQuery({
@@ -1384,11 +1385,11 @@ export async function handleQuickGmapsLinkImport() {
                     const place = results[0];
                     const placeLat = place.geometry.location.lat();
                     const placeLng = place.geometry.location.lng();
-                    
+
                     document.getElementById('day-edit-quick-name').value = place.name;
                     document.getElementById('day-edit-quick-lat').value = placeLat.toFixed(6);
                     document.getElementById('day-edit-quick-lng').value = placeLng.toFixed(6);
-                    
+
                     showToast('המיקום נטען בהצלחה!', 'success');
                     linkInput.value = '';
                 } else {
@@ -1459,7 +1460,7 @@ export function submitQuickAddPlace() {
         customColor: '#E5B23A',
         images: [],
         links,
-        groupId: '', 
+        groupId: '',
         tags: ['לוח זמנים'],
         createdAt: Date.now()
     };
@@ -1508,7 +1509,7 @@ export function updateGpxRangeUI(placeId, currentStart, currentEnd) {
 
     if (place && place.gpxData && place.gpxData.length > 0) {
         const totalDist = place.gpxData[place.gpxData.length - 1].dist || 0;
-        
+
         rangeContainer.style.display = 'grid';
         infoText.style.display = 'block';
 

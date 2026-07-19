@@ -8,6 +8,8 @@ import {
     map, setMap,
     markers, setMarkers,
     activeMarkerId, setActiveMarkerId,
+    activePolylines, setActivePolylines,
+    placesService, setPlacesService,
     hoverMarker, setHoverMarker,
     kmMarkers, setKmMarkers,
     markerClustererInstance, setMarkerClustererInstance,
@@ -54,7 +56,7 @@ export function initMap() {
         fullscreenControl: false,
         styles: isDark ? darkMapStyle : customMapStyle
     };
-    
+
     const newMap = new google.maps.Map(document.getElementById('map'), mapOptions);
     setMap(newMap);
 
@@ -174,16 +176,16 @@ function bindMapLayerUIControls(gMap) {
             e.stopPropagation();
             layerController.classList.toggle('active');
         });
-        
+
         document.addEventListener('click', () => {
             layerController.classList.remove('active');
         });
-        
+
         const options = layerController.querySelectorAll('.layer-option');
         options.forEach(opt => {
             opt.addEventListener('click', (e) => {
                 e.stopPropagation();
-                
+
                 const layer = opt.dataset.layer;
                 if (layer === 'slope-colors') {
                     setSlopeColoringEnabled(!slopeColoringEnabled);
@@ -200,14 +202,14 @@ function bindMapLayerUIControls(gMap) {
                     }
                     return;
                 }
-                
+
                 options.forEach(o => {
                     if (o.dataset.layer !== 'slope-colors' && o.dataset.layer !== 'waymarked-hiking') {
                         o.classList.remove('active');
                     }
                 });
                 opt.classList.add('active');
-                
+
                 if (layer === 'roadmap') {
                     gMap.setMapTypeId(google.maps.MapTypeId.ROADMAP);
                 } else if (layer === 'terrain') {
@@ -250,7 +252,7 @@ function bindMapLayerUIControls(gMap) {
 // ============= Markers Rendering =============
 export function renderMarkers() {
     if (typeof google === 'undefined' || !google.maps || !map) return;
-    
+
     // Clear existing markers
     markers.forEach(m => m.setMap(null));
     setMarkers([]);
@@ -385,7 +387,7 @@ export function setActiveMarker(placeId, forceExpand = false) {
 
 export function panToPlace(latOrPlace, lng) {
     let lat, lngVal, place;
-    
+
     if (typeof latOrPlace === 'object' && latOrPlace !== null) {
         place = latOrPlace;
         lat = place.lat;
@@ -395,9 +397,9 @@ export function panToPlace(latOrPlace, lng) {
         lngVal = lng;
         place = places.find(p => p.lat === lat && p.lng === lngVal);
     }
-    
+
     const hasGpx = place && place.gpxData && place.gpxData.length > 0;
-    
+
     if (isOfflineMode) {
         if (typeof L !== 'undefined' && leafletMap) {
             if (hasGpx) {
@@ -423,7 +425,7 @@ export function panToPlace(latOrPlace, lng) {
 // ============= GPX Tracks Drawing =============
 export function drawAllGpxTracks() {
     if (typeof google === 'undefined' || !google.maps) return;
-    
+
     if (activePolylines) {
         activePolylines.forEach(p => p.setMap(null));
         setActivePolylines([]);
@@ -444,7 +446,7 @@ export function drawAllGpxTracks() {
             hasTracks = true;
             const placeColor = getPlaceColor(place);
             const isActive = (place.id === activeMarkerId);
-            
+
             if (isActive) {
                 activeTrackPoints = place.gpxData;
             }
@@ -473,9 +475,9 @@ export function drawAllGpxTracks() {
                     if (day.gpxPlaceId === place.id && (day.gpxStartKm !== null || day.gpxEndKm !== null)) {
                         const startKm = day.gpxStartKm !== null ? day.gpxStartKm : 0;
                         const endKm = day.gpxEndKm !== null ? day.gpxEndKm : 99999;
-                        
+
                         const segmentPath = place.gpxData.filter(pt => pt.dist >= startKm && pt.dist <= endKm);
-                        
+
                         if (segmentPath.length > 1) {
                             const dayColor = day.color || activeItinerary.color || '#E5B23A';
                             const dayPoly = new google.maps.Polyline({
@@ -487,7 +489,7 @@ export function drawAllGpxTracks() {
                                 map: map,
                                 zIndex: 1600
                             });
-                            
+
                             const dayNum = dayIdx + 1;
                             const infoWindow = new google.maps.InfoWindow({
                                 content: `
@@ -499,12 +501,12 @@ export function drawAllGpxTracks() {
                                     </div>
                                 `
                             });
-                            
+
                             dayPoly.addListener('click', (e) => {
                                 infoWindow.setPosition(e.latLng);
                                 infoWindow.open(map);
                             });
-                            
+
                             activePolylines.push(dayPoly);
                         }
                     }
@@ -518,7 +520,7 @@ export function drawAllGpxTracks() {
                         const start = Math.min(seg.startIndex, seg.endIndex);
                         const end = Math.max(seg.startIndex, seg.endIndex);
                         const segmentPath = place.gpxData.slice(start, end + 1);
-                        
+
                         const segPoly = new google.maps.Polyline({
                             path: segmentPath,
                             geodesic: true,
@@ -528,7 +530,7 @@ export function drawAllGpxTracks() {
                             map: map,
                             zIndex: 2000
                         });
-                        
+
                         const infoWindow = new google.maps.InfoWindow({
                             content: `<div style="direction: rtl; text-align: right; font-family: 'Varela Round', sans-serif; padding: 4px;">
                                 <strong style="color: var(--primary); font-size:13.5px;">${escapeHtml(seg.name)}</strong><br>
@@ -536,12 +538,12 @@ export function drawAllGpxTracks() {
                                 <span style="font-size: 11.5px; color: var(--text-tertiary); display:block; margin-top:2px;">${escapeHtml(seg.description || '')}</span>
                             </div>`
                         });
-                        
+
                         segPoly.addListener('click', (e) => {
                             infoWindow.setPosition(e.latLng);
                             infoWindow.open(map);
                         });
-                        
+
                         activePolylines.push(segPoly);
                     }
                 });
@@ -572,20 +574,20 @@ export function drawAllGpxTracks() {
 export function drawSlopeColoredTracks() {
     slopePolylines.forEach(p => p.setMap(null));
     setSlopePolylines([]);
-    
+
     if (!map) return;
-    
+
     const visiblePlaces = getFilteredPlaces();
     visiblePlaces.forEach(place => {
         if (!place.gpxData || place.gpxData.length < 2) return;
         const points = place.gpxData;
         const stepSize = 4;
-        
+
         for (let i = 0; i < points.length - 1; i += stepSize) {
             const segEnd = Math.min(i + stepSize, points.length - 1);
             const ptStart = points[i];
             const ptEnd = points[segEnd];
-            
+
             const eleDiff = (ptEnd.ele || 0) - (ptStart.ele || 0);
             let distDiff;
             if (ptStart.dist !== undefined && ptEnd.dist !== undefined) {
@@ -593,9 +595,9 @@ export function drawSlopeColoredTracks() {
             } else {
                 distDiff = getDistance(ptStart.lat, ptStart.lng, ptEnd.lat, ptEnd.lng) * 1000;
             }
-            
+
             const slope = distDiff > 0 ? (eleDiff / distDiff) * 100 : 0;
-            
+
             let color;
             const absSlope = Math.abs(slope);
             if (absSlope < 5) {
@@ -607,9 +609,9 @@ export function drawSlopeColoredTracks() {
             } else {
                 color = '#ef4444'; // Very steep
             }
-            
+
             const pathSegment = points.slice(i, segEnd + 1).map(pt => ({ lat: pt.lat, lng: pt.lng }));
-            
+
             const poly = new google.maps.Polyline({
                 path: pathSegment,
                 strokeColor: color,
@@ -618,7 +620,7 @@ export function drawSlopeColoredTracks() {
                 map: map,
                 zIndex: 1800
             });
-            
+
             slopePolylines.push(poly);
         }
     });
@@ -627,12 +629,12 @@ export function drawSlopeColoredTracks() {
 export function drawKmMarkers() {
     kmMarkers.forEach(m => m.setMap(null));
     setKmMarkers([]);
-    
+
     if (!map || kmMarkerMode === 'off') return;
-    
+
     const activePlace = places.find(p => p.id === activeMarkerId);
     if (!activePlace || !activePlace.gpxData || activePlace.gpxData.length <= 1) return;
-    
+
     let step = 1;
     if (kmMarkerMode === 'dynamic') {
         const zoom = map.getZoom();
@@ -642,11 +644,11 @@ export function drawKmMarkers() {
     } else {
         step = parseInt(kmMarkerMode);
     }
-    
+
     const totalLength = activePlace.gpxData[activePlace.gpxData.length - 1].dist || 0;
     let lastKm = 0;
     const newKmMarkersList = [];
-    
+
     if (activePlace.isReversed) {
         for (let i = activePlace.gpxData.length - 2; i >= 0; i--) {
             const pt = activePlace.gpxData[i];
@@ -751,7 +753,7 @@ export function setupGpsTracking() {
                     showToast('דפדפן זה אינו תומך במיקום GPS', 'error');
                     return;
                 }
-                
+
                 showToast('מפעיל GPS ומאתר מיקום...', 'info');
                 gpsBtn.classList.add('tracking');
                 setIsTrackingUser(true);
@@ -760,7 +762,7 @@ export function setupGpsTracking() {
                     (position) => {
                         const lat = position.coords.latitude;
                         const lng = position.coords.longitude;
-                        
+
                         if (isOfflineMode) {
                             if (typeof L !== 'undefined' && leafletMap) {
                                 const pos = [lat, lng];
@@ -782,7 +784,7 @@ export function setupGpsTracking() {
                             }
                         } else if (typeof google !== 'undefined' && google.maps && map) {
                             const pos = { lat, lng };
-                            
+
                             if (!userLocationMarker) {
                                 const gMarker = new google.maps.Marker({
                                     position: pos,
@@ -799,7 +801,7 @@ export function setupGpsTracking() {
                             } else {
                                 userLocationMarker.setPosition(pos);
                             }
-                            
+
                             map.panTo(pos);
                             if (map.getZoom() < 15) {
                                 map.setZoom(16);
@@ -809,7 +811,7 @@ export function setupGpsTracking() {
                     (err) => {
                         console.error('Geolocation error:', err);
                         showToast('שגיאה בקבלת מיקום GPS. ודא שהרשאות המיקום פעילות במכשיר.', 'error');
-                        
+
                         if (watchId !== null) {
                             navigator.geolocation.clearWatch(watchId);
                             setWatchId(null);
@@ -840,32 +842,32 @@ export function setupGpsTracking() {
 // ============= Offline Leaflet Maps =============
 export function initLeafletMap() {
     if (leafletMap || typeof L === 'undefined') return;
-    
+
     const newLeafletMap = L.map('leaflet-map', {
         zoomControl: false,
         attributionControl: false
     }).setView([31.5, 34.8], 9);
     setLeafletMap(newLeafletMap);
-    
+
     const isMobile = window.innerWidth <= 900;
     if (!isMobile) {
         L.control.zoom({
             position: 'bottomleft'
         }).addTo(newLeafletMap);
     }
-    
+
     const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 20,
         maxNativeZoom: 17
     });
-    
+
     const topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
         maxZoom: 20,
         maxNativeZoom: 17
     });
-    
+
     osmLayer.addTo(newLeafletMap);
-    
+
     L.control.layers({
         "מפת כבישים (OSM)": osmLayer,
         "מפת שטח (OpenTopo)": topoLayer
@@ -879,20 +881,20 @@ export function syncLeafletView() {
     if (!leafletMap) {
         initLeafletMap();
     }
-    
+
     leafletPolylines.forEach(p => leafletMap.removeLayer(p));
     setLeafletPolylines([]);
-    
+
     leafletMarkers.forEach(m => leafletMap.removeLayer(m));
     setLeafletMarkers([]);
-    
+
     const visiblePlaces = getFilteredPlaces();
     if (visiblePlaces.length === 0) return;
-    
+
     const bounds = L.latLngBounds();
     const newPolys = [];
     const newMarkers = [];
-    
+
     // Draw tracks in Leaflet
     visiblePlaces.forEach(place => {
         if (place.gpxData && place.gpxData.length > 0) {
@@ -900,15 +902,15 @@ export function syncLeafletView() {
             const isHighlighted = (place.id === activeMarkerId);
             const color = isHighlighted ? '#E5B23A' : '#2C4E72';
             const weight = isHighlighted ? 5 : 3.5;
-            
+
             const poly = L.polyline(latlngs, {
                 color: color,
                 weight: weight,
                 opacity: 0.85
             }).addTo(leafletMap);
-            
+
             newPolys.push(poly);
-            
+
             // Draw active itinerary day specific GPX segments in Leaflet
             let activeItineraryIdVal = window.activeItineraryId || null;
             let activeItinerary = null;
@@ -921,19 +923,19 @@ export function syncLeafletView() {
                     if (day.gpxPlaceId === place.id && (day.gpxStartKm !== null || day.gpxEndKm !== null)) {
                         const startKm = day.gpxStartKm !== null ? day.gpxStartKm : 0;
                         const endKm = day.gpxEndKm !== null ? day.gpxEndKm : 99999;
-                        
+
                         const segmentPoints = place.gpxData.filter(pt => pt.dist >= startKm && pt.dist <= endKm);
-                        
+
                         if (segmentPoints.length > 1) {
                             const dayColor = day.color || activeItinerary.color || '#E5B23A';
                             const leafLatLngs = segmentPoints.map(pt => [pt.lat, pt.lng]);
-                            
+
                             const dayPoly = L.polyline(leafLatLngs, {
                                 color: dayColor,
                                 weight: 7,
                                 opacity: 0.95
                             }).addTo(leafletMap);
-                            
+
                             const dayNum = dayIdx + 1;
                             dayPoly.bindPopup(`
                                 <div style="direction: rtl; text-align: right; font-family: 'Varela Round', sans-serif; padding: 2px;">
@@ -941,39 +943,39 @@ export function syncLeafletView() {
                                     <span style="font-size:11px; color:#555;">מקטע מסלול: ק"מ ${startKm.toFixed(1)} עד ק"מ ${endKm.toFixed(1)}</span>
                                 </div>
                             `);
-                            
+
                             newPolys.push(dayPoly);
                         }
                     }
                 });
             }
-            
+
             latlngs.forEach(ll => bounds.extend(ll));
         }
     });
-    
+
     // Draw Markers in Leaflet
     visiblePlaces.forEach(place => {
         if (!place.lat || !place.lng) return;
-        
+
         const isHighlighted = (place.id === activeMarkerId);
         const group = groups.find(g => g.id === place.groupId);
         const badgeColor = group ? group.color : '#2C4E72';
         const labelText = String(place.sortOrder ?? '');
-        
+
         const markerHtml = `
             <div class="custom-leaflet-marker ${isHighlighted ? 'highlighted' : ''}" style="position:relative; display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:white; border:2.5px solid ${badgeColor}; box-shadow: 0 2px 6px rgba(0,0,0,0.25);">
                 <span style="font-size:11px; font-weight:bold; color:#333;">${labelText}</span>
             </div>
         `;
-        
+
         const customIcon = L.divIcon({
             html: markerHtml,
             className: 'leaflet-custom-marker-wrapper',
             iconSize: [28, 28],
             iconAnchor: [14, 14]
         });
-        
+
         const marker = L.marker([place.lat, place.lng], { icon: customIcon })
             .addTo(leafletMap)
             .on('click', () => {
@@ -991,14 +993,14 @@ export function syncLeafletView() {
         newMarkers.push(marker);
         bounds.extend([place.lat, place.lng]);
     });
-    
+
     setLeafletPolylines(newPolys);
     setLeafletMarkers(newMarkers);
 
     if (isTrackingUser && leafletUserMarker) {
         leafletUserMarker.addTo(leafletMap);
     }
-    
+
     if (bounds.isValid()) {
         leafletMap.fitBounds(bounds, { padding: [40, 40] });
     }
@@ -1026,7 +1028,7 @@ export function getTileXY(lat, lon, zoom) {
 export function getTilesForTrack(gpxData, layerType) {
     const tiles = new Set();
     const zooms = [12, 13, 14, 15, 16, 17];
-    
+
     gpxData.forEach(pt => {
         zooms.forEach(z => {
             const tile = getTileXY(pt.lat, pt.lng, z);
@@ -1039,7 +1041,7 @@ export function getTilesForTrack(gpxData, layerType) {
             tiles.add(url);
         });
     });
-    
+
     return Array.from(tiles);
 }
 
@@ -1049,15 +1051,15 @@ export async function downloadOfflineTiles(urls, mapKey, mapName, layerType) {
     const progressText = document.getElementById('offline-progress-text');
     const progressPercent = document.getElementById('offline-progress-percent');
     const downloadBtn = document.getElementById('btn-download-offline-map');
-    
+
     if (progressContainer) progressContainer.style.display = 'block';
     if (downloadBtn) downloadBtn.disabled = true;
-    
+
     try {
         const cache = await caches.open('offline-tiles-cache');
         const total = urls.length;
         let downloaded = 0;
-        
+
         const chunkSize = 8;
         for (let i = 0; i < urls.length; i += chunkSize) {
             const chunk = urls.slice(i, i + chunkSize);
@@ -1077,10 +1079,10 @@ export async function downloadOfflineTiles(urls, mapKey, mapName, layerType) {
                 if (progressText) progressText.innerText = `מוריד אריחים... (${downloaded}/${total})`;
             }));
         }
-        
+
         const savedList = JSON.parse(localStorage.getItem('savedOfflineMaps') || '[]');
         const existingIndex = savedList.findIndex(item => item.id === mapKey);
-        
+
         const newMapItem = {
             id: mapKey,
             name: mapName,
@@ -1088,16 +1090,16 @@ export async function downloadOfflineTiles(urls, mapKey, mapName, layerType) {
             layer: layerType,
             timestamp: Date.now()
         };
-        
+
         if (existingIndex > -1) {
             savedList[existingIndex] = newMapItem;
         } else {
             savedList.push(newMapItem);
         }
-        
+
         localStorage.setItem('savedOfflineMaps', JSON.stringify(savedList));
         showToast('המפה הורדה למכשיר בהצלחה!', 'success');
-        
+
     } catch (err) {
         console.error('Offline download failed:', err);
         showToast('שגיאה במהלך ההורדה', 'error');
@@ -1114,10 +1116,10 @@ export async function deleteSavedMap(mapKey) {
     const savedList = JSON.parse(localStorage.getItem('savedOfflineMaps') || '[]');
     const mapItem = savedList.find(item => item.id === mapKey);
     if (!mapItem) return;
-    
+
     const updatedList = savedList.filter(item => item.id !== mapKey);
     localStorage.setItem('savedOfflineMaps', JSON.stringify(updatedList));
-    
+
     try {
         const cache = await caches.open('offline-tiles-cache');
         let urlsToDelete = [];
@@ -1133,7 +1135,7 @@ export async function deleteSavedMap(mapKey) {
                 urlsToDelete = getTilesForTrack(place.gpxData, mapItem.layer);
             }
         }
-        
+
         await Promise.all(urlsToDelete.map(url => cache.delete(url)));
         showToast('המפה נמחקה מהמכשיר בהצלחה', 'info');
     } catch (err) {
@@ -1184,7 +1186,7 @@ window.switchToMobileMapTab = function() {
         document.body.classList.add('mobile-view-map');
         tabList.classList.remove('active');
         tabMap.classList.add('active');
-        
+
         if (isOfflineMode) {
             if (leafletMap) {
                 setTimeout(() => leafletMap.invalidateSize(), 50);
@@ -1202,11 +1204,11 @@ export function parseGpxFile(file, callback) {
         try {
             const parser = new DOMParser();
             const xml = parser.parseFromString(e.target.result, "text/xml");
-            
+
             // Extract track points <trkpt>
             const trackpoints = xml.querySelectorAll('trkpt');
             const points = [];
-            
+
             trackpoints.forEach(pt => {
                 const lat = parseFloat(pt.getAttribute('lat'));
                 const lng = parseFloat(pt.getAttribute('lon'));
@@ -1216,7 +1218,7 @@ export function parseGpxFile(file, callback) {
                     points.push({ lat, lng, ele });
                 }
             });
-            
+
             // If no trkpt, try route points <rtept>
             if (points.length === 0) {
                 const routepoints = xml.querySelectorAll('rtept');
@@ -1230,7 +1232,7 @@ export function parseGpxFile(file, callback) {
                     }
                 });
             }
-            
+
             // If still no points, try waypoints <wpt>
             if (points.length === 0) {
                 const waypoints = xml.querySelectorAll('wpt');
@@ -1244,7 +1246,7 @@ export function parseGpxFile(file, callback) {
                     }
                 });
             }
-            
+
             if (points.length === 0) {
                 callback(null, 'לא נמצאו נקודות GPS תקינות בקובץ ה-GPX');
             } else {
@@ -1262,10 +1264,10 @@ export function parseGpxFile(file, callback) {
 
 export function processGpxData(points) {
     if (!points || points.length === 0) return [];
-    
+
     let cumulativeDist = 0;
     const processed = [];
-    
+
     for (let i = 0; i < points.length; i++) {
         const pt = points[i];
         if (i > 0) {
@@ -1273,7 +1275,7 @@ export function processGpxData(points) {
             const d = getDistance(prev.lat, prev.lng, pt.lat, pt.lng);
             cumulativeDist += d;
         }
-        
+
         let slope = 0;
         if (i > 0 && pt.ele !== null && points[i - 1].ele !== null) {
             const prev = points[i - 1];
@@ -1283,7 +1285,7 @@ export function processGpxData(points) {
                 slope = Math.round((dEle / dDist) * 100);
             }
         }
-        
+
         processed.push({
             lat: pt.lat,
             lng: pt.lng,

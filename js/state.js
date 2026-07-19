@@ -77,8 +77,8 @@ export function throttle(fn, limit) {
 // ============= State Variables =============
 export let places = [];
 export let groups = [];
-export let activeGroupId = 'all'; 
-export let activeSubGroupId = 'all'; 
+export let activeGroupId = 'all';
+export let activeSubGroupId = 'all';
 export let map = null;
 export let markers = [];
 export let miniMap = null;
@@ -215,7 +215,7 @@ export function getFilteredPlaces() {
         result = [...places];
     } else {
         const allowedGroupIds = new Set();
-        
+
         // 1. Add activeGroupId and its child groups
         if (activeSubGroupId !== 'all') {
             allowedGroupIds.add(activeSubGroupId);
@@ -229,20 +229,20 @@ export function getFilteredPlaces() {
             allowedGroupIds.add(activeGroupId);
             groups.filter(g => g.parentId === activeGroupId).forEach(g => allowedGroupIds.add(g.id));
         }
-        
+
         // 2. Add additionalGroupIds and their sub groups
         additionalGroupIds.forEach(mainId => {
             allowedGroupIds.add(mainId);
             groups.filter(g => g.parentId === mainId).forEach(g => allowedGroupIds.add(g.id));
         });
-        
+
         // 3. Add additionalSubGroupIds from other groups
         additionalSubGroupIds.forEach(subId => {
             allowedGroupIds.add(subId);
         });
-        
+
         result = places.filter(p => allowedGroupIds.has(p.groupId));
     }
-    
+
     return result.sort((a, b) => (a.sortOrder ?? 99999) - (b.sortOrder ?? 99999));
 }

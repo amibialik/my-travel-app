@@ -1,13 +1,13 @@
-import { map, hoverMarker, setHoverMarker, places } from './state.js';
+import { map, setMap, hoverMarker, setHoverMarker, places } from './state.js';
 import { getPlaceColor, getPoiEmoji, escapeHtml, showToast } from './ui.js';
 import { getDistance } from './map.js';
 
 // Show helper marker on Google Map when hovering on chart
 export function showHoverMarkerOnMap(lat, lng, color) {
     if (!map || typeof google === 'undefined' || !google.maps) return;
-    
+
     const pos = { lat: lat, lng: lng };
-    
+
     if (hoverMarker) {
         hoverMarker.setPosition(pos);
         hoverMarker.setMap(map);
@@ -83,7 +83,7 @@ export function renderElevationChart(place, canvasId, selectedSegmentId = 'full'
     }
 
     const ctx = canvas.getContext('2d');
-    
+
     // Check if chart instance already exists on this canvas and destroy it first
     if (canvas.$chart) {
         canvas.$chart.destroy();
@@ -134,14 +134,14 @@ export function renderElevationChart(place, canvasId, selectedSegmentId = 'full'
         plugins: [{
             id: 'roadbookAnnotations',
             afterDraw: (chart) => {
-                const rb = place.roadbooks && place.roadbooks.length > 0 ? 
+                const rb = place.roadbooks && place.roadbooks.length > 0 ?
                     (place.roadbooks.find(r => r.id === place.$displayedRoadbookId) || place.roadbooks[0]) : null;
                 if (!rb || !rb.points || rb.points.length === 0) return;
 
                 const ctx = chart.ctx;
                 const xAxis = chart.scales.x;
                 const yAxis = chart.scales.y;
-                
+
                 const totalLength = place.gpxData[place.gpxData.length - 1].dist;
 
                 rb.points.forEach((pt, pIdx) => {
@@ -169,10 +169,10 @@ export function renderElevationChart(place, canvasId, selectedSegmentId = 'full'
                     ctx.font = 'bold 9px Varela Round, sans-serif';
                     ctx.fillStyle = pt.poi && pt.poi.type ? '#b45309' : 'var(--primary-dark)';
                     ctx.textAlign = 'center';
-                    
+
                     const labelText = pt.poi && pt.poi.type ? getPoiEmoji(pt.poi.type) : String(pIdx + 1);
                     ctx.fillText(labelText, xPixel, yBottom - 18);
-                    
+
                     ctx.font = '8px sans-serif';
                     ctx.fillStyle = '#64748b';
                     ctx.fillText(ptDist.toFixed(1) + 'k', xPixel, yBottom - 6);
@@ -266,7 +266,7 @@ export function renderElevationChart(place, canvasId, selectedSegmentId = 'full'
     };
 
     canvas.$chart = new Chart(ctx, chartConfig);
-    
+
     canvas.addEventListener('mouseleave', () => {
         if (hoverMarker) hoverMarker.setMap(null);
     });

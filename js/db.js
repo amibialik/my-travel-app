@@ -3,6 +3,7 @@ import {
     groups, setGroups,
     itineraries, setItineraries,
     savePlaces, saveGroups,
+    map,
     STORAGE_KEY, GROUPS_KEY, DEMO_PLACES, DEFAULT_GROUPS,
     debounce
 } from './state.js';
@@ -152,23 +153,23 @@ export function exportBackupData(itineraryList = []) {
             exportVersion: "2.0",
             exportedAt: new Date().toISOString()
         };
-        
+
         const jsonString = JSON.stringify(backupData, null, 2);
         const blob = new Blob([jsonString], { type: "application/json" });
         const url = URL.createObjectURL(blob);
-        
+
         const dateStr = new Date().toISOString().slice(0, 10);
         const filename = `travel_site_backup_${dateStr}.json`;
-        
+
         const a = document.createElement('a');
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
         a.click();
-        
+
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
+
         if (window.showToast) window.showToast("הגיבוי יוצא בהצלחה!", "success");
     } catch (e) {
         console.error("Backup export failed:", e);
@@ -186,45 +187,45 @@ export function importBackupData(file, statusDiv, finalizeImportCallback, finali
     reader.onload = function(evt) {
         try {
             const data = JSON.parse(evt.target.result);
-            
+
             // Validation
             if (!data || !Array.isArray(data.places) || !Array.isArray(data.groups)) {
                 throw new Error("קובץ גיבוי לא תקין. חסרים נתוני מיקומים או קבוצות.");
             }
-            
+
             statusDiv.textContent = 'מייבא נתונים ומסנכרן לענן...';
-            
+
             // Update local state
             setPlaces(data.places);
             setGroups(data.groups);
-            
+
             if (Array.isArray(data.itineraries)) {
                 setItineraries(data.itineraries);
                 localStorage.setItem('mytravel-itineraries', JSON.stringify(data.itineraries));
             }
-            
+
             // Save to LocalStorage
             savePlaces();
             saveGroups();
-            
+
             // Sync to Firebase Firestore if configured
             if (window.IS_FIREBASE_CONFIGURED && window.db) {
                 const promises = [];
-                
+
                 groups.forEach(g => {
                     promises.push(window.db.collection('groups').doc(g.id).set(g));
                 });
-                
+
                 places.forEach(p => {
                     promises.push(window.db.collection('places').doc(p.id).set(p));
                 });
-                
+
                 if (Array.isArray(data.itineraries)) {
                     data.itineraries.forEach(it => {
                         promises.push(window.db.collection('itineraries').doc(it.id).set(it));
                     });
                 }
-                
+
                 Promise.all(promises).then(() => {
                     if (typeof finalizeImportCallback === 'function') finalizeImportCallback(statusDiv);
                 }).catch(err => {

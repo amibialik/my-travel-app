@@ -12,7 +12,8 @@ import {
     savePlaces, saveGroups,
     getFilteredPlaces, getGroupById, getGroupPlaceCount,
     generateId, generateGroupId,
-    DEFAULT_CENTER, DEFAULT_ZOOM
+    DEFAULT_CENTER, DEFAULT_ZOOM,
+    map
 } from './state.js';
 
 import {
@@ -51,7 +52,7 @@ export function showToast(message, type = 'info') {
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
-    
+
     let icon = 'fa-info-circle';
     if (type === 'success') icon = 'fa-check-circle';
     if (type === 'error') icon = 'fa-exclamation-circle';
@@ -134,7 +135,7 @@ export function renderGroupTabs() {
         const placeCount = getGroupPlaceCount(g.id);
         const subList = groups.filter(sub => sub.parentId === g.id);
         const totalCount = placeCount + subList.reduce((acc, sub) => acc + getGroupPlaceCount(sub.id), 0);
-        
+
         mainHtml += `
             <div class="group-tab ${activeGroupId === g.id ? 'active' : ''}" data-group-id="${g.id}">
                 <span class="group-tab-dot" style="background-color:${g.color}"></span>
@@ -155,7 +156,7 @@ export function renderGroupTabs() {
             subContainer.parentElement.style.display = 'none';
         } else {
             subContainer.parentElement.style.display = 'flex';
-            
+
             let subHtml = `
                 <div class="sub-group-tab ${activeSubGroupId === 'all' ? 'active' : ''}" data-sub-group-id="all">
                     <span>כל המסלולים</span>
@@ -173,7 +174,7 @@ export function renderGroupTabs() {
             });
 
             subContainer.innerHTML = subHtml;
-            
+
             // Sub-groups tabs event listeners
             subContainer.querySelectorAll('.sub-group-tab').forEach(tab => {
                 tab.addEventListener('click', () => {
@@ -223,12 +224,12 @@ export function renderGroupSelect() {
     if (!select) return;
 
     let html = '<option value="">ללא קבוצה</option>';
-    
+
     // Parent groups (Countries)
     const parents = groups.filter(g => !g.parentId);
     parents.forEach(p => {
         html += `<option value="${p.id}" style="font-weight:bold; color:${p.color};">${escapeHtml(p.name)} (מדינה)</option>`;
-        
+
         // Children (Treks)
         const children = groups.filter(g => g.parentId === p.id);
         children.forEach(c => {
@@ -263,7 +264,7 @@ export function renderPlaces() {
     const isSearchActive = searchQuery.trim().length > 0;
     if (isSearchActive) {
         const q = searchQuery.trim().toLowerCase();
-        filtered = filtered.filter(p => 
+        filtered = filtered.filter(p =>
             (p.name && p.name.toLowerCase().includes(q)) ||
             (p.description && p.description.toLowerCase().includes(q))
         );
@@ -360,7 +361,7 @@ export function createTrekCard(trek, index) {
     card.className = 'place-card trek-card';
     card.style.animationDelay = `${index * 0.08}s`;
     card.style.borderRightColor = trek.color;
-    
+
     card.innerHTML = `
         <div class="card-header" style="padding-bottom:12px;">
             <div class="card-number" style="background:${trek.color}20; color:${trek.color}; border-color:${trek.color};"><i class="fas fa-hiking"></i></div>
@@ -396,7 +397,7 @@ export function createTrekHeaderCard(trek) {
     card.className = 'place-card trek-header-card';
     card.style.borderRightColor = trek.color;
     card.style.background = 'var(--primary-light)';
-    
+
     card.innerHTML = `
         <div class="card-header" style="padding-bottom:8px;">
             <div class="card-number" style="background:${trek.color}; color:white; border-color:${trek.color};"><i class="fas fa-hiking"></i></div>
@@ -477,13 +478,13 @@ export function createPlaceCard(place, index) {
         const tagsContainer = document.createElement('div');
         tagsContainer.className = 'card-tags';
         tagsContainer.style = 'display:flex; flex-wrap:wrap; gap:6px; margin: 4px 0 10px 0;';
-        
+
         place.tags.forEach(tag => {
             const tagSpan = document.createElement('span');
             tagSpan.className = 'card-tag';
             tagSpan.style = 'font-size:11px; padding:2px 8px; border-radius:12px; background:var(--primary-light); color:var(--text-secondary); border:1px solid var(--border-light); font-weight:bold; cursor:pointer;';
             tagSpan.innerHTML = `<i class="fas fa-tag" style="font-size:9px; margin-left:4px;"></i>${escapeHtml(tag)}`;
-            
+
             tagSpan.onclick = (e) => {
                 e.stopPropagation();
                 const searchInput = document.getElementById('search-places-input');
@@ -493,7 +494,7 @@ export function createPlaceCard(place, index) {
                     renderPlaces();
                 }
             };
-            
+
             tagsContainer.appendChild(tagSpan);
         });
         body.appendChild(tagsContainer);
@@ -566,13 +567,13 @@ export function createPlaceCard(place, index) {
                 <canvas id="elevation-chart-${place.id}" style="width: 100%; height: 140px;"></canvas>
             </div>
         `;
-        
+
         const headerEl = profileDiv.querySelector('.elevation-profile-header');
         const wrapper = profileDiv.querySelector('.elevation-profile-chart-wrapper');
         const icon = profileDiv.querySelector('.elevation-profile-toggle i');
         const select = profileDiv.querySelector('.chart-segment-selector');
         const reverseBtn = profileDiv.querySelector('.btn-reverse-route');
-        
+
         select.addEventListener('click', (e) => e.stopPropagation());
         reverseBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -582,12 +583,12 @@ export function createPlaceCard(place, index) {
             renderPlaces();
             showToast(place.isReversed ? 'כיוון ההתקדמות וגרף הגבהים נהפכו!' : 'כיוון ההתקדמות הוחזר למקור.', 'success');
         });
-        
+
         select.addEventListener('change', (e) => {
             e.stopPropagation();
             renderElevationChart(place, `elevation-chart-${place.id}`, select.value);
         });
-        
+
         headerEl.addEventListener('click', (e) => {
             if (e.target.closest('select') || e.target.closest('.btn-reverse-route')) return;
             e.stopPropagation();
@@ -603,17 +604,17 @@ export function createPlaceCard(place, index) {
                 setTimeout(() => renderElevationChart(place, `elevation-chart-${place.id}`, select.value), 50);
             }
         });
-        
+
         body.appendChild(profileDiv);
     }
 
     if (place.gpxData && place.gpxData.length > 0) {
         const segmentsDiv = document.createElement('div');
         segmentsDiv.className = 'route-segments-container';
-        
+
         const segments = place.gpxSegments || [];
         const roadbooks = place.roadbooks || [];
-        
+
         let roadbooksListHtml = '';
         if (roadbooks.length > 0) {
             roadbooksListHtml = `
@@ -678,11 +679,11 @@ export function createPlaceCard(place, index) {
                 ${roadbooksListHtml}
             </div>
         `;
-        
+
         const header = segmentsDiv.querySelector('.segments-header');
         const listWrapper = segmentsDiv.querySelector('.segments-list-wrapper');
         const icon = segmentsDiv.querySelector('.segments-toggle-list i');
-        
+
         if (header && listWrapper) {
             header.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -703,7 +704,7 @@ export function createPlaceCard(place, index) {
                 openMeasurementControlBar(place);
             });
         });
-        
+
         segmentsDiv.querySelectorAll('.chk-segment-visibility').forEach(chk => {
             chk.addEventListener('change', (e) => {
                 e.stopPropagation();
@@ -712,7 +713,7 @@ export function createPlaceCard(place, index) {
                 toggleSegmentVisibility(placeId, segId, e.target.checked);
             });
         });
-        
+
         segmentsDiv.querySelectorAll('.delete-seg-action').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -724,7 +725,7 @@ export function createPlaceCard(place, index) {
                 }
             });
         });
-        
+
         segmentsDiv.querySelectorAll('.segment-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 if (e.target.closest('.delete-seg-action') || e.target.closest('.segment-eye-toggle')) return;
@@ -768,7 +769,7 @@ export function createPlaceCard(place, index) {
                 }
             });
         });
-        
+
         body.appendChild(segmentsDiv);
     }
 
@@ -839,7 +840,7 @@ export function createPlaceCard(place, index) {
 
     card.addEventListener('click', (e) => {
         if (e.target.closest('.card-action-btn') || e.target.closest('a') || e.target.closest('.carousel-btn') || e.target.closest('.carousel-item') || e.target.closest('.route-segments-container') || e.target.closest('.elevation-profile-container') || e.target.closest('input') || e.target.closest('button')) return;
-        
+
         const wasActive = (activeMarkerId === place.id);
         if (wasActive) {
             setActiveMarker(place.id);
@@ -851,7 +852,7 @@ export function createPlaceCard(place, index) {
 
         panToPlace(place.lat, place.lng);
         setActiveMarker(place.id);
-        
+
         if (window.innerWidth <= 900 && typeof window.switchToMobileMapTab === 'function') {
             window.switchToMobileMapTab();
         }
@@ -884,10 +885,10 @@ function getSegmentStatsLocal(place, startIdx, endIdx) {
     let gain = 0;
     let loss = 0;
     if (!place.gpxData) return { gain, loss };
-    
+
     const start = Math.min(startIdx, endIdx);
     const end = Math.max(startIdx, endIdx);
-    
+
     for (let i = start; i < end; i++) {
         const p1 = place.gpxData[i];
         const p2 = place.gpxData[i + 1];
@@ -930,7 +931,7 @@ export function focusMapOnSegment(place, seg) {
     const start = Math.min(seg.startIndex, seg.endIndex);
     const end = Math.max(seg.startIndex, seg.endIndex);
     const segmentPath = place.gpxData.slice(start, end + 1);
-    
+
     if (segmentPath.length > 0) {
         if (isOfflineMode && leafletMap) {
             const bounds = L.latLngBounds(segmentPath.map(pt => [pt.lat, pt.lng]));
@@ -947,7 +948,7 @@ export function focusMapOnSegment(place, seg) {
 export function toggleSegmentVisibility(placeId, segId, isVisible) {
     const place = places.find(p => p.id === placeId);
     if (!place || !place.gpxSegments) return;
-    
+
     const seg = place.gpxSegments.find(s => s.id === segId);
     if (seg) {
         seg.visible = isVisible;
@@ -955,7 +956,7 @@ export function toggleSegmentVisibility(placeId, segId, isVisible) {
         syncPlaceToFirebase(place);
         drawAllGpxTracks();
         if (isOfflineMode) syncLeafletView();
-        
+
         // Update eye icon class dynamically
         const card = document.querySelector(`.place-card[data-id="${placeId}"]`);
         if (card) {
@@ -976,14 +977,14 @@ export function toggleSegmentVisibility(placeId, segId, isVisible) {
 export function deleteSegment(placeId, segId) {
     const place = places.find(p => p.id === placeId);
     if (!place || !place.gpxSegments) return;
-    
+
     place.gpxSegments = place.gpxSegments.filter(s => s.id !== segId);
     savePlaces();
     syncPlaceToFirebase(place);
     renderPlaces();
     drawAllGpxTracks();
     if (isOfflineMode) syncLeafletView();
-    showToast('المקטע נמחק בהצלחה', 'info');
+    showToast('המקטע נמחק בהצלחה', 'info');
 }
 
 export function sharePlace(placeId) {
@@ -994,7 +995,7 @@ export function sharePlace(placeId) {
             title: place ? place.name : 'מיקום מהטיול שלי',
             text: place ? place.description : 'ראה מקום זה במפה',
             url: shareUrl
-        }).catch(err => console.log('Share error:', err));
+        }).catch(err => console.error('Share error:', err));
     } else {
         navigator.clipboard.writeText(shareUrl).then(() => {
             showToast('קישור לשיתוף המקום הועתק ללוח!', 'success');
@@ -1105,7 +1106,7 @@ export function openModal(mode, place) {
         updateMiniMap(place.lat, place.lng);
     } else {
         title.innerHTML = '<i class="fas fa-map-pin"></i> הוסף מקום חדש';
-        
+
         let centerLat = DEFAULT_CENTER[0];
         let centerLng = DEFAULT_CENTER[1];
         if (map) {
@@ -1172,7 +1173,7 @@ export function savePlace() {
     const tags = tagsString ? tagsString.split(',').map(t => t.trim()).filter(Boolean) : [];
 
     const placeId = editingPlaceId || generateId();
-    
+
     showToast('שומר את השינויים...', 'info');
 
     uploadPendingImages(placeId, pendingImages).then(uploadedImages => {
@@ -1248,7 +1249,7 @@ export function confirmDelete(placeId) {
 
 export function executeDelete() {
     if (!deleteTargetId) return;
-    
+
     deletePlaceFromFirebase(deleteTargetId);
 
     setPlaces(places.filter(p => p.id !== deleteTargetId));
@@ -1268,11 +1269,11 @@ export function executeDelete() {
 export function addLinkInput(url = '', type = 'Wikipedia') {
     const container = document.getElementById('links-container');
     if (!container) return;
-    
+
     const row = document.createElement('div');
     row.className = 'link-input-row';
     row.style = 'display:flex; gap:8px; margin-bottom:8px;';
-    
+
     row.innerHTML = `
         <select class="link-type" style="width:110px; height:32px; font-size:12.5px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:inherit;">
             <option value="wikipedia" ${type === 'wikipedia' ? 'selected' : ''}>Wikipedia</option>
@@ -1285,11 +1286,11 @@ export function addLinkInput(url = '', type = 'Wikipedia') {
         <input type="url" class="link-url" placeholder="https://example.com" value="${escapeHtml(url)}" style="flex:1; height:32px; padding:0 8px; font-size:12.5px; border:1px solid var(--border); border-radius:var(--radius-sm); font-family:inherit;">
         <button type="button" class="btn-remove-link icon-btn" style="color:var(--accent-rose); border:none; background:transparent; cursor:pointer; font-size:14px;"><i class="fas fa-trash-alt"></i></button>
     `;
-    
+
     row.querySelector('.btn-remove-link').addEventListener('click', () => {
         row.remove();
     });
-    
+
     container.appendChild(row);
 }
 
@@ -1310,13 +1311,13 @@ export function updateMiniMap(lat, lng) {
             streetViewControl: false,
             fullscreenControl: false
         });
-        
+
         window.miniMap.addListener('click', (e) => {
             const clickedLat = e.latLng.lat();
             const clickedLng = e.latLng.lng();
             document.getElementById('place-lat').value = clickedLat.toFixed(6);
             document.getElementById('place-lng').value = clickedLng.toFixed(6);
-            
+
             if (window.miniMapMarker) {
                 window.miniMapMarker.setPosition(e.latLng);
             } else {
@@ -1339,7 +1340,7 @@ export function updateMiniMap(lat, lng) {
                 map: window.miniMap,
                 draggable: true
             });
-            
+
             google.maps.event.addListener(window.miniMapMarker, 'dragend', (evt) => {
                 document.getElementById('place-lat').value = evt.latLng.lat().toFixed(6);
                 document.getElementById('place-lng').value = evt.latLng.lng().toFixed(6);
@@ -1353,17 +1354,17 @@ export function renderImagePreviews() {
     const container = document.getElementById('image-previews');
     if (!container) return;
     container.innerHTML = '';
-    
+
     pendingImages.forEach((img, idx) => {
         const div = document.createElement('div');
         div.className = 'image-preview-item';
         div.style = 'position:relative; width:80px; height:60px; border-radius:4px; overflow:hidden; border:1.5px solid var(--border-light);';
-        
+
         div.innerHTML = `
             <img src="${img}" style="width:100%; height:100%; object-fit:cover;">
             <button type="button" class="btn-delete-preview-image" data-idx="${idx}" style="position:absolute; top:2px; left:2px; background:rgba(0,0,0,0.6); color:white; border:none; border-radius:2px; width:18px; height:18px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:10px;"><i class="fas fa-times"></i></button>
         `;
-        
+
         div.querySelector('.btn-delete-preview-image').addEventListener('click', (e) => {
             e.stopPropagation();
             const removeIdx = parseInt(e.currentTarget.dataset.idx);
@@ -1371,7 +1372,7 @@ export function renderImagePreviews() {
             setPendingImages([...pendingImages]);
             renderImagePreviews();
         });
-        
+
         container.appendChild(div);
     });
 }
@@ -1394,7 +1395,7 @@ export function showGooglePlaceDetails(placeId) {
         panel.classList.remove('loading');
         if (status === google.maps.places.PlacesServiceStatus.OK && place) {
             panel.$activeGooglePlace = place; // Cache data
-            
+
             let photoUrl = '';
             if (place.photos && place.photos.length > 0) {
                 photoUrl = place.photos[0].getUrl({ maxWidth: 400, maxHeight: 220 });
@@ -1422,9 +1423,9 @@ export function showGooglePlaceDetails(placeId) {
                     <h2 class="panel-title" style="font-size:18px; font-weight:bold; color:var(--primary-dark); margin:0 0 4px 0;">${escapeHtml(place.name)}</h2>
                     ${ratingHtml}
                     <div class="panel-address" style="font-size:12.5px; color:var(--text-secondary); margin-top:8px;"><i class="fas fa-map-marker-alt" style="color:var(--text-muted); margin-left:6px;"></i>${escapeHtml(place.formatted_address || 'אין כתובת')}</div>
-                    
+
                     ${place.formatted_phone_number ? `<div class="panel-phone" style="font-size:12.5px; color:var(--text-secondary); margin-top:6px;"><i class="fas fa-phone-alt" style="color:var(--text-muted); margin-left:6px;"></i>${escapeHtml(place.formatted_phone_number)}</div>` : ''}
-                    
+
                     <div style="display:flex; gap:8px; margin-top:16px;">
                         <button class="panel-btn" id="btn-add-google-place" style="flex:1; height:34px; background:#10B981; border:none; color:white; font-family:inherit; font-size:12.5px; font-weight:bold; border-radius:var(--radius-sm); cursor:pointer;"><i class="fas fa-plus" style="margin-left:4px;"></i>שמור למפת החלומות</button>
                         ${place.website ? `<a href="${place.website}" target="_blank" class="panel-btn-outline" style="text-decoration:none; display:flex; align-items:center; justify-content:center; width:34px; height:34px; border:1.5px solid var(--border); border-radius:var(--radius-sm); color:var(--text-secondary);"><i class="fas fa-globe"></i></a>` : ''}
@@ -1450,7 +1451,7 @@ export function closeGooglePlacePanel() {
 
 export function openModalFromGooglePlace(googlePlace) {
     closeGooglePlacePanel();
-    
+
     let latVal = 0;
     let lngVal = 0;
     if (googlePlace.geometry && googlePlace.geometry.location) {
@@ -1493,13 +1494,13 @@ export function openLightbox(imgSrc) {
 export function updateSavedMapsList() {
     const container = document.getElementById('offline-saved-list');
     if (!container) return;
-    
+
     const savedList = JSON.parse(localStorage.getItem('savedOfflineMaps') || '[]');
     if (savedList.length === 0) {
         container.innerHTML = `<div style="text-align: center; padding: 8px; font-style: italic;">אין מפות שמורות עדיין</div>`;
         return;
     }
-    
+
     container.innerHTML = savedList.map(item => {
         const layerLabel = item.layer === 'osm' ? 'דרכים' : 'טופוגרפי';
         return `
@@ -1516,7 +1517,7 @@ export function updateSavedMapsList() {
             </div>
         `;
     }).join('');
-    
+
     container.querySelectorAll('.delete-map-btn').forEach(btn => {
         btn.addEventListener('click', async (e) => {
             const mapId = e.currentTarget.dataset.mapId;

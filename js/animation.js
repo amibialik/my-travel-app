@@ -37,25 +37,25 @@ export function setIsCinematicModeActive(val) { isCinematicModeActive = val; }
 export function openRecordingControlBar(place) {
     closeRecordingControlBar();
     if (window.closeMeasurementControlBar) window.closeRecordingControlBar();
-    
+
     setAnimActivePlace(place);
     setAnimPoints(place.isReversed ? [...(place.gpxData || [])].reverse() : (place.gpxData || []));
     if (animPoints.length === 0) {
         showToast('אין נקודות מסלול להנפשה', 'error');
         return;
     }
-    
+
     setAnimCurrentIndex(0);
     setAnimPlayState('idle');
     setAnimSpeed(10);
     setAnimDirection('forward');
-    
+
     const placeColor = getPlaceColor(place);
-    
+
     const bar = document.createElement('div');
     bar.className = 'recording-control-bar';
     bar.id = 'recording-control-bar';
-    
+
     bar.innerHTML = `
         <div class="control-section">
             <span class="control-title">
@@ -63,7 +63,7 @@ export function openRecordingControlBar(place) {
                 <span>${escapeHtml(place.name)}</span>
             </span>
         </div>
-        
+
         <div class="control-section">
             <label for="anim-speed" style="font-size:12px; font-weight:bold; color:var(--text-secondary);">מהירות:</label>
             <select id="anim-speed">
@@ -74,7 +74,7 @@ export function openRecordingControlBar(place) {
                 <option value="50">50x (מהיר)</option>
             </select>
         </div>
-        
+
         <div class="control-section">
             <label for="anim-dir" style="font-size:12px; font-weight:bold; color:var(--text-secondary);">כיוון:</label>
             <select id="anim-dir">
@@ -82,37 +82,37 @@ export function openRecordingControlBar(place) {
                 <option value="reverse">הפוך 🚶‍♂️ ➔ 🏃‍♂️</option>
             </select>
         </div>
-        
+
         <button class="control-btn control-btn-play" id="btn-anim-play">
             <i class="fas fa-play"></i> <span>הפעל</span>
         </button>
-        
+
         <button class="control-btn control-btn-record" id="btn-anim-record">
             <i class="fas fa-circle"></i> <span>הקלט מסך</span>
         </button>
-        
+
         <div class="control-section" style="margin-right: 8px;">
             <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:bold; color:var(--text-secondary); cursor:pointer;">
                 <input type="checkbox" id="chk-cinematic" style="cursor:pointer;">
                 <span>מצב קולנועי (נקי)</span>
             </label>
         </div>
-        
+
         <button class="control-btn control-btn-close" id="btn-anim-close">
             <i class="fas fa-times"></i> <span>סגור</span>
         </button>
-        
+
         <div class="recording-progress-container">
             <div class="recording-progress-fill" id="anim-progress-fill"></div>
         </div>
     `;
-    
+
     document.getElementById('map-panel').appendChild(bar);
-    
+
     bar.querySelector('#anim-speed').addEventListener('change', (e) => {
         setAnimSpeed(parseInt(e.target.value) || 10);
     });
-    
+
     bar.querySelector('#anim-dir').addEventListener('change', (e) => {
         setAnimDirection(e.target.value);
         if (animPlayState === 'idle') {
@@ -120,20 +120,20 @@ export function openRecordingControlBar(place) {
             updateWalkerPosition();
         }
     });
-    
+
     bar.querySelector('#btn-anim-play').addEventListener('click', toggleAnimPlay);
     bar.querySelector('#btn-anim-record').addEventListener('click', toggleScreenRecording);
     bar.querySelector('#chk-cinematic').addEventListener('change', (e) => {
         toggleCinematicMode(e.target.checked);
     });
-    
+
     bar.querySelector('#btn-anim-close').addEventListener('click', () => {
         closeRecordingControlBar();
     });
-    
+
     const startPoint = animPoints[0];
     setAnimCurrentIndex(0);
-    
+
     const marker = new google.maps.Marker({
         position: { lat: startPoint.lat, lng: startPoint.lng },
         map: map,
@@ -150,7 +150,7 @@ export function openRecordingControlBar(place) {
         }
     });
     setAnimWalkerMarker(marker);
-    
+
     panToPlace(startPoint.lat, startPoint.lng);
     map.setZoom(15);
 }
@@ -160,25 +160,25 @@ export function closeRecordingControlBar() {
         cancelAnimationFrame(animAnimationFrameId);
         setAnimAnimationFrameId(null);
     }
-    
+
     if (isRecordingActive) {
         stopScreenRecording();
     }
-    
+
     if (isCinematicModeActive) {
         toggleCinematicMode(false);
     }
-    
+
     if (animWalkerMarker) {
         animWalkerMarker.setMap(null);
         setAnimWalkerMarker(null);
     }
-    
+
     const bar = document.getElementById('recording-control-bar');
     if (bar) {
         bar.remove();
     }
-    
+
     setAnimActivePlace(null);
     setAnimPoints([]);
     setAnimPlayState('idle');
@@ -190,7 +190,7 @@ export function updateWalkerPosition() {
     if (pt) {
         const pos = { lat: pt.lat, lng: pt.lng };
         animWalkerMarker.setPosition(pos);
-        
+
         const emoji = animDirection === 'forward' ? '🚶' : '🏃';
         const placeColor = getPlaceColor(animActivePlace);
         animWalkerMarker.setIcon({
@@ -203,7 +203,7 @@ export function updateWalkerPosition() {
             `),
             anchor: new google.maps.Point(19, 19)
         });
-        
+
         const progressFill = document.getElementById('anim-progress-fill');
         if (progressFill) {
             const total = animPoints.length - 1;
@@ -217,7 +217,7 @@ export function updateWalkerPosition() {
 export function toggleAnimPlay() {
     const playBtn = document.getElementById('btn-anim-play');
     if (!playBtn) return;
-    
+
     if (animPlayState === 'playing') {
         setAnimPlayState('paused');
         playBtn.innerHTML = `<i class="fas fa-play"></i> <span>הפעל</span>`;
@@ -230,11 +230,11 @@ export function toggleAnimPlay() {
         if (animPlayState === 'idle') {
             setAnimCurrentIndex((animDirection === 'forward') ? 0 : animPoints.length - 1);
         }
-        
+
         setAnimPlayState('playing');
         playBtn.innerHTML = `<i class="fas fa-pause"></i> <span>השהה</span>`;
         showToast('ההנפשה מופעלת', 'success');
-        
+
         const frameId = requestAnimationFrame(animateStep);
         setAnimAnimationFrameId(frameId);
     }
@@ -242,7 +242,7 @@ export function toggleAnimPlay() {
 
 export function animateStep() {
     if (animPlayState !== 'playing' || animPoints.length === 0) return;
-    
+
     if (animDirection === 'forward') {
         setAnimCurrentIndex(animCurrentIndex + animSpeed);
         if (animCurrentIndex >= animPoints.length - 1) {
@@ -260,30 +260,30 @@ export function animateStep() {
             return;
         }
     }
-    
+
     updateWalkerPosition();
-    
+
     const pt = animPoints[animCurrentIndex];
     if (pt && map) {
         map.panTo({ lat: pt.lat, lng: pt.lng });
     }
-    
+
     const frameId = requestAnimationFrame(animateStep);
     setAnimAnimationFrameId(frameId);
 }
 
 export function finishAnimation() {
     updateWalkerPosition();
-    
+
     if (isRecordingActive) {
         stopScreenRecording();
     }
-    
+
     const playBtn = document.getElementById('btn-anim-play');
     if (playBtn) {
         playBtn.innerHTML = `<i class="fas fa-redo"></i> <span>הפעל שוב</span>`;
     }
-    
+
     showToast('ההנפשה הושלמה בהצלחה!', 'success');
     if (animAnimationFrameId) {
         cancelAnimationFrame(animAnimationFrameId);
@@ -302,9 +302,9 @@ export function toggleScreenRecording() {
 export function startScreenRecording() {
     const recordBtn = document.getElementById('btn-anim-record');
     if (!recordBtn) return;
-    
+
     setRecordChunks([]);
-    
+
     navigator.mediaDevices.getDisplayMedia({
         video: {
             displaySurface: "browser",
@@ -314,21 +314,21 @@ export function startScreenRecording() {
     }).then(stream => {
         setRecordStream(stream);
         setIsRecordingActive(true);
-        
+
         recordBtn.className = 'control-btn control-btn-record recording';
         recordBtn.innerHTML = `<i class="fas fa-square" style="animation: none;"></i> <span>עצור הקלטה</span>`;
         showToast('ההקלטה התחילה! הפעל את האנימציה כעת.', 'success');
-        
+
         if (animPlayState === 'idle' || animPlayState === 'paused') {
             toggleAnimPlay();
         }
-        
+
         stream.getVideoTracks()[0].onended = () => {
             if (isRecordingActive) {
                 stopScreenRecording();
             }
         };
-        
+
         let options = { mimeType: 'video/webm;codecs=vp9' };
         if (!MediaRecorder.isTypeSupported(options.mimeType)) {
             options = { mimeType: 'video/webm;codecs=vp8' };
@@ -336,37 +336,37 @@ export function startScreenRecording() {
                 options = { mimeType: 'video/webm' };
             }
         }
-        
+
         const mediaRecorder = new MediaRecorder(stream, options);
         setRecordMediaRecorder(mediaRecorder);
-        
+
         mediaRecorder.ondataavailable = (e) => {
             if (e.data && e.data.size > 0) {
                 recordChunks.push(e.data);
             }
         };
-        
+
         mediaRecorder.onstop = () => {
             const blob = new Blob(recordChunks, { type: 'video/webm' });
             const url = URL.createObjectURL(blob);
-            
+
             const cleanTrekName = animActivePlace ? animActivePlace.name.replace(/[^a-zA-Z0-9א-ת\s]/g, '').replace(/\s+/g, '_') : 'route';
             const filename = `מסלול_${cleanTrekName}_${new Date().toISOString().slice(0, 10)}.webm`;
-            
+
             const a = document.createElement('a');
             a.href = url;
             a.download = filename;
             document.body.appendChild(a);
             a.click();
-            
+
             setTimeout(() => {
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             }, 100);
-            
+
             showToast('הסרטון נשמר והורד למחשב!', 'success');
         };
-        
+
         mediaRecorder.start();
     }).catch(err => {
         console.error("Screen capture failed:", err);
@@ -380,18 +380,18 @@ export function stopScreenRecording() {
         recordBtn.className = 'control-btn control-btn-record';
         recordBtn.innerHTML = `<i class="fas fa-circle"></i> <span>הקלט מסך</span>`;
     }
-    
+
     setIsRecordingActive(false);
-    
+
     if (recordMediaRecorder && recordMediaRecorder.state !== 'inactive') {
         recordMediaRecorder.stop();
     }
-    
+
     if (recordStream) {
         recordStream.getTracks().forEach(track => track.stop());
         setRecordStream(null);
     }
-    
+
     showToast('הקלטת הווידאו נעצרה', 'info');
 }
 
@@ -399,13 +399,13 @@ export function toggleCinematicMode(enable) {
     setIsCinematicModeActive(enable);
     const body = document.body;
     const chk = document.getElementById('chk-cinematic');
-    
+
     if (chk) chk.checked = enable;
-    
+
     if (enable) {
         body.classList.add('cinematic-active');
         showToast('מצב קולנועי מופעל! לוח הבקרה זמין בתחתית.', 'info');
-        
+
         setTimeout(() => {
             if (typeof google !== 'undefined' && google.maps && map) {
                 google.maps.event.trigger(map, 'resize');
@@ -414,7 +414,7 @@ export function toggleCinematicMode(enable) {
     } else {
         body.classList.remove('cinematic-active');
         showToast('מצב קולנועי כבוי', 'info');
-        
+
         setTimeout(() => {
             if (typeof google !== 'undefined' && google.maps && map) {
                 google.maps.event.trigger(map, 'resize');
