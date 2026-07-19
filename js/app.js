@@ -1205,8 +1205,8 @@ function init() {
     if (savedTheme === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
     }
-    loadGroups();
-    loadPlaces();
+    loadGroups(renderGroupTabs, renderGroupSelect, renderGroupParentSelect);
+    loadPlaces(renderPlaces, renderMarkers, drawAllGpxTracks);
 
     const hasGoogle = (typeof google !== 'undefined' && google.maps);
     if (hasGoogle) {

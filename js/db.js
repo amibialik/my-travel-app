@@ -8,6 +8,18 @@ import {
     debounce
 } from './state.js';
 
+import {
+    renderPlaces as defaultRenderPlaces,
+    renderGroupTabs as defaultRenderGroupTabs,
+    renderGroupSelect as defaultRenderGroupSelect,
+    renderGroupParentSelect as defaultRenderGroupParentSelect
+} from './ui.js';
+
+import {
+    renderMarkers as defaultRenderMarkers,
+    drawAllGpxTracks as defaultDrawAllGpxTracks
+} from './map.js';
+
 // Global error logger for Firebase connectivity/permission issues
 export function logFirebaseError(message, error) {
     console.error(message, error);
@@ -18,6 +30,10 @@ export function logFirebaseError(message, error) {
 
 // ============= Places Firebase Operations =============
 export function loadPlaces(renderPlaces, renderMarkers, drawAllGpxTracks) {
+    const fnPlaces = typeof renderPlaces === 'function' ? renderPlaces : defaultRenderPlaces;
+    const fnMarkers = typeof renderMarkers === 'function' ? renderMarkers : defaultRenderMarkers;
+    const fnGpx = typeof drawAllGpxTracks === 'function' ? drawAllGpxTracks : defaultDrawAllGpxTracks;
+
     if (window.IS_FIREBASE_CONFIGURED && window.db) {
         window.db.collection('places').onSnapshot(snapshot => {
             if (snapshot.empty) {
@@ -38,15 +54,15 @@ export function loadPlaces(renderPlaces, renderMarkers, drawAllGpxTracks) {
                 setPlaces(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             }
             savePlaces();
-            if (typeof renderPlaces === 'function') renderPlaces();
-            if (typeof renderMarkers === 'function') renderMarkers();
-            if (typeof drawAllGpxTracks === 'function') drawAllGpxTracks();
+            if (typeof fnPlaces === 'function') fnPlaces();
+            if (typeof fnMarkers === 'function') fnMarkers();
+            if (typeof fnGpx === 'function') fnGpx();
         }, err => {
             logFirebaseError("Error loading places from Firebase:", err);
-            loadPlacesFromLocalStorageOnly(renderPlaces, renderMarkers, drawAllGpxTracks);
+            loadPlacesFromLocalStorageOnly(fnPlaces, fnMarkers, fnGpx);
         });
     } else {
-        loadPlacesFromLocalStorageOnly(renderPlaces, renderMarkers, drawAllGpxTracks);
+        loadPlacesFromLocalStorageOnly(fnPlaces, fnMarkers, fnGpx);
     }
 }
 
@@ -79,6 +95,10 @@ export function deletePlaceFromFirebase(placeId) {
 
 // ============= Groups Firebase Operations =============
 export function loadGroups(renderGroupTabs, renderGroupSelect, renderGroupParentSelect) {
+    const fnTabs = typeof renderGroupTabs === 'function' ? renderGroupTabs : defaultRenderGroupTabs;
+    const fnSelect = typeof renderGroupSelect === 'function' ? renderGroupSelect : defaultRenderGroupSelect;
+    const fnParent = typeof renderGroupParentSelect === 'function' ? renderGroupParentSelect : defaultRenderGroupParentSelect;
+
     if (window.IS_FIREBASE_CONFIGURED && window.db) {
         window.db.collection('groups').onSnapshot(snapshot => {
             if (snapshot.empty) {
@@ -95,15 +115,15 @@ export function loadGroups(renderGroupTabs, renderGroupSelect, renderGroupParent
                 setGroups(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             }
             localStorage.setItem(GROUPS_KEY, JSON.stringify(groups));
-            if (typeof renderGroupTabs === 'function') renderGroupTabs();
-            if (typeof renderGroupSelect === 'function') renderGroupSelect();
-            if (typeof renderGroupParentSelect === 'function') renderGroupParentSelect();
+            if (typeof fnTabs === 'function') fnTabs();
+            if (typeof fnSelect === 'function') fnSelect();
+            if (typeof fnParent === 'function') fnParent();
         }, err => {
             logFirebaseError("Error loading groups from Firebase:", err);
-            loadGroupsFromLocalStorageOnly(renderGroupTabs, renderGroupSelect, renderGroupParentSelect);
+            loadGroupsFromLocalStorageOnly(fnTabs, fnSelect, fnParent);
         });
     } else {
-        loadGroupsFromLocalStorageOnly(renderGroupTabs, renderGroupSelect, renderGroupParentSelect);
+        loadGroupsFromLocalStorageOnly(fnTabs, fnSelect, fnParent);
     }
 }
 
