@@ -139,73 +139,39 @@ export function getLinkIcon(type) {
 
 // ============= Group Rendering & Selection =============
 export function renderGroupTabs() {
-    const mainContainer = document.getElementById('group-tabs-list');
-    const subContainer = document.getElementById('sub-groups-tabs-list');
-    if (!mainContainer || !subContainer) return;
+    const mainContainer = document.querySelector('.groups-scroll');
+    const subContainer = document.getElementById('sub-groups-scroll');
+    const subBar = document.getElementById('sub-groups-bar');
+    if (!mainContainer) return;
 
     // Filter main (parent) groups
     const mainGroups = groups.filter(g => !g.parentId);
+    mainGroups.sort((a, b) => (a.sortOrder ?? 9999) - (b.sortOrder ?? 9999));
 
     // Render Main Groups
     let mainHtml = `
-        <div class="group-tab ${activeGroupId === 'all' ? 'active' : ''}" data-group-id="all">
-            <span style="font-weight:bold;"><i class="fas fa-th-large"></i> הכל</span>
-        </div>
+        <button class="group-tab ${activeGroupId === 'all' ? 'active' : ''}" data-group-id="all">
+            <i class="fas fa-globe-americas"></i> <span>הכל</span> <span class="group-count">${places.length}</span>
+        </button>
     `;
 
     mainGroups.forEach(g => {
         const placeCount = getGroupPlaceCount(g.id);
-        const subList = groups.filter(sub => sub.parentId === g.id);
-        const totalCount = placeCount + subList.reduce((acc, sub) => acc + getGroupPlaceCount(sub.id), 0);
+        const childGroupIds = groups.filter(sub => sub.parentId === g.id).map(sub => sub.id);
+        const totalCount = placeCount + places.filter(p => childGroupIds.includes(p.groupId)).length;
+
+        const isSelected = activeGroupId === g.id;
 
         mainHtml += `
-            <div class="group-tab ${activeGroupId === g.id ? 'active' : ''}" data-group-id="${g.id}">
+            <button class="group-tab ${isSelected ? 'active' : ''}" data-group-id="${g.id}" style="${isSelected ? `background:${g.color}; border-color:${g.color}; box-shadow:0 2px 8px ${g.color}40;` : ''}">
                 <span class="group-tab-dot" style="background-color:${g.color}"></span>
                 <span>${escapeHtml(g.name)}</span>
-                <span class="group-tab-badge">${totalCount}</span>
-            </div>
+                <span class="group-count">${totalCount}</span>
+            </button>
         `;
     });
 
     mainContainer.innerHTML = mainHtml;
-
-    // Render Sub-groups (Treks)
-    if (activeGroupId === 'all') {
-        subContainer.parentElement.style.display = 'none';
-    } else {
-        const subGroupsList = groups.filter(g => g.parentId === activeGroupId);
-        if (subGroupsList.length === 0) {
-            subContainer.parentElement.style.display = 'none';
-        } else {
-            subContainer.parentElement.style.display = 'flex';
-
-            let subHtml = `
-                <div class="sub-group-tab ${activeSubGroupId === 'all' ? 'active' : ''}" data-sub-group-id="all">
-                    <span>כל המסלולים</span>
-                </div>
-            `;
-
-            subGroupsList.forEach(sub => {
-                const subPlaceCount = getGroupPlaceCount(sub.id);
-                subHtml += `
-                    <div class="sub-group-tab ${activeSubGroupId === sub.id ? 'active' : ''}" data-sub-group-id="${sub.id}">
-                        <span>${escapeHtml(sub.name)}</span>
-                        <span class="sub-group-tab-badge">${subPlaceCount}</span>
-                    </div>
-                `;
-            });
-
-            subContainer.innerHTML = subHtml;
-
-            // Sub-groups tabs event listeners
-            subContainer.querySelectorAll('.sub-group-tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const subId = tab.dataset.subGroupId;
-                    setActiveSubGroup(subId);
-                });
-            });
-        }
-    }
 
     // Main group tabs event listeners
     mainContainer.querySelectorAll('.group-tab').forEach(tab => {
@@ -214,6 +180,49 @@ export function renderGroupTabs() {
             setActiveGroup(grpId);
         });
     });
+
+    // Render Sub-groups (Treks)
+    if (subContainer && subBar) {
+        if (activeGroupId === 'all') {
+            subBar.style.display = 'none';
+        } else {
+            const subGroupsList = groups.filter(g => g.parentId === activeGroupId);
+            subGroupsList.sort((a, b) => (a.sortOrder ?? 9999) - (b.sortOrder ?? 9999));
+
+            if (subGroupsList.length === 0) {
+                subBar.style.display = 'none';
+            } else {
+                subBar.style.display = 'flex';
+
+                let subHtml = `
+                    <button class="sub-group-tab ${activeSubGroupId === 'all' ? 'active' : ''}" data-sub-group-id="all">
+                        <span>כל המסלולים</span>
+                    </button>
+                `;
+
+                subGroupsList.forEach(sub => {
+                    const subPlaceCount = getGroupPlaceCount(sub.id);
+                    const isSubSelected = activeSubGroupId === sub.id;
+                    subHtml += `
+                        <button class="sub-group-tab ${isSubSelected ? 'active' : ''}" data-sub-group-id="${sub.id}">
+                            <span>${escapeHtml(sub.name)}</span>
+                            <span class="sub-group-count">${subPlaceCount}</span>
+                        </button>
+                    `;
+                });
+
+                subContainer.innerHTML = subHtml;
+
+                // Sub-groups tabs event listeners
+                subContainer.querySelectorAll('.sub-group-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const subId = tab.dataset.subGroupId;
+                        setActiveSubGroup(subId);
+                    });
+                });
+            }
+        }
+    }
 }
 
 export function setActiveGroup(groupId) {

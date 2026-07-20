@@ -15,6 +15,8 @@ import {
     debounce,
     itineraries,
     map, markers,
+    miniMap, setMiniMap,
+    miniMapMarker, setMiniMapMarker,
     pendingImages, setPendingImages
 } from './state.js';
 
