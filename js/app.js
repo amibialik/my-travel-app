@@ -1136,13 +1136,20 @@ function initEvents() {
         });
     }
 
-    const startBtn = document.getElementById('btn-start-app');
+export function closeSplashScreen() {
     const splash = document.getElementById('splash-screen');
-    if (startBtn && splash) {
-        startBtn.addEventListener('click', () => {
-            splash.classList.add('hide');
-            setTimeout(() => splash.remove(), 800);
-        });
+    if (splash) {
+        splash.classList.add('hide');
+        setTimeout(() => {
+            if (splash.parentNode) splash.remove();
+        }, 800);
+    }
+}
+window.closeSplashScreen = closeSplashScreen;
+
+    const startBtn = document.getElementById('btn-start-app');
+    if (startBtn) {
+        startBtn.addEventListener('click', closeSplashScreen);
     }
 
     const loadGmapsLinkBtn = document.getElementById('btn-load-gmaps-link');
