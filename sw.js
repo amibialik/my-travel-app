@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bialik-travels-v7';
+const CACHE_NAME = 'bialik-travels-v8';
 const ASSETS = [
   './',
   './index.html',
