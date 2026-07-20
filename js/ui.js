@@ -1761,4 +1761,147 @@ export function initOfflineEvents() {
     }
 }
 
+// ============= Resizable Split Pane (Map / Places List / Itinerary) =============
+export function initResizablePanels() {
+    const placesPanel = document.getElementById('places-panel');
+    const itineraryPanel = document.getElementById('itinerary-panel');
+    const mapPanel = document.getElementById('map-panel');
+    const divPlacesItin = document.getElementById('places-itin-divider');
+    const divItinMap = document.getElementById('itin-map-divider');
+    const container = document.querySelector('.app-container');
+
+    if (!placesPanel || !itineraryPanel || !mapPanel || !divPlacesItin || !divItinMap || !container) return;
+
+    // Load saved widths/heights or use defaults
+    let placesWidth = parseInt(localStorage.getItem('placesPanelWidth')) || 350;
+    let itinWidth = parseInt(localStorage.getItem('itineraryPanelWidth')) || 380;
+    let sideWidth = parseInt(localStorage.getItem('sidePanelsWidth')) || 380;
+    let placesHeight = parseInt(localStorage.getItem('placesPanelHeight')) || 350;
+
+    // Apply saved widths/heights on load
+    container.style.setProperty('--places-width', `${placesWidth}px`);
+    container.style.setProperty('--itin-width', `${itinWidth}px`);
+    container.style.setProperty('--side-width', `${sideWidth}px`);
+    container.style.setProperty('--places-height', `${placesHeight}px`);
+
+    const setupDrag = (divider, onDrag, onStop) => {
+        let isDragging = false;
+
+        divider.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            const currentLayout = localStorage.getItem('mytravel-app-layout') || 'cols';
+            const isHorizontal = (divider.id === 'places-itin-divider' && currentLayout !== 'cols');
+
+            document.body.style.cursor = isHorizontal ? 'row-resize' : 'col-resize';
+            document.body.style.userSelect = 'none';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            onDrag(e.clientX, e.clientY);
+        });
+
+        const stopDrag = () => {
+            if (isDragging) {
+                isDragging = false;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+                if (onStop) onStop();
+            }
+        };
+
+        document.addEventListener('mouseup', stopDrag);
+
+        // Touch events
+        divider.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            e.preventDefault();
+        });
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            onDrag(touch.clientX, touch.clientY);
+        });
+        document.addEventListener('touchend', stopDrag);
+    };
+
+    // places-itin divider
+    setupDrag(divPlacesItin, (clientX, clientY) => {
+        const currentLayout = localStorage.getItem('mytravel-app-layout') || 'cols';
+
+        if (currentLayout === 'cols') {
+            // Columns view: resizes placesPanel width (RTL)
+            const containerRect = container.getBoundingClientRect();
+            let width = containerRect.right - clientX;
+            if (width < 250) width = 250;
+            if (width > 600) width = 600;
+            placesWidth = width;
+            container.style.setProperty('--places-width', `${width}px`);
+        } else {
+            // Split view: resizes placesPanel height (Horizontal divider)
+            const containerRect = container.getBoundingClientRect();
+            let height = clientY - containerRect.top;
+            if (height < 150) height = 150;
+            if (height > containerRect.height - 150) height = containerRect.height - 150;
+            placesHeight = height;
+            container.style.setProperty('--places-height', `${height}px`);
+        }
+
+        if (typeof google !== 'undefined' && google.maps && map) {
+            google.maps.event.trigger(map, 'resize');
+        }
+    }, () => {
+        const currentLayout = localStorage.getItem('mytravel-app-layout') || 'cols';
+        if (currentLayout === 'cols') {
+            localStorage.setItem('placesPanelWidth', placesWidth);
+        } else {
+            localStorage.setItem('placesPanelHeight', placesHeight);
+        }
+    });
+
+    // itin-map divider
+    setupDrag(divItinMap, (clientX, clientY) => {
+        const currentLayout = localStorage.getItem('mytravel-app-layout') || 'cols';
+        const containerRect = container.getBoundingClientRect();
+
+        if (currentLayout === 'cols') {
+            // Columns view: resizes itineraryPanel width
+            const placesRect = placesPanel.getBoundingClientRect();
+            const startX = placesPanel.style.display !== 'none' ? placesRect.left : containerRect.right;
+            let width = startX - clientX;
+            if (width < 280) width = 280;
+            if (width > 700) width = 700;
+            itinWidth = width;
+            container.style.setProperty('--itin-width', `${width}px`);
+        } else if (currentLayout === 'map-left') {
+            // Map Left view: itin-map divider separates side panels (right) and map (left)
+            let width = containerRect.right - clientX;
+            if (width < 280) width = 280;
+            if (width > containerRect.width - 250) width = containerRect.width - 250;
+            sideWidth = width;
+            container.style.setProperty('--side-width', `${width}px`);
+        } else if (currentLayout === 'map-right') {
+            // Map Right view: itin-map divider separates map (right) and side panels (left)
+            let width = clientX - containerRect.left;
+            if (width < 280) width = 280;
+            if (width > containerRect.width - 250) width = containerRect.width - 250;
+            sideWidth = width;
+            container.style.setProperty('--side-width', `${width}px`);
+        }
+
+        if (typeof google !== 'undefined' && google.maps && map) {
+            google.maps.event.trigger(map, 'resize');
+        }
+    }, () => {
+        const currentLayout = localStorage.getItem('mytravel-app-layout') || 'cols';
+        if (currentLayout === 'cols') {
+            localStorage.setItem('itineraryPanelWidth', itinWidth);
+        } else {
+            localStorage.setItem('sidePanelsWidth', sideWidth);
+        }
+    });
+}
+
+
 
