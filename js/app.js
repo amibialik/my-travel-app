@@ -915,7 +915,7 @@ function initEvents() {
 
         if (activeTab === 'list') {
             document.body.classList.add('mobile-view-list');
-            if (tabList) tabList.add('active');
+            if (tabList) tabList.classList.add('active');
             if (itinPanel) itinPanel.style.display = 'none';
         } else if (activeTab === 'map') {
             document.body.classList.add('mobile-view-map');
@@ -1043,20 +1043,15 @@ function initEvents() {
         });
     }
 
-export function closeSplashScreen() {
-    const splash = document.getElementById('splash-screen');
-    if (splash) {
-        splash.classList.add('hide');
-        setTimeout(() => {
-            if (splash.parentNode) splash.remove();
-        }, 800);
-    }
-}
-window.closeSplashScreen = closeSplashScreen;
-
     const startBtn = document.getElementById('btn-start-app');
     if (startBtn) {
-        startBtn.addEventListener('click', closeSplashScreen);
+        startBtn.addEventListener('click', () => {
+            const splash = document.getElementById('splash-screen');
+            if (splash) {
+                splash.classList.add('hide');
+                setTimeout(() => { if (splash.parentNode) splash.remove(); }, 800);
+            }
+        });
     }
 
     const loadGmapsLinkBtn = document.getElementById('btn-load-gmaps-link');
@@ -1197,9 +1192,7 @@ function init() {
         }, 800);
     }
 
-    if (typeof window.checkAdminMode === 'function') {
-        window.checkAdminMode();
-    }
+    checkAdminMode();
 }
 
 // Start Application
