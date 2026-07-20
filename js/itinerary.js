@@ -61,12 +61,14 @@ export function loadItineraries() {
             }
             localStorage.setItem(ITINERARIES_KEY, JSON.stringify(itineraries));
 
-            // Restore saved active itinerary
+            // Restore saved active itinerary or default to first itinerary
             const savedActiveId = localStorage.getItem('mytravel-active-itinerary-id');
             if (savedActiveId && itineraries.some(it => it.id === savedActiveId)) {
                 setActiveItineraryId(savedActiveId);
-                // Also set activeItineraryId on window for global scopes like map
                 window.activeItineraryId = savedActiveId;
+            } else if (itineraries.length > 0) {
+                setActiveItineraryId(itineraries[0].id);
+                window.activeItineraryId = itineraries[0].id;
             }
 
             renderItineraryList();
@@ -79,11 +81,6 @@ export function loadItineraries() {
         });
     } else {
         loadItinerariesFromLocalStorage();
-        const savedActiveId = localStorage.getItem('mytravel-active-itinerary-id');
-        if (savedActiveId && itineraries.some(it => it.id === savedActiveId)) {
-            setActiveItineraryId(savedActiveId);
-            window.activeItineraryId = savedActiveId;
-        }
     }
 }
 
@@ -94,10 +91,29 @@ export function loadItinerariesFromLocalStorage() {
     } else {
         setItineraries([]);
     }
+
+    const savedActiveId = localStorage.getItem('mytravel-active-itinerary-id');
+    if (savedActiveId && itineraries.some(it => it.id === savedActiveId)) {
+        setActiveItineraryId(savedActiveId);
+        window.activeItineraryId = savedActiveId;
+    } else if (itineraries.length > 0) {
+        setActiveItineraryId(itineraries[0].id);
+        window.activeItineraryId = itineraries[0].id;
+    }
+
+    renderItineraryList();
+    if (activeItineraryId) {
+        renderGanttView(activeItineraryId);
+    }
 }
 
 export function saveItineraries() {
     localStorage.setItem(ITINERARIES_KEY, JSON.stringify(itineraries));
+    if (window.IS_FIREBASE_CONFIGURED && window.db && Array.isArray(itineraries)) {
+        itineraries.forEach(it => {
+            syncItineraryToFirebase(it);
+        });
+    }
 }
 
 export function syncItineraryToFirebase(itinerary) {
