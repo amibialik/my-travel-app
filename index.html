@@ -6,6 +6,15 @@
         if (window.location.pathname.endsWith('/travel-site')) {
             window.location.replace(window.location.pathname + '/' + window.location.search + window.location.hash);
         }
+        function closeSplashScreen() {
+            var splash = document.getElementById('splash-screen');
+            if (splash) {
+                splash.classList.add('hide');
+                setTimeout(function() {
+                    if (splash.parentNode) splash.parentNode.removeChild(splash);
+                }, 800);
+            }
+        }
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -932,7 +941,7 @@
     </div>
 
     <!-- ============ Scripts ============ -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCAuBUvFpo3eTmujgaD9NfnFcnhT-N3bWU&libraries=places&language=he&region=IL"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCAuBUvFpo3eTmujgaD9NfnFcnhT-N3bWU&libraries=places&language=he&region=IL&loading=async"></script>
     <!-- Firebase SDK (v10 Compat) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js" crossorigin="anonymous"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js" crossorigin="anonymous"></script>
