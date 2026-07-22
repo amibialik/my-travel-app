@@ -86,7 +86,7 @@
                     <i class="fas fa-download"></i>
                     <span>גיבוי ושחזור</span>
                 </button>
-                <button class="btn-outline" id="btn-knt-trail" title="עדכוני שביל KNT 2026 — מקטעים 8-13" onclick="document.getElementById('knt-modal').classList.add('active')" style="border-color: rgba(255,255,255,0.3); color: white; background: rgba(255,255,255,0.07); transition: all var(--transition);">
+                <button class="btn-outline" id="btn-knt-trail" title="עדכוני שביל KNT 2026 — מקטעים 8-15" onclick="document.getElementById('knt-modal').classList.add('active')" style="border-color: rgba(255,255,255,0.3); color: white; background: rgba(255,255,255,0.07); transition: all var(--transition);">
                     <i class="fas fa-mountain"></i>
                     <span>KNT Trail</span>
                 </button>
@@ -961,6 +961,8 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
     <script type="module" src="js/app.js"></script>
 
+
+
 <!-- KNT Modal -->
 <!-- ============ KNT Trail Updates Modal ============ -->
 <div id="knt-modal" class="knt-modal-overlay" role="dialog" aria-modal="true" aria-label="עדכוני שביל KNT">
@@ -969,8 +971,8 @@
             <div class="knt-modal-title-wrap">
                 <span class="knt-modal-icon">🏔️</span>
                 <div>
-                    <div class="knt-modal-title">KNT · S8–S13</div>
-                    <div class="knt-modal-subtitle">עדכוני שביל מקובצים מקבוצת הוואטסאפ — מקטעים 8 עד 13</div>
+                    <div class="knt-modal-title">KNT · S8–S15</div>
+                    <div class="knt-modal-subtitle">עדכוני שביל מקובצים מקבוצת הוואטסאפ — מקטעים 8 עד 15</div>
                 </div>
             </div>
             <div class="knt-modal-controls">
@@ -980,116 +982,757 @@
         </div>
         <div class="knt-topbar">
             <div class="knt-tabs">
-                <a class="knt-tab knt-tab-general" href="#knt-general">★ <span class="knt-tab-n">כללי</span></a>
-                <a class="knt-tab" href="#knt-s8">08 <span class="knt-tab-n">Tash Rabat</span></a>
-                <a class="knt-tab" href="#knt-s9">09 <span class="knt-tab-n">At-Bashi</span></a>
-                <a class="knt-tab" href="#knt-s10">10 <span class="knt-tab-n">Kel-Suu</span></a>
-                <a class="knt-tab" href="#knt-s11">11 <span class="knt-tab-n">Ak-Sai</span></a>
-                <a class="knt-tab" href="#knt-s12">12 <span class="knt-tab-n">Naryn River</span></a>
-                <a class="knt-tab" href="#knt-s13">13 <span class="knt-tab-n">Arabel</span></a>
+<a class="knt-tab knt-tab-general" href="#knt-general">★ <span class="knt-tab-n">כללי</span></a>
+<a class="knt-tab" href="#knt-s8">08 <span class="knt-tab-n">Tash Rabat</span></a>
+<a class="knt-tab" href="#knt-s9">09 <span class="knt-tab-n">At-Bashi</span></a>
+<a class="knt-tab" href="#knt-s10">10 <span class="knt-tab-n">Kel-Suu</span></a>
+<a class="knt-tab" href="#knt-s11">11 <span class="knt-tab-n">Ak-Sai</span></a>
+<a class="knt-tab" href="#knt-s12">12 <span class="knt-tab-n">Naryn River</span></a>
+<a class="knt-tab" href="#knt-s13">13 <span class="knt-tab-n">Arabel</span></a>
+<a class="knt-tab" href="#knt-s14">14 <span class="knt-tab-n">Karakol</span></a>
+<a class="knt-tab" href="#knt-s15">15 <span class="knt-tab-n">Jyrgalan</span></a>
             </div>
-            <input id="knt-search" type="text" class="knt-search" placeholder="חיפוש… bridge, water, Kel Suu, Kara Say…" />
+            <input id="knt-search" type="text" class="knt-search" placeholder="חיפוש… bridge, water, Kel Suu, Kara Say, Karakol, Ala-Kul…" />
         </div>
         <div class="knt-modal-body" id="knt-modal-body">
-            <div class="knt-notice">
-                <b>⚠ שינוי מספור מקטעים ב-15.7.2026:</b> יובל הודיע שמקטע <code>11</code> הישן פוצל לשני מקטעים — <code>11</code> ו-<code>12</code> — ומה שהיה <code>12</code> הישן נקרא כעת <code>13</code>. מקטעים 8, 9, 10 לא הושפעו. הודעות לפני 15.7 21:20 מסומנות <span class="knt-flag">מספור ישן</span>.
-            </div>
+<div class="knt-notice">
+  <b>⚠ שינוי מספור מקטעים ב-15.7.2026:</b> יובל הודיע בקבוצה שמקטע <code>11</code> הישן פוצל לשני מקטעים חדשים — <code>11</code> ו-<code>12</code> — ומה שהיה <code>מקטע 12</code> הישן נקרא כעת <code>מקטע 13</code>. מקטעים 8, 9, 10 לא הושפעו. הודעות שנשלחו <b>לפני</b> ה-15.7 בשעה 21:20 שמזכירות "מקטע 11" או "מקטע 12" עשויות להתייחס למספור הישן. סימנתי כל הודעה כזו בתגית <span class="knt-flag">מספור ישן</span> — התוכן עדיין רלוונטי, רק שיוך המספר המדויק פחות ודאי.
+</div>
 
-            <!-- GENERAL -->
-            <section class="knt-segment" id="knt-general">
-                <div class="knt-seg-head"><div class="knt-seg-num knt-gen">★ כללי</div><div class="knt-seg-name">מידע כלל-שבילי</div><div class="knt-seg-meta">היתרים · אספקה · ציוד · ניווט · בטיחות</div></div>
-                <div class="knt-seg-topic">ניווט, GPX ומפות · בטיחות ‼️</div>
-                <div class="knt-entries">
-                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">29.6 · 5.7</span><span class="knt-sender">Yuval</span><span class="knt-chip">אזהרת GPX — קריטי</span></div><div class="knt-body-en"><p>The GPX tracks are NOT exact instructions. The trail in Kyrgyzstan changes very often — read the land in front of you. Never fully trust the GPX.</p></div><div class="knt-body-he"><p>מסלולי ה-GPX <b>אינם</b> הוראה מדויקת. השביל משתנה תכופות. לעולם אל תסמכו על ה-GPX במלואו.</p></div></div>
-                    <div class="knt-entry" style="--knt-cat:#7B5EA7"><div class="knt-entry-head"><span class="knt-date">5.7 · 9.7</span><span class="knt-sender">Valentin Henri / Grégoire</span><span class="knt-chip">שיטת ניווט</span></div><div class="knt-body-en"><ul><li>Valentin: uses printed Soviet topo maps + RussianTopoMaps app. GPX efficient but <b>not safer</b>. In fog — GPX is important.</li><li><b>OSMand</b> — best in Central Asia (Grégoire). Mapy.cz shares same path data.</li></ul></div><div class="knt-body-he"><ul><li>ניווט עם מפות טופו מודפסות + RussianTopoMaps. GPX לא בטוח יותר.</li><li><b>OSMand</b> — הכי טוב במרכז אסיה.</li></ul></div></div>
-                </div>
-                <div class="knt-seg-topic">היתרים ובירוקרטיה</div>
-                <div class="knt-entries">
-                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">22.6</span><span class="knt-sender">Greg Carter</span><span class="knt-chip">עדכון היתרים</span></div><div class="knt-body-en"><p>CBT Naryn won't issue back-to-back 2-month multi-region permits. 4 months = 2-month permit (€35) + 2×1-month (€30 each). Segments 8,10,11,12,13 require a border permit. Military checkpoint at Kara-Say (A364) — printed+signed permit + passport required.</p></div><div class="knt-body-he"><p>CBT נארין לא מנפיקה היתרים חוזרים לחודשיים. מקטעים 8,10,11,12,13 דורשים היתר גבול. נקודת ביקורת צבאית בקארה-סאי — היתר מודפס+חתום ודרכון.</p></div></div>
-                </div>
-                <div class="knt-seg-topic">אספקה, משלוחים ואנשי קשר</div>
-                <div class="knt-entries">
-                    <div class="knt-entry" style="--knt-cat:#D4960A"><div class="knt-entry-head"><span class="knt-date">23.6 · 4.7</span><span class="knt-sender">Josha / Clémence</span><span class="knt-chip">אספקה לאורך השביל</span></div><div class="knt-body-en"><ul><li>Resupply to Osh: <b>Yldam Express</b>. Coordinate with <b>Timur / Visit Alay Osh</b> (backup: CBT Osh, Baiysh Toobaev).</li><li><b>Kel Suu:</b> via CBT Naryn — give box, agree on yurt camp. "Very reliable and cheap."</li><li><b>Kara-Say:</b> <b>Zholdosh +996 706 596 956</b> (also spelled Dzuldush).</li><li><b>Karakol:</b> isobutane at <b>4Rent</b>. Gas in Naryn/Karakol/Kazarman.</li></ul></div><div class="knt-body-he"><ul><li>אוש: <b>Yldam Express</b> + <b>Visit Alay Timur</b>. ציוד: <b>Gergert Sport בישקק</b>.</li><li><b>קל-סו:</b> CBT נארין — אמין וזול.</li><li><b>קארה-סאי:</b> <b>Zholdosh +996 706 596 956</b>.</li><li>גז: <b>4Rent קاראקול</b> / נארין / קזרמן.</li></ul></div></div>
-                    <div class="knt-entry" style="--knt-cat:#D4960A"><div class="knt-entry-head"><span class="knt-date">30.6</span><span class="knt-sender">Greg Carter</span><span class="knt-chip">גז מתוברג</span></div><div class="knt-body-en"><p>Threaded canisters in Osh: <b>Destination Osh</b> (Bek) — Large 1,500 SOM, Small 1,000. <b>Visit Alay</b> also has smalls. Check stove-canister thread fit before buying. Bishkek: <b>Gergert Sport</b>.</p></div><div class="knt-body-he"><p>גז מתוברג באוש: <b>Destination Osh</b> (Bek) גדול 1,500 / קטן 1,000 סום. לבדוק תבריג לפני קנייה. בישקק: <b>Gergert Sport</b>.</p></div></div>
-                </div>
-                <div class="knt-seg-topic">מים · מזג אוויר · אקלום</div>
-                <div class="knt-entries">
-                    <div class="knt-entry" style="--knt-cat:#2E5480"><div class="knt-entry-head"><span class="knt-date">23–24.6</span><span class="knt-sender">דיון קבוצתי</span><span class="knt-chip">מים וטיהור</span></div><div class="knt-body-en"><ul><li>Filters: Sawyer Squeeze/Mini, Katadyn BeFree, Platypus QuickDraw.</li><li>Glacial silt: prefilter through buff/bandana.</li><li><b>Always purify</b> — even clear side-streams can be contaminated (livestock everywhere).</li></ul></div><div class="knt-body-he"><ul><li>מסננים: Sawyer, BeFree, Platypus. סחף קרחוני: לסנן דרך באף.</li><li><b>תמיד לטהר</b> — גם נחלי צד צלולים עלולים להיות מזוהמים.</li></ul></div></div>
-                    <div class="knt-entry" style="--knt-cat:#2E5480"><div class="knt-entry-head"><span class="knt-date">23.6</span><span class="knt-sender">Richard / Grüs</span><span class="knt-chip">תחזיות מזג אוויר</span></div><div class="knt-body-en"><p>Best: <b>Windy</b> + <b>YR.no</b>. Garmin good same/next day only — "always sunny" 2+ days out. Government SMS rain warnings arrive even when currently sunny.</p></div><div class="knt-body-he"><p>הכי טוב: <b>Windy</b> + <b>YR.no</b>. גרמין — טוב ליום-יומיים בלבד. התראות SMS ממשלתיות מגיעות גם כשכרגע שמשי.</p></div></div>
-                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">11.7</span><span class="knt-sender">Josha</span><span class="knt-chip">אקלום לפני מקטע 8</span></div><div class="knt-body-en"><p>First night 3,500–3,600m then 4,000m pass. Struggled with altitude even at 3,400m after Kazarman. Consider starting altitude pills already in Kazarman.</p></div><div class="knt-body-he"><p>לילה ראשון 3,500 מ', מעבר 4,000 מ'. שקלו גלולות גובה כבר בקזרמן.</p></div></div>
-                </div>
-                <div class="knt-seg-topic">כלבי רועים · ערים</div>
-                <div class="knt-entries">
-                    <div class="knt-entry" style="--knt-cat:#0D9E72"><div class="knt-entry-head"><span class="knt-date">5.7 · 27.6</span><span class="knt-sender">Léon / Yuval / Ryan</span><span class="knt-chip">כלבים + לינה + מזומן</span></div><div class="knt-body-en"><ul><li>Dogs mostly bark. Hit poles together; shepherd calls them. Pretend to pick up a stone.</li><li>Bishkek hostels: <b>Meeting Place, Koisha, Ololo Yurt, Sakura, Compass</b>.</li><li>Yuval recommends ~<b>15,000 som / week</b>.</li></ul></div><div class="knt-body-he"><ul><li>כלבים בעיקר נובחים. להקיש מקלות. להעמיד פנים שמרימים אבן.</li><li>אכסניות בישקק: <b>Meeting Place, Koisha, Ololo Yurt, Sakura, Compass</b>.</li><li>יובל ממליץ ~<b>15,000 סום לשבוע</b>.</li></ul></div></div>
-                </div>
-            </section>
+<!-- GENERAL / TRAIL-WIDE -->
+<section class="knt-segment" id="knt-general">
+  <div class="knt-seg-head">
+    <div class="knt-seg-num knt-gen">★ כללי</div>
+    <div class="knt-seg-name">מידע כלל-שבילי — לא משויך למקטע מסוים</div>
+    <div class="knt-seg-meta">היתרים · אספקה · ציוד · ניווט · בטיחות</div>
+  </div>
 
-            <!-- SEGMENT 8 -->
-            <section class="knt-segment" id="knt-s8">
-                <div class="knt-seg-head"><div class="knt-seg-num">08</div><div class="knt-seg-name">Tash Rabat · טאש-רבאט</div><div class="knt-seg-meta">44km</div></div>
-                <details class="knt-refbox"><summary>נקודות ציון ואנשי קשר (יובל)</summary><div class="knt-reftable"><div class="knt-refrow"><div class="knt-ref-name">Tash Rabat</div><div class="knt-ref-detail">יורט קמפ Nazar — לינה 1800c, ארוחת ערב 800c. <b>Nazar +996 557 060 494</b></div></div><div class="knt-refrow"><div class="knt-ref-name">Kazybek</div><div class="knt-ref-detail">2 ק"מ מהשביל. Jyparkul Guest House — לינה 1000c. <b>Jypara +996 703 230 591, Ermek 0701 485 688</b>. בית מרקחת ובית חולים בכפר.</div></div></div></details>
-                <div class="knt-entries">
-                    <div class="knt-entry" style="--knt-cat:#0D9E72"><div class="knt-entry-head"><span class="knt-date">5–20.7</span><span class="knt-sender">Yuval / Josha / Clémence / Laurent / Lotteke</span><span class="knt-chip">גישה / תחבורה</span></div><div class="knt-body-en"><ul><li>Kazarman→Turugart: split via Naryn. Josha found taxi Naryn→S8 for <b>€100</b> (CBT quoted €150).</li><li>Driver: <b>Sapar +996 558 222 273</b>. Gulira at CBT Naryn has driver connections.</li><li>Laurent: CBT Baktygul Kazarman quoted €300 — too expensive.</li><li>Hitchhiking Turugart→Naryn works. Taxis to Tash Rabat itself may be cheaper (more tourist traffic).</li><li>Hitchhiking S8+S9 area worked well for group of 3 (Laurent, 20.7).</li></ul></div><div class="knt-body-he"><ul><li>מקזרמן לטורוגארט — לפצל דרך נארין. מונית נארין→מ8 <b>€100</b>. נהג: <b>Sapar +996 558 222 273</b>.</li><li>טרמפים מטורוגארט לנארין עבדו. מוניות לטאש-רבאט לעיתים זולות יותר.</li></ul></div></div>
-                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">16.7</span><span class="knt-sender">Josha</span><span class="knt-chip">מים / מסלול</span></div><div class="knt-body-en"><ul><li>Camp in shallow cave just below Panda Pass — by the only running stream before the pass.</li><li><b>Two other hikers found even that stream dry.</b> In dry spell, Chatyr-Kul lake = only water source until the pass.</li><li>Tash Rabat caravanserai: "underwhelming" — hidden under corrugated iron roof. Nazar yurt camp: nice family.</li></ul></div><div class="knt-body-he"><ul><li>מחנאות במערה מתחת למעבר פנדה — ליד הנחל היחיד לפני המעבר.</li><li><b>שני מטיילים מצאו גם אותו יבש.</b> ביובש — אגם צ'אטיר-קול = מקור מים יחיד עד המעבר.</li></ul></div></div>
-                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">19.7</span><span class="knt-sender">Grégoire</span><span class="knt-chip">הליכה הפוכה — מים</span></div><div class="knt-body-en"><p>S8 in reverse: only water source was the lake + one generous family. Avoid walking close to shore — swarming bugs. Big construction zone at end of S7.</p></div><div class="knt-body-he"><p>הליכה הפוכה: מים — רק האגם. להתרחק מחוף (חרקים). אזור בנייה גדול בסוף מקטע 7.</p></div></div>
-                </div>
-            </section>
+  <!-- Navigation / GPX / safety -->
+  <div class="knt-seg-topic">ניווט, GPX ומפות · בטיחות ‼️</div>
+  <div class="knt-entries">
 
-            <!-- SEGMENT 9 -->
-            <section class="knt-segment" id="knt-s9">
-                <div class="knt-seg-head"><div class="knt-seg-num">09</div><div class="knt-seg-name">At-Bashi · אט-באשי</div><div class="knt-seg-meta">85–88km</div></div>
-                <details class="knt-refbox"><summary>נקודות ציון ואנשי קשר (יובל)</summary><div class="knt-reftable"><div class="knt-refrow"><div class="knt-ref-name">At-Bashi</div><div class="knt-ref-detail">5 ק"מ מהשביל. Murat guesthouse — לינה+ב.בוקר+ערב 2000c. <b>Murat +996 772 842 858 (WhatsApp)</b>. מרשרוטקה נארין→אט-באשי 100 סום.</div></div></div></details>
-                <div class="knt-entries">
-                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">14.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">מעבר נהר קשה מאוד</span></div><div class="knt-body-en"><p>Difficult river crossing "in the valley after the resupply" — failed to cross, had to climb steep hillside with no holds. Detour on map is much bigger than it looked — "probably a good idea to use the GPX." Spiky bushwhacking. Described as the hardest day of the trip so far.</p></div><div class="knt-body-he"><p>מעבר נהר קשה "בעמק שאחרי האספקה" — נכשל, עלייה תלולה בלי אחיזות. עקיפה גדולה ממה שנראה במפה — "כדאי להשתמש ב-GPX". צמחייה קוצנית. היום הקשה ביותר עד כה.</p></div></div>
-                    <div class="knt-entry" style="--knt-cat:#D4960A"><div class="knt-entry-head"><span class="knt-date">15.7</span><span class="knt-sender">Lotteke</span><span class="knt-chip">גשר</span><span class="knt-flag">פרטים בהודעה קולית</span></div><div class="knt-body-en"><p>Bridge update in S9 delivered as voice message (~14–15.7 by Valentin Henri) — not transcribed. Check original audio files if details needed (files 00003277, 00003560).</p></div><div class="knt-body-he"><p>עדכון על גשר במקטע 9 — נמסר כהודעה קולית, לא מתומלל. לבדוק אודיו מקורי לפרטים.</p></div></div>
-                    <div class="knt-entry" style="--knt-cat:#D4960A"><div class="knt-entry-head"><span class="knt-date">16.7</span><span class="knt-sender">Josha</span><span class="knt-chip">מסלול / אספקה</span></div><div class="knt-body-en"><ul><li>Path to Kazybek fine; small shop with basics.</li><li>After Kazybek: knee-deep lilac flowers + bushwhacking through hard-branched hedgerow plants.</li><li>Trail becomes "find the trail" — faint, vanishes, reappears.</li><li>Stayed at <b>Ulukhaus guesthouse</b> in Acha-Kaindy — saves 5km extra to At-Bashi. Small shop there too.</li></ul></div><div class="knt-body-he"><ul><li>שביל לקזיבק תקין. לאחר מכן: בקיעה דרך פרחי לילך + צמחי גדר קשים.</li><li>שביל "מתחבא" — נעלם ומופיע.</li><li><b>אכסניית אולוחאוס</b> באצ'ה-קאינדי — חוסכת 5 ק"מ לאט-באשי.</li></ul></div></div>
-                </div>
-            </section>
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">29.6 · 5.7</span><span class="knt-sender">Yuval</span><span class="knt-chip">אזהרת GPX — קריטי</span></div>
+      <div class="knt-body-en"><p>The GPX tracks are NOT exact or accurate instructions. The trail in Kyrgyzstan changes very often — you must read the land in front of you and find the best path at all times. You cannot strictly follow the line on your phone and expect the trail to be perfectly aligned. The best place to cross a river changes with water flow and land shifts; horse and cow paths change constantly; floods, rain and where shepherds/animals walk in a given year change the viability of a path. Changes made now, especially in rough little-travelled terrain, won't necessarily be viable next month — and definitely not next year. Never fully trust the GPX. Keep your eyes open and take everything with a few grains of salt.</p></div>
+      <div class="knt-body-he"><p>מסלולי ה-GPX <b>אינם</b> הוראה מדויקת. השביל בקירגיזסטן משתנה לעתים קרובות מאוד — חייבים לקרוא את השטח שלפניכם ולמצוא את הדרך הטובה ביותר בכל רגע. אי אפשר לעקוב בעיוורון אחרי הקו בטלפון ולצפות שהשביל יתאים בול. נקודת המעבר הטובה בנהר משתנה לפי זרימת המים ותזוזות קרקע; שבילי סוסים ופרות משתנים כל הזמן; שיטפונות, גשם, ואיפה שהרועים והחיות בוחרים ללכת באותה שנה — כל אלה משנים אם שביל מסוים עביר. שינויים שנעשים עכשיו, במיוחד בשטח מחוספס שכמעט לא הולכים בו, לא בהכרח יהיו רלוונטיים בחודש הבא — ובוודאי לא בשנה הבאה. לעולם אל תסמכו על ה-GPX במלואו. תישארו עם עיניים פקוחות ותיקחו הכל בערבון מוגבל.</p></div>
+    </div>
 
-            <!-- SEGMENT 10 -->
-            <section class="knt-segment" id="knt-s10">
-                <div class="knt-seg-head"><div class="knt-seg-num">10</div><div class="knt-seg-name">Kel-Suu · קל-סו</div><div class="knt-seg-meta">129–134km</div></div>
-                <details class="knt-refbox"><summary>נקודות ציון ואנשי קשר (יובל)</summary><div class="knt-reftable"><div class="knt-refrow"><div class="knt-ref-name">Bash-Kaindi</div><div class="knt-ref-detail">על השביל. Zhumagul guesthouse — 3 חדרים, 8 אנשים, אוכל חם.</div></div><div class="knt-refrow"><div class="knt-ref-name">Biricnhi May (1 Mai)</div><div class="knt-ref-detail">יורט קמפ Jol-Bogushtu — לינה+ב.בוקר 3000c. <b>Ainura +996 507 608 609</b>. Nargiza guesthouse: <b>+996 702 903 090</b>.</div></div></div></details>
-                <div class="knt-entries">
-                    <div class="knt-entry" style="--knt-cat:#7B5EA7"><div class="knt-entry-head"><span class="knt-date">14.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">חוות דעת: לא כדאי</span></div><div class="knt-body-en"><ul><li>"Not one of my favorites" — lots of road walking. "Yurt camp" = "yurt city."</li><li><b>His take: not worth the detour</b> — cut through plateau at S11 junction, saving 2–3 days.</li><li>Edelweiß flowers everywhere (highlight). Lake shores vertical — camp in valley below.</li></ul></div><div class="knt-body-he"><ul><li>הרבה הליכה על כביש, "עיר יורטות".</li><li><b>לדעתו: לא שווה</b> — לחתוך לצומת עם מקטע 11, חיסכון 2–3 ימים.</li><li>פרחי אדלווייס. חופי האגם תלולים — לחנות בעמק שמתחת.</li></ul></div></div>
-                    <div class="knt-entry" style="--knt-cat:#0D9E72"><div class="knt-entry-head"><span class="knt-date">19.7</span><span class="knt-sender">Josha</span><span class="knt-chip">חוות דעת: כדאי מאוד! ⭐</span></div><div class="knt-body-en"><ul><li><b>Opposite opinion</b> — "the detour to Kel Suu is SO worth it!! The lake really is one of a kind."</li><li>"A few decent camp spots right at the lake — potentially best camping of the entire KNT!!"</li><li>Skipped waterfall, took taxi Acha-Kaindy→1 Mai (Ulukhaus husband can drive).</li></ul></div><div class="knt-body-he"><ul><li><b>דעה הפוכה</b> — "שווה לגמרי! האגם יוצא דופן."</li><li>"אולי מחנאות הטובות ביותר ב-KNT!!" ממש ליד האגם.</li></ul></div></div>
-                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">19.7</span><span class="knt-sender">Josha</span><span class="knt-chip">מעבר נהר — סכנה ⚠</span></div><div class="knt-body-en"><p><b>Big river at Ak-Sai valley (S10/S11 boundary) can be deep.</b> Got locals on horses to help with first braid — assumed next braid was same — walked in — belly-button deep. Phone water damage. Take crossing point selection seriously even if previous braid seemed easy.</p></div><div class="knt-body-he"><p><b>נהר גדול בגבול מקטעים 10/11 עלול להיות עמוק.</b> הניחו שהזרוע השנייה כמו הראשונה — התברר עמוק עד הטבור. טלפון ניזוק. לקחת ברצינות בחירת נקודת מעבר.</p></div></div>
-                    <div class="knt-entry" style="--knt-cat:#D4960A"><div class="knt-entry-head"><span class="knt-date">18–19.7</span><span class="knt-sender">Clémence / Josha</span><span class="knt-chip">אספקה קל-סו</span></div><div class="knt-body-en"><ul><li>Clémence: kids at yurt camp ate almost everything from their CBT Naryn drop bag — had to wait for replacement.</li><li>Josha: CBT Naryn resupply worked well. Tip: wrap package in lots of tape.</li></ul></div><div class="knt-body-he"><ul><li>ילדים פתחו שקיות האספקה ואכלו כמעט הכל — נאלצו להמתין.</li><li>אספקה CBT נארין עבדה. טיפ: הרבה נייר דבק.</li></ul></div></div>
-                </div>
-            </section>
+    <div class="knt-entry" style="--knt-cat:var(--accent-dusk, #7B5EA7)">
+      <div class="knt-entry-head"><span class="knt-date">5.7 · 9.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">שיטת ניווט</span></div>
+      <div class="knt-body-en"><p>Navigates mostly with the printed (Soviet/Russian topo) maps, checking the <b>"RussianTopoMaps" app</b> only when really in doubt — the app works great even in the mountains and its maps match Yuval's printed ones. Following the GPX may be more efficient but is <b>not safer</b> — it can lead people into terrain they're uncomfortable with because they assume "that's the trail." Not using navigation on his watch also extends battery from ~2 days to ~6. In fog the GPX is genuinely important, though. Bad weather is dangerous with or without a track — sometimes an unwanted rest day beats pushing on recklessly.</p></div>
+      <div class="knt-body-he"><p>מנווט בעיקר עם המפות המודפסות (טופו סובייטי/רוסי), ובודק ב<b>אפליקציית "RussianTopoMaps"</b> רק כשבאמת מסופק — האפליקציה עובדת מצוין גם בהרים והמפות שלה זהות למודפסות של יובל. מעקב אחרי ה-GPX אולי יעיל יותר אבל <b>לא בטוח יותר</b> — הוא יכול להוביל אנשים לשטח שלא נוח להם בו כי הם מניחים "זה השביל". בנוסף, ניווט מכבה את השעון תוך יומיים, בעוד שרק tracking מחזיק ~6 ימים. בערפל ה-GPX באמת חשוב. מזג אוויר גרוע מסוכן עם או בלי מסלול — לפעמים יום מנוחה לא מתוכנן עדיף על המשך פזיז.</p></div>
+    </div>
 
-            <!-- SEGMENT 11 -->
-            <section class="knt-segment" id="knt-s11">
-                <div class="knt-seg-head"><div class="knt-seg-num">11</div><div class="knt-seg-name">Ak-Sai · אק-סאי</div><div class="knt-seg-meta">80km · נוצר מפיצול מקטע 11 הישן ב-15.7</div></div>
-                <div class="knt-entries">
-                    <div class="knt-entry" style="--knt-cat:#D4960A"><div class="knt-entry-head"><span class="knt-date">15.7</span><span class="knt-sender">Yuval</span><span class="knt-chip">הודעת המספור מחדש</span></div><div class="knt-body-en"><p>"Section 11 was split into 11 and 12. What used to be section 12 is now section 13. The new route has a better path and less bushwhacking."</p></div><div class="knt-body-he"><p>מקטע 11 הישן פוצל ל-11 ו-12. מה שהיה 12 הוא עכשיו 13. למסלול החדש שביל טוב יותר ופחות בקיעה.</p></div></div>
-                    <div class="knt-entry" style="--knt-cat:#9A8E82"><div class="knt-entry-head"><span class="knt-date">4–15.7 (לפני 21:20)</span><span class="knt-sender">עידו פרבר / Valentin Henri</span><span class="knt-chip">מספור ישן</span><span class="knt-flag">גבול 11/12 לא ודאי</span></div><div class="knt-body-en"><ul><li>Ido: resupply at Kel Suu via CBT Naryn. "End of section 11" = Kara-Say via Zholdosh.</li><li>Valentin: "Section 11 felt magical — flat, vast landscapes, Kymyz/tea, played cards with locals. Mineral springs: sparkling water from the ground, safe to drink. Detour to peak (3,642m) recommended."</li></ul></div><div class="knt-body-he"><ul><li>עידו: אספקה קל-סו CBT נארין. "סוף מקטע 11" = קארה-סאי דרך Zholdosh.</li><li>ולנטין: "מקטע 11 קסום — נוף רחב, קימיז. מעיינות מינרלים — מים תוססים מהאדמה, בטוח לשתות. לסטות לפסגה 3,642 מ'."</li></ul></div></div>
-                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">22.7</span><span class="knt-sender">Josha</span><span class="knt-chip">מים דלים — חשוב ⚠</span></div><div class="knt-body-en"><ul><li>No technical difficulties — "just a very long slog through Ak-Sai."</li><li>View of river + glaciers from climb out of Kel Suu valley — "KNT Top 3."</li><li><b>Water is sparse:</b> streams on Russian Topo may be dry. <b>No water for 20–25km</b> until just before the mineral spring. Plan accordingly.</li></ul></div><div class="knt-body-he"><ul><li>בלי קשיים טכניים — "הליכה ארוכה מאוד בעמק אק-סאי".</li><li>נוף קרחונים מהמעלה — "KNT Top 3".</li><li><b>מים דלים מאוד:</b> <b>20–25 ק"מ ללא מים</b> עד לפני המעיין המינרלי. לתכנן בהתאם.</li></ul></div></div>
-                </div>
-            </section>
+    <div class="knt-entry" style="--knt-cat:var(--accent-dusk, #7B5EA7)">
+      <div class="knt-entry-head"><span class="knt-date">6–7.7</span><span class="knt-sender">Grégoire / Richard / Nicholas</span><span class="knt-chip">אפליקציות מפות</span></div>
+      <div class="knt-body-en"><ul>
+        <li><b>OSMand</b> — "hands down" the best in Central Asia (Grégoire).</li>
+        <li><b>Mapy.cz</b> and Organic Maps share the same path data, but Mapy has more gradient detail — Richard used Mapy ~90% and Russian Topo ~10%.</li>
+        <li>Russian Topo Maps app for the Soviet topography that shows shepherd trails and gorge names.</li>
+      </ul></div>
+      <div class="knt-body-he"><ul>
+        <li><b>OSMand</b> — הכי טוב במרכז אסיה, ללא ספק (גרגואר).</li>
+        <li><b>Mapy.cz</b> ו-Organic Maps חולקות אותו מידע שבילים, אבל ל-Mapy יש יותר פירוט שיפועים — ריצ'רד השתמש ב-Mapy כ-90% וב-Russian Topo כ-10%.</li>
+        <li>אפליקציית Russian Topo Maps לטופוגרפיה הסובייטית שמראה שבילי רועים ושמות של ערוצי נהר.</li>
+      </ul></div>
+    </div>
 
-            <!-- SEGMENT 12 -->
-            <section class="knt-segment" id="knt-s12">
-                <div class="knt-seg-head"><div class="knt-seg-num">12</div><div class="knt-seg-name">Naryn River · נהר נארין</div><div class="knt-seg-meta">183km · מקטע חדש מפיצול 15.7</div></div>
-                <details class="knt-refbox"><summary>נקודות ציון ואנשי קשר (יובל)</summary><div class="knt-reftable"><div class="knt-refrow"><div class="knt-ref-name">Kara-Say</div><div class="knt-ref-detail">ביקורת צבאית — היתר מודפס+חתום ודרכון. <b>Zholdosh +996 706 596 956</b> לאספקה.</div></div></div></details>
-                <div class="knt-entries">
-                    <div class="knt-entry" style="--knt-cat:#9A8E82"><div class="knt-entry-head"><span class="knt-date">לפני 15.7</span><span class="knt-sender">הודעות שונות</span><span class="knt-chip">מספור ישן</span><span class="knt-flag">שיוך לא ודאי</span></div><div class="knt-body-en"><p>Messages before 15.7 mentioning "section 12" may refer to old numbering (now section 13). Content is relevant — exact segment assignment uncertain. The new segment 12 has limited separate field reports at this time.</p></div><div class="knt-body-he"><p>הודעות לפני 15.7 שמזכירות "מקטע 12" עשויות להתייחס למספור הישן (שהוא עכשיו מקטע 13). התוכן רלוונטי — שיוך לא ודאי. למקטע 12 החדש יש דיווחים שטח מוגבלים כרגע.</p></div></div>
-                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Elli</span><span class="knt-chip">שאלת SOS / חילוץ</span></div><div class="knt-body-en"><p>Question about mountain-rescue / SOS procedures for segment 12 — no documented answer found in scanned range. Consider: Garmin InReach, local emergency contacts via CBT Naryn, or helicopter evacuation arrangements.</p></div><div class="knt-body-he"><p>שאלה על נהלי חילוץ / SOS במקטע 12 — לא נמצאה תשובה מתועדת. שקלו: Garmin InReach, CBT נארין לאנשי קשר חירום.</p></div></div>
-                </div>
-            </section>
+  </div>
 
-            <!-- SEGMENT 13 -->
-            <section class="knt-segment" id="knt-s13">
-                <div class="knt-seg-head"><div class="knt-seg-num">13</div><div class="knt-seg-name">Arabel · ארבל</div><div class="knt-seg-meta">108km · מה שהיה מקטע 12 הישן</div></div>
-                <div class="knt-entries">
-                    <div class="knt-entry" style="--knt-cat:#0D9E72"><div class="knt-entry-head"><span class="knt-date">18.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">גישה / תחבורה</span></div><div class="knt-body-en"><p>Hitchhiking to start of S13: sometimes drivers want money, sometimes not — compare to Marshrutka/Yandex-taxi and decide.</p></div><div class="knt-body-he"><p>טרמפים לתחילת מקטע 13: לפעמים הנהגים רוצים כסף. להשוות למרשרוטקה/יאנדקס.</p></div></div>
-                    <div class="knt-entry" style="--knt-cat:#7B5EA7"><div class="knt-entry-head"><span class="knt-date">20.7</span><span class="knt-sender">Josha → Yuval/Sviat</span><span class="knt-chip">שינוי מסלול</span></div><div class="knt-body-en"><p>Route near end of S13 changed — extra climb to next valley added. Now exits at <b>Kyzyl-Suu</b> instead of Saruu. Appears to route around a hazard at a thermal-bath location (flagged "red flag").</p></div><div class="knt-body-he"><p>מסלול קרוב לסוף מקטע 13 השתנה — עלייה נוספת. יוצא ב-<b>קיזיל-סו</b> במקום סארו. עוקף סכנה ליד אמבטיה תרמית.</p></div></div>
-                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">דוח מלא מקטע 13 ⚠ קשה</span></div><div class="knt-body-en"><ul><li>Starts easy — big plateau, many swampy areas.</li><li>Goldmine: entry forbidden, white signs every 50m, staff strict.</li><li>Pass: easy climb. Glacier ~4,000m — microspikes optional. Stay mid-slope afternoon (rockfall from melting ice).</li><li><b>Descent notably harder than all previous KNT passes — "maybe the most difficult."</b> 2+ hours steep rocky scrambling; bivouac partway down with headlamp. <b>Do descent in morning.</b> High mountaineering boots would have helped.</li><li>Rest of section: easy + beautiful — "Yosemite vibes."</li></ul></div><div class="knt-body-he"><ul><li>מתחיל בקלות. רמה גדולה, אזורים ביצתיים.</li><li>מכרה זהב — כניסה אסורה. מעבר: קרחון ~4,000 מ', מיקרוספייקס אופציונליים. להישאר באמצע המדרון אחה"צ.</li><li><b>הירידה קשה מאוד — "אולי הקשה ביותר ב-KNT."</b> יותר משעתיים סלעי תלול. ביוואק עם פנס ראש. <b>לרדת בבוקר.</b> מגפי הרים גבוהים יועילו.</li><li>המשך: קל ויפה, "תחושת יוסמיטי".</li></ul></div></div>
-                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">בטיחות — תזמון מעבר ⚠</span></div><div class="knt-body-en"><ul><li>Cross the pass early, ideally before sunrise. Loose rocks from former glacier — don't walk above one another in a group.</li><li>Stones fall most likely in the evening (melting ice/frost).</li><li>River crossings S13: not difficult even with more water — cross under glacier early, stay left bank.</li><li>If worried about landslide: camp in woods, cross in morning. Second pass can be skipped in heavy rain.</li></ul></div><div class="knt-body-he"><ul><li>לחצות לפני הזריחה. אבנים משוחררות — לא ללכת אחד מעל השני.</li><li>אבנים נופלות בעיקר בערב.</li><li>מעברי נהר מקטע 13: לא קשים — לחצות מוקדם מתחת לקרחון, להישאר בצד שמאל.</li><li>אם מודאגים ממפולת: לחנות ביער ולחצות בבוקר.</li></ul></div></div>
-                </div>
-            </section>
+  <!-- Permits -->
+  <div class="knt-seg-topic">היתרים ובירוקרטיה</div>
+  <div class="knt-entries">
 
-            <div class="knt-footer">מבוסס על 601 הודעות מקבוצת "KNT Hikers 2026" (18.6–22.7.2026). <b>★ כללי</b> = מידע כלל-שבילי. כרטיסים עם <span class="knt-flag">מספור ישן</span> נכתבו לפני שינוי המספור ב-15.7. עודכן לאחרונה: 22.7.2026.</div>
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">22.6</span><span class="knt-sender">Greg Carter</span><span class="knt-chip">עדכון היתרים</span></div>
+      <div class="knt-body-en"><p>Permit update: CBT Naryn advised that the police department won't let them issue back-to-back 2-month multi-region permits. For a total of 4 months: after the initial 2-month permit (€35), he had to get 2 × 1-month permits, negotiated to €30 each.</p></div>
+      <div class="knt-body-he"><p>עדכון היתרים: CBT נארין הודיעו שמשטרת האזור לא מאפשרת להם להנפיק היתרים רב-אזוריים של חודשיים ברצף. עבור 4 חודשים בסך הכל: אחרי היתר החודשיים הראשוני (35 יורו), נאלץ להוציא 2 היתרים של חודש כל אחד, במחיר מוסכם של 30 יורו לכל אחד.</p></div>
+    </div>
+
+  </div>
+
+  <!-- Resupply & shipping -->
+  <div class="knt-seg-topic">אספקה, משלוחים ואנשי קשר</div>
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-star, #D4960A)">
+      <div class="knt-entry-head"><span class="knt-date">23.6</span><span class="knt-sender">Josha</span><span class="knt-chip">משלוח לאוש</span></div>
+      <div class="knt-body-en"><p>How to send a resupply box to Osh: take your box to an office of <b>Yldam Express</b>; you need the recipient's address and phone, and to confirm in advance they'll accept it. Josha coordinated with <b>Timur from Visit Alay in Osh</b> (backup contact: CBT Osh, Baiysh Toobaev). Also broke a pole and ordered new ones via WhatsApp from <b>Gergert Sport in Bishkek</b>, sent to CBT Osh; and shipped a box of gas etc. from Bishkek to CBT Osh beforehand.</p></div>
+      <div class="knt-body-he"><p>איך לשלוח קופסת אספקה לאוש: לוקחים את הקופסה למשרד של <b>Yldam Express</b>; צריך את הכתובת והטלפון של הנמען, ולוודא מראש שיסכימו לקבל. Josha תיאם עם <b>טימור מ-Visit Alay באוש</b> (איש קשר גיבוי: CBT Osh, Baiysh Toobaev). בנוסף שבר מקל הליכה והזמין חדשים בוואטסאפ מ<b>Gergert Sport בבישקק</b>, שנשלחו ל-CBT Osh; וגם שלח מראש קופסה עם גז וכו' מבישקק ל-CBT Osh.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-star, #D4960A)">
+      <div class="knt-entry-head"><span class="knt-date">4.7</span><span class="knt-sender">Clémence + תגובות</span><span class="knt-chip">אספקה במקטעים מרוחקים</span></div>
+      <div class="knt-body-en"><ul>
+        <li>Question: how to arrange food resupply on sections with no towns (between 10–11 and 11–12).</li>
+        <li><b>Kel Suu:</b> resupply via the CBT center in Naryn — give them a box, agree on a specific yurt camp for pickup. "Very reliable and cheap" (עידו).</li>
+        <li><b>Kara-Say:</b> via contact <b>Zholdosh</b> (also spelled Dzuldush) — Yuval says talk to him directly and tell him what you want.</li>
+        <li><b>Karakol:</b> isobutane gas found at <b>4Rent</b> (Grégoire).</li>
+      </ul></div>
+      <div class="knt-body-he"><ul>
+        <li>שאלה: איך לארגן אספקת מזון במקטעים בלי עיירות (בין 10–11 ובין 11–12).</li>
+        <li><b>קל-סו:</b> אספקה דרך מרכז ה-CBT בנארין — נותנים להם קופסה, מסכמים על יורט קמפ ספציפי לאיסוף. "מאוד אמין וזול" (עידו).</li>
+        <li><b>קארה-סאי:</b> דרך איש הקשר <b>Zholdosh</b> (נכתב גם Dzuldush) — יובל אומר לדבר איתו ישירות ולומר לו מה רוצים.</li>
+        <li><b>קاراקول:</b> גז איזובוטאן נמצא ב-<b>4Rent</b> (גרגואר).</li>
+      </ul></div>
+    </div>
+
+  </div>
+
+  <!-- Gas / fuel -->
+  <div class="knt-seg-topic">גז ודלק</div>
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-star, #D4960A)">
+      <div class="knt-entry-head"><span class="knt-date">30.6</span><span class="knt-sender">Greg Carter</span><span class="knt-chip">קופסאות גז מתוברגות</span></div>
+      <div class="knt-body-en"><p>Threaded (screw-on) gas canister find in Osh: a large stash at <b>Destination Osh</b> — Big 1,500 SOM, Small 1,000 SOM. Contact the owner, <b>Bek</b>, first, because they open at irregular hours. <b>Visit Alay</b> also has 2 smalls at 1,000 each. Important: check your stove actually screws onto the canister before buying — thread tolerances vary (he had trouble fitting an MSR Pocket Rocket 2). In Bishkek: <b>Gergert Sport</b>.</p></div>
+      <div class="knt-body-he"><p>מציאת קופסאות גז מתוברגות באוש: מלאי גדול ב-<b>Destination Osh</b> — גדול 1,500 סום, קטן 1,000 סום. צרו קשר קודם עם הבעלים, <b>Bek</b>, כי שעות הפתיחה לא סדירות. גם ל-<b>Visit Alay</b> יש 2 קטנים ב-1,000 כל אחד. חשוב: בדקו שהכיריים באמת מתברגות על הקופסה לפני קנייה — יש שונות בתבריגים (היה לו קושי עם MSR Pocket Rocket 2). בבישקק: <b>Gergert Sport</b>.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-star, #D4960A)">
+      <div class="knt-entry-head"><span class="knt-date">30.6</span><span class="knt-sender">Josha</span><span class="knt-chip">איזובוטאן לאורך השביל</span></div>
+      <div class="knt-body-en"><p>Uses an MSR PocketRocket Deluxe; by shipping boxes ahead he made sure to have isobutane gas available everywhere along the trail.</p></div>
+      <div class="knt-body-he"><p>משתמש ב-MSR PocketRocket Deluxe; באמצעות שליחת קופסאות מראש הוא דאג שיהיה גז איזובוטאן זמין בכל מקום לאורך השביל.</p></div>
+    </div>
+
+  </div>
+
+  <!-- Water purification -->
+  <div class="knt-seg-topic">מים וטיהור</div>
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--primary-lighter, #5B8DB8)">
+      <div class="knt-entry-head"><span class="knt-date">23–24.6</span><span class="knt-sender">דיון קבוצתי</span><span class="knt-chip">מערכות טיהור</span></div>
+      <div class="knt-body-en"><ul>
+        <li>Filters people use: Sawyer Squeeze / Mini, Katadyn BeFree, Platypus QuickDraw (faster, needs backflushing), Katadyn pump, purification tablets.</li>
+        <li>For glacial silt: prefilter through a buff/bandana or coffee filter around the intake; or let sediment settle in a pot and filter from the top; best to avoid silty water if side streams exist.</li>
+        <li><b>Warning (Antje):</b> even clear side-streams can be contaminated — there's livestock everywhere. Always purify (echoes the KNT Q&A).</li>
+      </ul></div>
+      <div class="knt-body-he"><ul>
+        <li>מסננים שאנשים משתמשים בהם: Sawyer Squeeze / Mini, Katadyn BeFree, Platypus QuickDraw (מהיר יותר, צריך שטיפה לאחור), משאבת Katadyn, טבליות טיהור.</li>
+        <li>לסחף קרחוני: סינון מקדים דרך באף/בנדנה או פילטר קפה סביב פתח היניקה; או לתת למשקע לשקוע בסיר ולסנן מלמעלה; עדיף להימנע ממים עכורים אם יש נחלי צד.</li>
+        <li><b>אזהרה (Antje):</b> אפילו נחלי צד צלולים יכולים להיות מזוהמים — יש בעלי חיים בכל מקום. תמיד לטהר (תואם את ה-Q&A של ה-KNT).</li>
+      </ul></div>
+    </div>
+
+  </div>
+
+  <!-- Weather -->
+  <div class="knt-seg-topic">מזג אוויר ותחזיות</div>
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--primary-lighter, #5B8DB8)">
+      <div class="knt-entry-head"><span class="knt-date">23.6</span><span class="knt-sender">Richard / Grüs</span><span class="knt-chip">תחזיות</span></div>
+      <div class="knt-body-en"><ul>
+        <li>Garmin forecasts are reasonably accurate for same/next day but "always sunny" 2 days out — don't rely on them.</li>
+        <li>Government SMS warnings of heavy rain do arrive (even when currently sunny).</li>
+        <li>Recommended: <b>Windy</b> and <b>YR.no</b> for best worldwide coverage; in Central Asia also check Russian sources and compare. (KNT Q&A also recommends YR.no + Garmin InReach for high mountains.)</li>
+      </ul></div>
+      <div class="knt-body-he"><ul>
+        <li>תחזיות גרמין סבירות ליום הנוכחי/הבא אבל "תמיד שמשי" יומיים קדימה — אל תסמכו עליהן.</li>
+        <li>התראות SMS ממשלתיות על גשם כבד כן מגיעות (גם כשכרגע שמשי).</li>
+        <li>מומלץ: <b>Windy</b> ו-<b>YR.no</b> לכיסוי עולמי הכי טוב; במרכז אסיה כדאי לבדוק גם מקורות רוסיים ולהשוות. (ה-Q&A של ה-KNT ממליץ גם על YR.no + Garmin InReach להרים הגבוהים.)</li>
+      </ul></div>
+    </div>
+
+  </div>
+
+  <!-- Acclimatization -->
+  <div class="knt-seg-topic">אקלום וגובה · בטיחות</div>
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">11.7</span><span class="knt-sender">Josha</span><span class="knt-chip">אקלום לפני מקטע 8</span></div>
+      <div class="knt-body-en"><p>Think about acclimatization before section 8: the first night is at 3500–3600m and then you climb a 4000m pass. They struggled with altitude even at 3400m after staying (low) in Kazarman. It might be a good idea to start taking altitude pills already in Kazarman. (Relevant for the whole high eastern stretch, sections 8+.)</p></div>
+      <div class="knt-body-he"><p>חשבו על אקלום לפני מקטע 8: הלילה הראשון בגובה 3500–3600 מ' ואז מטפסים למעבר של 4000 מ'. הם התקשו עם הגובה אפילו ב-3400 מ' אחרי שהות (נמוכה) בקזרמן. אולי כדאי להתחיל לקחת גלולות גובה כבר בקזרמן. (רלוונטי לכל המקטע המזרחי הגבוה, מקטע 8 והלאה.)</p></div>
+    </div>
+
+  </div>
+
+  <!-- Shepherd dogs -->
+  <div class="knt-seg-topic">כלבי רועים</div>
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">5.7</span><span class="knt-sender">Léon + תגובות</span><span class="knt-chip">התמודדות עם כלבים</span></div>
+      <div class="knt-body-en"><ul>
+        <li>Experience so far: dogs mostly just bark. Whack trekking poles together to make noise; the shepherd usually comes out and calls the dog to heel. Pretending to pick up a stone also works.</li>
+        <li>Kyrgyz dogs were reported as kind/manageable — noticeably better than Tajikistan / Azerbaijan. Nobody in the group was seriously worried. (KNT Q&A: never run; stop if they charge; look large.)</li>
+      </ul></div>
+      <div class="knt-body-he"><ul>
+        <li>הניסיון עד כה: הכלבים בעיקר נובחים. אפשר להקיש מקלות הליכה זה בזה כדי לעשות רעש; הרועה בדרך כלל יוצא וקורא לכלב לחזור. גם העמדת פנים של הרמת אבן עובדת.</li>
+        <li>כלבי קירגיזסטן דווחו כנחמדים/נשלטים — טובים בהרבה מטג'יקיסטן / אזרבייג'ן. אף אחד בקבוצה לא היה מודאג ברצינות. (Q&A של ה-KNT: לעולם לא לברוח; לעצור אם תוקפים; להיראות גדול.)</li>
+      </ul></div>
+    </div>
+
+  </div>
+
+  <!-- Emergency / SOS -->
+  <div class="knt-seg-topic">חירום, SOS וחילוץ</div>
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Yuval / Richard</span><span class="knt-chip">Garmin SOS</span></div>
+      <div class="knt-body-en"><ul>
+        <li>The Garmin SOS button connects <b>only to the Garmin Command Center</b> (not directly to a local body). You must set up your emergency contacts on the device.</li>
+        <li>Regular messages can be sent to phone numbers (SMS) or to emails via the app.</li>
+        <li>If you buy Garmin's extra search-and-rescue security service, they have their own contacts. <b>Connect it to your travel insurance and make sure you have search-and-rescue cover.</b></li>
+        <li>Richard: on SOS, Garmin contacts the appropriate organisation — the ranger service in a national park/reserve, otherwise ambulance/rescue services. You won't necessarily know which in advance. "An amazing service — definitely sign up for the full service for the period of your hike."</li>
+        <li>Yuval (general): watch the conditions — if it doesn't feel safe to continue, find a safe place and wait. Avoid passes and river crossings in bad weather; on bad-weather days the time of day matters less, and heavy rain can catch you at any time.</li>
+      </ul></div>
+      <div class="knt-body-he"><ul>
+        <li>כפתור ה-SOS של גרמין מתחבר <b>רק ל-Garmin Command Center</b> (לא ישירות לגוף מקומי). חובה להגדיר אנשי קשר לחירום במכשיר.</li>
+        <li>הודעות רגילות אפשר לשלוח למספרי טלפון (SMS) או למיילים דרך האפליקציה.</li>
+        <li>אם קונים את שירות האבטחה הנוסף של גרמין לחיפוש והצלה, יש להם אנשי קשר משלהם. <b>חברו את זה לביטוח הנסיעות וודאו שיש כיסוי לחיפוש והצלה.</b></li>
+        <li>ריצ'רד: ב-SOS, גרמין יוצרים קשר עם הגוף המתאים — שירות הריינג'רים בפארק/שמורה, אחרת שירותי אמבולנס/הצלה. לא בהכרח תדעו מראש מי. "שירות מדהים — בהחלט להירשם לשירות המלא לתקופת הטיול."</li>
+        <li>יובל (כללי): לעקוב אחרי התנאים — אם לא מרגיש בטוח להמשיך, למצוא מקום בטוח ולחכות. להימנע ממעברים וממעברי נהר במזג אוויר גרוע; בימים גרועים שעת היום פחות משנה, וגשם כבד יכול לתפוס בכל רגע.</li>
+      </ul></div>
+    </div>
+
+  </div>
+
+  <!-- City logistics -->
+  <div class="knt-seg-topic">ערים: לינה, חנויות ומזומן</div>
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">27.6</span><span class="knt-sender">Yuval / Ryan</span><span class="knt-chip">לינה בבישקק</span></div>
+      <div class="knt-body-en"><p>Recommended Bishkek hostels: <b>Meeting Place, Koisha, Ololo Yurt, Sakura, Compass</b>. For a quieter (cheaper) spot, Lumi is nice but on the outskirts — better to stay north of it (Ryan).</p></div>
+      <div class="knt-body-he"><p>אכסניות מומלצות בבישקק: <b>Meeting Place, Koisha, Ololo Yurt, Sakura, Compass</b>. למקום שקט (וזול) יותר, Lumi נחמד אבל בפאתי העיר — עדיף להתמקם צפונית לו (ראיין).</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">19.6 · 30.6</span><span class="knt-sender">Yuval</span><span class="knt-chip">מזומן</span></div>
+      <div class="knt-body-en"><p>Recommends carrying around <b>15,000 som per week</b>.</p></div>
+      <div class="knt-body-he"><p>ממליץ לשאת בערך <b>15,000 סום לשבוע</b>.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">כללי</span><span class="knt-sender">מהצ'אט + Q&A</span><span class="knt-chip">חנויות ציוד</span></div>
+      <div class="knt-body-en"><p>Outdoor gear: <b>Gergert Sport</b> in Bishkek (ships within the country too). Osh and Karakol have gear shops but far more limited than Bishkek. Isobutane gas is available in Naryn, Karakol and Kazarman (order ahead in Kazarman).</p></div>
+      <div class="knt-body-he"><p>ציוד שטח: <b>Gergert Sport</b> בבישקק (שולחים גם בתוך המדינה). באוש וקاراקول יש חנויות ציוד אבל מוגבלות בהרבה מבישקק. גז איזובוטאן זמין בנארין, קاراקول וקזרמן (בקזרמן להזמין מראש).</p></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SEGMENT 8 -->
+<section class="knt-segment" id="knt-s8">
+  <div class="knt-seg-head">
+    <div class="knt-seg-num">08</div>
+    <div class="knt-seg-name">Tash Rabat · טאש-רבאט</div>
+    <div class="knt-seg-meta">44km · גבול עם מקטע 9</div>
+  </div>
+
+  <details class="knt-refbox">
+    <summary>נקודות ציון ואנשי קשר (מתוך גיליון יובל)</summary>
+    <div class="knt-reftable">
+      <div class="knt-refrow"><div class="knt-ref-name">Tash Rabat</div><div class="knt-ref-detail">יורט קמפ Nazar — לינה 1800c, ארוחת ערב 800c. <b>Nazar +996 557 060 494</b>. יכול לארגן הסעה לכפר הקרוב לצורך אספקה.</div></div>
+      <div class="knt-refrow"><div class="knt-ref-name">Kazybek (Pogranichnik)</div><div class="knt-ref-detail">2 ק"מ מהשביל, מעבר לגשר. Jyparkul Guest House — לינה 1000c, אוכל 300–500c. יכולים לאסוף מסוף מקטע 7 (כביש לטורוגארט) ב-3000c לרכב. <b>Jypara +996 703 230 591, Ermek 0701 485 688</b>. יש בית מרקחת ובית חולים בכפר.</div></div>
+    </div>
+  </details>
+
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">11.7</span><span class="knt-sender">Yuval</span><span class="knt-chip">גישה/תחבורה</span></div>
+      <div class="knt-body-en"><p>From Kazarman to Turugart Pass at the beginning of Section 8 is a really long way for a taxi (there and back to Kazarman). Recommend splitting the journey: first to Naryn, then from there to Turugart Pass.</p></div>
+      <div class="knt-body-he"><p>מקזרמן למעבר טורוגארט בתחילת מקטע 8 זו נסיעה ארוכה מדי למונית (הלוך ושוב לקזרמן). מומלץ לפצל את הנסיעה: קודם לנארין, ומשם למעבר טורוגארט.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">11.7</span><span class="knt-sender">Laurent</span><span class="knt-chip">גישה/תחבורה</span></div>
+      <div class="knt-body-en"><p>In Kazarman, CBT Baktygul quoted 300€ to reach the start of section 8 — considered too expensive.</p></div>
+      <div class="knt-body-he"><p>בקזרמן, CBT בקטיגול הציעו מחיר של 300 יורו להגעה לתחילת מקטע 8 — נחשב יקר מדי.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">11.7</span><span class="knt-sender">Josha</span><span class="knt-chip">גישה/תחבורה</span></div>
+      <div class="knt-body-en"><p>Found a taxi from Naryn to the start of section 8 for €100 (CBT Naryn had quoted €150). Peak season — taxis to Kel Suu / Tash Rabat in high demand.</p></div>
+      <div class="knt-body-he"><p>נמצאה מונית מנארין לתחילת מקטע 8 ב-100 יורו (CBT נארין הציעו 150 יורו). עונת שיא — ביקוש גבוה למוניות לכיוון קל-סו וטאש-רבאט.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">5–13.7</span><span class="knt-sender">Clémence / Christian / Lotteke</span><span class="knt-chip">גישה/תחבורה</span></div>
+      <div class="knt-body-en"><ul>
+        <li>Driver contact: <b>Sapar +996 558 222 273</b> — drove hikers from Naryn permit office to Tash Rabat.</li>
+        <li><b>Gulira</b> at CBT Naryn has driver connections for Turugart Pass ⇄ Naryn (~150€ quoted, hikers found an alternative for ~100€).</li>
+        <li>Hitchhiking Turugart Pass → Naryn worked fine for some.</li>
+        <li>Taxis to/from Tash Rabat specifically may be cheaper — more tourist traffic there than at the pass.</li>
+      </ul></div>
+      <div class="knt-body-he"><ul>
+        <li>איש קשר נהג: <b>ספאר +996 558 222 273</b> — הסיע מטיילים ממשרד ההיתרים בנארין לטאש-רבאט.</li>
+        <li><b>גולירה</b> ב-CBT נארין מכירה נהגים למעבר טורוגארט ⇄ נארין (הוצע כ-150 יורו, טיילים מצאו חלופה בכ-100 יורו).</li>
+        <li>טרמפים ממעבר טורוגארט לנארין עבדו טוב עבור חלק מהמטיילים.</li>
+        <li>מוניות מ/אל טאש-רבאט עצמו עשויות להיות זולות יותר — יש שם יותר תנועת תיירים מאשר במעבר.</li>
+      </ul></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">16.7</span><span class="knt-sender">Josha</span><span class="knt-chip">מים / מסלול</span></div>
+      <div class="knt-body-en"><ul>
+        <li>Nice camp spot in a shallow cave just below Panda Pass — past the last yurt, by the only running stream before the pass.</li>
+        <li><b>Two other hikers found even that stream dry.</b> In a dry spell, Chatyr-Kul (the lake) is the only water source until the pass.</li>
+        <li>Tash Rabat caravanserai itself: "underwhelming" — hidden under a corrugated iron roof.</li>
+        <li>Stayed at Nazar yurt camp (Tash Rabat) — nice family, but "probably the least comfortable of the camps there."</li>
+      </ul></div>
+      <div class="knt-body-he"><ul>
+        <li>נקודת מחנאות נחמדה במערה רדודה ממש מתחת למעבר פנדה — אחרי היורט האחרונה, ליד הנחל היחיד הזורם לפני המעבר.</li>
+        <li><b>שני מטיילים אחרים מצאו שאפילו הנחל הזה יבש.</b> בתקופת יובש, אגם צ'אטיר-קול הוא מקור המים היחיד עד המעבר.</li>
+        <li>המבנה ההיסטורי (קרוואנסראי) של טאש-רבאט עצמו: "מאכזב" — מוסתר מתחת לגג פח מגולוון.</li>
+        <li>לנו ביורט קמפ של נזאר בטאש-רבאט — משפחה נחמדה, אך "כנראה הפחות נוח מבין הקמפים שם".</li>
+      </ul></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">19.7</span><span class="knt-sender">Grégoire</span><span class="knt-chip">מים / סכנה</span></div>
+      <div class="knt-body-en"><p>Hiking section 8 in reverse: only water source was the lake (plus one generous family). Avoided walking close to the shore due to swarming bugs. Big construction zone right at the end of section 7 — discouraging to navigate after a long day in the rain.</p></div>
+      <div class="knt-body-he"><p>הליכה במקטע 8 בכיוון הפוך: מקור המים היחיד היה האגם (ועוד משפחה נדיבה אחת). נמנעו מהליכה קרוב לחוף בגלל חרקים מציקים. אזור בנייה גדול ממש בסוף מקטע 7 — מתסכל לניווט אחרי יום ארוך בגשם.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">20.7</span><span class="knt-sender">Laurent</span><span class="knt-chip">גישה/תחבורה</span></div>
+      <div class="knt-body-en"><p>Hitchhiking to/from the start and end of sections 8 &amp; 9 (e.g. back to Naryn) worked well for a group of 3.</p></div>
+      <div class="knt-body-he"><p>טרמפים להתחלה/סוף של מקטעים 8 ו-9 (למשל בחזרה לנארין) עבדו טוב לקבוצה של 3 אנשים.</p></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SEGMENT 9 -->
+<section class="knt-segment" id="knt-s9">
+  <div class="knt-seg-head">
+    <div class="knt-seg-num">09</div>
+    <div class="knt-seg-name">At-Bashi · אט-באשי</div>
+    <div class="knt-seg-meta">85–88km · לא הושפע מהשינוי במספור</div>
+  </div>
+
+  <details class="knt-refbox">
+    <summary>נקודות ציון ואנשי קשר (מתוך גיליון יובל)</summary>
+    <div class="knt-reftable">
+      <div class="knt-refrow"><div class="knt-ref-name">At-Bashi (town)</div><div class="knt-ref-detail">5 ק"מ מהשביל. Murat &amp; Tolkun guesthouse — לינה+ב.בוקר+ארוחת ערב 2000c. יכול לארגן טקסי לנארין, בוסוגו, אגם קל-סו וטאש-רבאט. סופרמרקטים ובזארים בעיר. <b>Murat +996 772 842 858 (WhatsApp)</b>.</div></div>
+    </div>
+  </details>
+
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-dusk, #7B5EA7)">
+      <div class="knt-entry-head"><span class="knt-date">15.7</span><span class="knt-sender">Lotteke</span><span class="knt-chip">גשר</span><span class="knt-flag">פרטים לא תועדו</span></div>
+      <div class="knt-body-en"><p>"We missed the memo but listened just in time to hear about the bridge in section 9." — עדכון על גשר במקטע 9 נמסר כנראה בהודעה קולית (לא מתומללת) סביב 14–15.7 על ידי Valentin Henri. תוכן העדכון עצמו לא נמצא בטקסט הכתוב של הצ'אט — כדאי לבדוק את קובצי האודיו המקוריים אם צריך פרטים.</p></div>
+      <div class="knt-body-he"><p>"פספסנו את ההודעה אבל הספקנו לשמוע בול בזמן על הגשר במקטע 9."</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">14.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">מסלול קשה</span></div>
+      <div class="knt-body-en"><p>Difficult river crossing "in the valley after the resupply" — tried to cross, failed. Had to climb steep hillside with no solid holds to bypass where the trail leaves the river; the map-shown detour was much bigger than it looked ("probably a good idea to use the GPX track"). Densely overgrown, spiky vegetation on both attempts — described as the hardest day of the trip so far.</p></div>
+      <div class="knt-body-he"><p>מעבר נהר קשה "בעמק שאחרי נקודת האספקה" — ניסה לחצות, נכשל. נאלץ לטפס במורד תלול בלי אחיזות יציבות כדי לעקוף את המקום שבו השביל עוזב את הנהר; העקיפה שמופיעה במפה גדולה בהרבה ממה שנראה ("כדאי להשתמש במסלול ה-GPX"). צמחייה סבוכה וקוצנית בשני הניסיונות — מתואר כיום הקשה ביותר בטיול עד כה.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">10.7</span><span class="knt-sender">Clémence Farigoule</span><span class="knt-chip">פציעה/מזור</span></div>
+      <div class="knt-body-en"><p>Hiked ~50km of section 9, had to leave the trail toward At-Bashi after cutting a foot — didn't want the injury to worsen. Restarted with section 10 the next day.</p></div>
+      <div class="knt-body-he"><p>הלכה כ-50 ק"מ במקטע 9, נאלצה לרדת מהשביל לכיוון אט-באשי אחרי חתך ברגל — לא רצתה שהפציעה תחמיר. חזרה למקטע 10 למחרת.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">16.7</span><span class="knt-sender">Josha</span><span class="knt-chip">מסלול / אספקה</span></div>
+      <div class="knt-body-en"><ul>
+        <li>Path to Kazybek fine; the shop there is small but has the basics.</li>
+        <li>After Kazybek, heading uphill gets "wilder" — bushwhacking through knee-deep lilac flowers and edelweiss, then more bushwhacking through hedgerow-type plants with hard branches (matches Valentin's spiky-plant account above).</li>
+        <li>Trail becomes "find the trail" — sometimes faint, sometimes vanishes, sometimes reappears.</li>
+        <li>Left the traverse a bit early, headed down a ridgeline aiming between Terek-Suu and Acha-Kaindy, ended up on a dirt road all the way to Acha-Kaindy.</li>
+        <li>Stayed at <b>Ulukhaus guesthouse</b> in Acha-Kaindy (avoids an extra 5km detour to At-Bashi) — small shop with basics in Acha-Kaindy too. "Very nice guesthouse."</li>
+      </ul></div>
+      <div class="knt-body-he"><ul>
+        <li>השביל לקזיבק תקין; החנות שם קטנה אך יש בה את הבסיס.</li>
+        <li>אחרי קזיבק, העלייה נעשית "פראית יותר" — בקיעה דרך פרחי לילך וקדוושה עד לברכיים, ואז עוד בקיעה דרך צמחי גדר עם ענפים קשים (תואם את הדיווח של ולנטין למעלה).</li>
+        <li>השביל הופך למשחק "תמצא את השביל" — לפעמים דהוי, לפעמים נעלם, לפעמים מופיע שוב.</li>
+        <li>עזבו את המסלול מוקדם מדי, ירדו במורד רכס בין טרק-סו לאצ'ה-קאינדי, הגיעו לדרך עפר עד אצ'ה-קאינדי.</li>
+        <li>לנו ב<b>אכסניית אולוחאוס</b> באצ'ה-קאינדי (חוסך עוד 5 ק"מ הליכה לאט-באשי) — יש חנות קטנה עם בסיס גם באצ'ה-קאינדי. "אכסניה מאוד נחמדה".</li>
+      </ul></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SEGMENT 10 -->
+<section class="knt-segment" id="knt-s10">
+  <div class="knt-seg-head">
+    <div class="knt-seg-num">10</div>
+    <div class="knt-seg-name">Kel-Suu · קל-סו</div>
+    <div class="knt-seg-meta">129–134km · לא הושפע מהשינוי במספור</div>
+  </div>
+
+  <details class="knt-refbox">
+    <summary>נקודות ציון ואנשי קשר (מתוך גיליון יובל)</summary>
+    <div class="knt-reftable">
+      <div class="knt-refrow"><div class="knt-ref-name">Bash-Kaindi</div><div class="knt-ref-detail">על השביל. Zhumagul guesthouse — 3 חדרים, עד 8 אנשים, אוכל חם. יורט בחצר.</div></div>
+      <div class="knt-refrow"><div class="knt-ref-name">Biricnhi May (1 Mai)</div><div class="knt-ref-detail">יורט קמפ Jol-Bogushtu (3 ק"מ מהכפר) — לינה+ב.בוקר 3000c, ארוחות 800–900c. סיורי סוסים לאגם קל-סו ולמפל שאר. <b>Ainura +996 507 608 609</b>. גם Nargiza Guesthouse — 5 חדרים. <b>Nargiza +996 702 903 090</b>.</div></div>
+      <div class="knt-refrow"><div class="knt-ref-name">Kel-Suu (יורט קמפ)</div><div class="knt-ref-detail">Zhyparkul Ulan yurt camp — בגבול מקטע 10/12.</div></div>
+    </div>
+  </details>
+
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-dusk, #7B5EA7)">
+      <div class="knt-entry-head"><span class="knt-date">14.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">חוות דעת: לא כדאי</span></div>
+      <div class="knt-body-en"><ul>
+        <li>"Not one of my favorites" — lots of road walking, too much detouring.</li>
+        <li>At Kel Suu: hard to watch mass tourism arriving; "yurt camp" is more like a "yurt city."</li>
+        <li>Waterfall was cool, no infrastructure around — can also be done as a horse trip.</li>
+        <li>At the lake: sales pitch for boat tours; arriving early = boat-free view, but then caravans, boat engines and drones arrive.</li>
+        <li><b>His take: not worth the detour</b> — can cut through the plateau at the triple river crossing junction with section 11 instead, saving 2–3 days; possible to do 10+11 without a resupply this way.</li>
+        <li>Highlight: Edelweiß flowers everywhere.</li>
+        <li>Follow-up on camping: lake shores are vertical, little flat ground — camp in the valley below or find a spot on the ascent instead. "The whole area spoiled the magic of the trail... would skip it completely if I'd do it again." Still calls it an impressive, beautiful lake.</li>
+      </ul></div>
+      <div class="knt-body-he"><ul>
+        <li>"לא אחד המקטעים האהובים עליי" — הרבה הליכה על כביש, יותר מדי עיקופים.</li>
+        <li>בקל-סו קשה לראות תיירות המונים מגיעה גם למקומות נידחים בקירגיזסטן; "יורט קמפ" זה יותר כמו "עיר יורטות".</li>
+        <li>המפל היה מגניב, בלי תשתיות סביבו — אפשר גם לעשות את זה כטיול סוסים.</li>
+        <li>באגם: הצעת מכירה לסיור סירות; הגעה מוקדמת = נוף בלי סירות, אבל אז מגיעים השיירות, מנועי הסירות והרחפנים.</li>
+        <li><b>לדעתו: לא שווה את העיקוף</b> — אפשר לחתוך דרך הרמה בצומת המעבר המשולש עם מקטע 11 במקום, וכך לחסוך 2–3 ימי הליכה; אפשר לעשות 10+11 בלי אספקה בדרך זו.</li>
+        <li>השיא: פרחי אדלווייס בכל מקום.</li>
+        <li>המשך לגבי מחנאות: חופי האגם תלולים, מעט שטח שטוח — עדיף לחנות בעמק שמתחת או למצוא מקום בעלייה. "כל האזור קלקל את הקסם של השביל... הייתי מדלג עליו לגמרי אם הייתי עושה את זה שוב." עדיין קורא לזה אגם מרשים ויפה.</li>
+      </ul></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-dusk, #7B5EA7)">
+      <div class="knt-entry-head"><span class="knt-date">19.7</span><span class="knt-sender">Josha</span><span class="knt-chip">חוות דעת: כדאי</span></div>
+      <div class="knt-body-en"><ul>
+        <li><b>Opposite opinion</b> — "the detour to Kel Suu is so worth it!!! The lake really is one of a kind."</li>
+        <li>Boat tour is expensive but worth it — rock formation views incredible.</li>
+        <li>"There are actually a few decent camp spots right at the lake, potentially the best camping spots of the entire KNT!!"</li>
+        <li>Skipped the waterfall, took a taxi from Acha-Kaindy to 1 Mai instead of the 22km hot road walk (Ulukhaus guesthouse husband can drive).</li>
+        <li>Road walk toward Kel Suu itself: boring, busy with cars.</li>
+      </ul></div>
+      <div class="knt-body-he"><ul>
+        <li><b>דעה הפוכה</b> — "העיקוף לקל-סו שווה לגמרי!!! האגם הוא באמת יוצא דופן."</li>
+        <li>סיור הסירות יקר אך שווה — הנוף של תצורות הסלע מדהים.</li>
+        <li>"יש בפועל כמה נקודות מחנאות טובות ממש ליד האגם, אולי הטובות ביותר בכל ה-KNT!!"</li>
+        <li>דילגו על המפל, לקחו מונית מאצ'ה-קאינדי ל-1 מאי במקום הליכה של 22 ק"מ על כביש בחום (הבעל של אכסניית אולוחאוס יכול להסיע).</li>
+        <li>ההליכה על הכביש לכיוון קל-סו עצמה: משעממת, עמוסת מכוניות.</li>
+      </ul></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">19.7</span><span class="knt-sender">Josha</span><span class="knt-chip">מעבר נהר — סכנה</span></div>
+      <div class="knt-body-en"><p>From 1 Mai: no technical difficulties, <b>but the big river in the Ak-Sai valley (section 10/11 boundary) can be deep</b> — take care finding the crossing point. First braid: got help from 2 locals on horses, seemed shallow; assumed the next braid was the same and walked in without thinking — turned out belly-button deep. Phone suffered water damage. Take crossing point selection seriously even if a previous braid seemed easy.</p></div>
+      <div class="knt-body-he"><p>מ-1 מאי: אין קשיים טכניים, <b>אבל הנהר הגדול בעמק אק-סאי (גבול מקטעים 10/11) יכול להיות עמוק</b> — יש להיזהר במציאת נקודת המעבר. בזרוע הראשונה: קיבלו עזרה משני מקומיים על סוסים, נראה רדוד; הניחו שהזרוע הבאה זהה ונכנסו בלי לחשוב — התברר שעמוק עד הטבור. הטלפון נפגע ממים. יש לקחת ברצינות את בחירת נקודת המעבר גם אם זרוע קודמת נראתה קלה.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-star, #D4960A)">
+      <div class="knt-entry-head"><span class="knt-date">18.7</span><span class="knt-sender">Clémence Farigoule</span><span class="knt-chip">אספקה — תקלה</span></div>
+      <div class="knt-body-en"><p>Stuck at the Kel Suu yurt camps: kids at the camp opened their resupply bags (dropped off in advance by CBT Naryn) and ate almost everything. Waiting for CBT to bring replacement food before continuing.</p></div>
+      <div class="knt-body-he"><p>תקועים ביורטות של קל-סו: ילדים במחנה פתחו את שקיות האספקה שלהם (שהושארו מראש ע"י CBT נארין) ואכלו כמעט הכל. ממתינים ש-CBT יביאו אוכל חלופי לפני שיוכלו להמשיך.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-star, #D4960A)">
+      <div class="knt-entry-head"><span class="knt-date">19.7</span><span class="knt-sender">Josha</span><span class="knt-chip">אספקה — הצלחה</span></div>
+      <div class="knt-body-en"><p>Organised resupply in Kel-Suu via CBT Naryn successfully. Tip: the woman at Intourist Hotel Naryn wrapped the package in a lot of tape, which helped it survive the trip.</p></div>
+      <div class="knt-body-he"><p>אירגנו אספקה בקל-סו דרך CBT נארין בהצלחה. טיפ: האישה במלון אינטוריסט בנארין עטפה את החבילה בהמון נייר דבק, מה שעזר לה לשרוד את המסע.</p></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SEGMENT 11 -->
+<section class="knt-segment" id="knt-s11">
+  <div class="knt-seg-head">
+    <div class="knt-seg-num">11</div>
+    <div class="knt-seg-name">Ak-Sai · אק-סאי</div>
+    <div class="knt-seg-meta">80km · נוצר מפיצול מקטע 11 הישן ב-15.7</div>
+  </div>
+
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-star, #D4960A)">
+      <div class="knt-entry-head"><span class="knt-date">15.7</span><span class="knt-sender">Yuval</span><span class="knt-chip">הודעת המספור מחדש</span></div>
+      <div class="knt-body-en"><p>"You are referring to the old section distribution. Now section 11 was split into 11 and 12. And what used to be section 12 is now section 13... The new route has a better path and less bushwhacking and off-trail meandering."</p></div>
+      <div class="knt-body-he"><p>"אתם מתייחסים לחלוקת המקטעים הישנה. עכשיו מקטע 11 פוצל ל-11 ו-12. ומה שהיה מקטע 12 הוא עכשיו מקטע 13... למסלול החדש יש שביל טוב יותר ופחות בקיעה וסטיות משביל."</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-star, #D4960A)">
+      <div class="knt-entry-head"><span class="knt-date">4–15.7 (לפני 21:20)</span><span class="knt-sender">עידו פרבר / Valentin Henri</span><span class="knt-chip">מספור ישן</span><span class="knt-flag">גבול 11/12 לא ודאי</span></div>
+      <div class="knt-body-en"><ul>
+        <li><i>עידו (4.7):</i> resupplied at Kel Suu via the CBT center in Naryn; "end of section 11" reached Kara-Say with help of contact Zholdosh (shared by Yuval).</li>
+        <li><i>Valentin (14.7):</i> "Section 11 felt magical — relatively flat, vast landscapes, Kymyz/tea breaks, played durak with local kids. At the mineral springs, sparkling water comes right out of the ground and is fine to drink. Recommends detouring to a peak (3642m) nearby for the view. Easy ascent/descent, no technical difficulties, only took 1 day."</li>
+      </ul><p style="margin-top:6px;color:var(--text-tertiary, #9A8E82);font-size:12px;">תוכן זה נכתב <b>לפני</b> הבהרת המספור מחדש — לא ברור אם הוא שייך למקטע 11 החדש, למקטע 12 החדש, או לגבול ביניהם.</p></div>
+      <div class="knt-body-he"><ul>
+        <li><i>עידו (4.7):</i> קיבל אספקה בקל-סו דרך מרכז ה-CBT בנארין. "סוף מקטע 11" הגיע לקארה-סאי בעזרת איש הקשר Zholdosh (ששותף ע"י יובל).</li>
+        <li><i>ולנטין (14.7):</i> "מקטע 11 הרגיש קסום — יחסית שטוח, נופים רחבי ידיים, הפסקות קימיז ותה, שיחק דוראק עם ילדים מקומיים. במעיינות המינרלים, מים תוססים יוצאים ישר מהאדמה ובטוחים לשתייה. ממליץ לסטות לפסגה סמוכה (3642 מ') בשביל הנוף. עלייה וירידה קלות, בלי קשיים טכניים, לקח רק יום אחד."</li>
+      </ul></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">22.7</span><span class="knt-sender">Josha</span><span class="knt-chip">מים — דל</span></div>
+      <div class="knt-body-en"><ul>
+        <li>No technical difficulties, no tricky river crossings — "just a very long slog through Ak-Sai."</li>
+        <li>After climbing out of the yurt-camp valley at Kel Suu: amazing view of river + glaciers ("KNT top 3").</li>
+        <li><b>Water is sparse:</b> some streams marked on Russian Topo Maps are dry. One running stream along the road, one after the road's left turn (trail continues straight). Another stream ~35km from the start — then <b>no water source for the next 20–25km</b> until just before the mineral spring.</li>
+        <li>Recommends camping at the mineral spring: easy water access, a shelter for cooking in the rain, and a fence that keeps animals out.</li>
+      </ul></div>
+      <div class="knt-body-he"><ul>
+        <li>אין קשיים טכניים, אין מעברי נהר בעייתיים — "סתם גרירה ארוכה דרך אק-סאי".</li>
+        <li>אחרי היציאה מעמק היורטות בקל-סו: נוף מדהים של נהר וקרחונים ("טופ 3 של ה-KNT").</li>
+        <li><b>מים דלים:</b> כמה נחלים שמסומנים במפות הטופו הרוסיות יבשים. נחל זורם אחד לאורך הכביש, אחד אחרי הפנייה שמאלה של הכביש (השביל ממשיך ישר). עוד נחל כ-35 ק"מ מההתחלה — ואז <b>אין מקור מים במשך 20–25 הק"מ הבאים</b> עד ממש לפני מעיין המינרלים.</li>
+        <li>ממליץ לחנות ליד מעיין המינרלים: גישה קלה למים, מחסה לבישול בגשם, וגדר ששומרת על בעלי חיים בחוץ.</li>
+      </ul></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-star, #D4960A)">
+      <div class="knt-entry-head"><span class="knt-date">22.7</span><span class="knt-sender">Josha</span><span class="knt-chip">מנוחה</span></div>
+      <div class="knt-body-en"><p>Rested at Bosogo Resort (end of section 11 / into 12): "all right, but not really worth the money" — no internet in the room, cold shower. Better to hitchhike to Naryn for a rest day instead. Did successfully receive a resupply box there, delivered by CBT Naryn.</p></div>
+      <div class="knt-body-he"><p>מנוחה באתר בוסוגו (סוף מקטע 11 / כניסה ל-12): "בסדר, אבל לא ממש שווה את הכסף" — אין אינטרנט בחדר, מקלחת קרה. עדיף לתפוס טרמפ לנארין ליום מנוחה במקום. כן קיבלו בהצלחה קופסת אספקה שנשלחה ע"י CBT נארין.</p></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SEGMENT 12 -->
+<section class="knt-segment" id="knt-s12">
+  <div class="knt-seg-head">
+    <div class="knt-seg-num">12</div>
+    <div class="knt-seg-name">Naryn River</div>
+    <div class="knt-seg-meta">183km · מקטע ארוך; מסתיים בקארה-סאי</div>
+  </div>
+
+  <details class="knt-refbox">
+    <summary>נקודות ציון ואנשי קשר (מתוך גיליון יובל)</summary>
+    <div class="knt-reftable">
+      <div class="knt-refrow"><div class="knt-ref-name">Bosogo</div><div class="knt-ref-detail">A-Frame resort, 5 בתים. לינה 2500c לאדם (כולל ב.בוקר) / 5000c לחדר זוגי. אפשר לישון באוהל באתר (5$). מסעדה 07:00–22:00. הזמנת אספקה מנארין דרך <a href="https://visitnarynkg.com/contact/" style="color:inherit">Destination Naryn</a>. <b>Sagynbek +996 701 669 988</b>. גם Nargiza yurt camp. יש נקודת ביקורת (checkpoint) בכביש ליד בוסוגו.</div></div>
+      <div class="knt-refrow"><div class="knt-ref-name">Kara-Say</div><div class="knt-ref-detail">אין תושבים קבועים, רק רועים בקיץ. איש קשר Zholdosh מברסקון — הסעה ואספקה מקארה-סאי, 12,000c. <b>Zholdosh +996 706 596 956</b>. <b>מחסום צבאי</b> במקום שבו השביל פוגש את כביש A364 — דורש היתר גבול מודפס וחתום + דרכון.</div></div>
+    </div>
+  </details>
+
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-star, #D4960A)">
+      <div class="knt-entry-head"><span class="knt-date">14–15.7 (לפני 21:20)</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">מספור ישן</span><span class="knt-flag">גבול 12/13 לא ודאי</span></div>
+      <div class="knt-body-en"><p><b>Full report (posted as "Section 12" under the old numbering, before the clarification):</b></p><ul>
+        <li>Ak-Muz — small resupply village, barely enough connection to send messages (beeline only); checked 2 shops, found most but not everything needed. Hitchhiking in/out easy, may need to wait a bit early morning/late evening.</li>
+        <li>Trail opens through lush pasture with many yurts; strong hospitality (invited for dinner, camped beside a family's yurt during hail).</li>
+        <li>Kol-Tor lake — as beautiful as Kel Suu but untouched, likely enjoyed alone. Locals in the valley offer WiFi for 500 som.</li>
+        <li>After the pasture land, ~100km+ with no one except wildlife.</li>
+        <li>Canyon with 8–10 Himalayan vultures riding thermals.</li>
+        <li>Some narrow "bottleneck" stretches requiring judgment calls — scrambling along the shore (up to ~5a bouldering) or crossing and trying the other side. Worst case: wet feet.</li>
+        <li>Many Ibex horns/skulls in riverbeds; later, Marco Polo sheep sightings become common.</li>
+        <li><b>Navigation warning:</b> the Russian Topo Maps download only covered half the section — had to navigate the rest purely by skill.</li>
+        <li>Arrived at Kara-Say (mid-route, not the endpoint) on schedule, but got lost twice with >1km detours.</li>
+        <li>Second pass over 4000m — recommends the extra 200m climb to a nearby peak for the view.</li>
+        <li>A river crossing with a bridge, then a canyon with a 40m rock formation ("muray") blocking the narrow passage — got lost here too, mistaking it for a dead end; the actual trail goes through a rock "gate" to the right. An unplanned camping spot nearby is useful for timing the pass crossing.</li>
+        <li>Afterwards, yaks dominate the pasture ("cows with ADHD" — easy to chase off if they approach).</li>
+        <li><b>Hitchhiking out was hard:</b> evening arrival, border-checkpoint soldiers helped wait but no luck; ~11pm a truck driver let him sleep in the truck; quick ride the next morning with a soldier onward.</li>
+      </ul><p style="margin-top:6px;color:var(--text-tertiary, #9A8E82);font-size:12px;">נכתב לפני הבהרת המספור מחדש. מכיל תוכן שלפי המיקומים (קארה-סאי, בוסוגו) כנראה שייך למקטע 12 החדש, אך חלק עשוי להשתייך למקטע 13.</p></div>
+      <div class="knt-body-he"><p><b>דוח מקיף (פורסם בתור "מקטע 12" לפי המספור הישן, לפני ההבהרה):</b></p><ul>
+        <li>אק-מוז — כפר אספקה קטן, בקושי יש קליטה לשליחת הודעות (רק ביליין); בדק 2 חנויות, מצא את רוב מה שהיה צריך אך לא הכל. טרמפים פנימה והחוצה קלים, אולי צריך לחכות קצת בבוקר מוקדם/ערב מאוחר.</li>
+        <li>השביל נפתח דרך מרעה שופע עם הרבה יורטות; הכנסת אורחים חזקה (הוזמן לארוחת ערב, חנה ליד יורט של משפחה בזמן ברד).</li>
+        <li>אגם קול-טור — יפה כמו קל-סו אך לא נגוע, כנראה ייהנה ממנו לבד. מקומיים בעמק מציעים WiFi ב-500 סום.</li>
+        <li>אחרי אדמות המרעה, כ-100+ ק"מ בלי אף אחד מלבד חיות בר.</li>
+        <li>קניון עם 8–10 נשרים הימלאיים רוכבים על זרמי חום.</li>
+        <li>כמה קטעים צרים ("צווארי בקבוק") דורשים החלטות שיקול דעת — טיפוס לאורך החוף (עד דרגת טיפוס ~5a) או חצייה וניסיון בצד השני. במקרה הגרוע: רגליים רטובות.</li>
+        <li>הרבה קרני יעל וגולגלות בערוצי הנהר; בהמשך, תצפיות בכבשי מרקו פולו נעשות נפוצות.</li>
+        <li><b>אזהרת ניווט:</b> הורדת מפות הטופו הרוסיות כיסתה רק חצי מהמקטע — היה צריך לנווט את השאר רק לפי כישורים.</li>
+        <li>הגיע לקארה-סאי (באמצע המסלול, לא בסופו) בזמן, אך התבלבל פעמיים עם סטיות של יותר מק"מ.</li>
+        <li>מעבר שני מעל 4000 מ' — ממליץ על העלייה הנוספת של 200 מ' לפסגה סמוכה בשביל הנוף.</li>
+        <li>מעבר נהר עם גשר, ואז קניון עם תצורת סלע ("מוראי") בגובה 40 מ' שחוסמת את המעבר הצר — התבלבל גם כאן, חשב שזה מבוי סתום; השביל האמיתי עובר דרך "שער" סלע מימין. נקודת מחנאות לא מתוכננת בקרבת מקום שימושית לתזמון מעבר ההר.</li>
+        <li>אחר כך, יאקים שולטים במרעה ("פרות עם ADHD" — קל להבריח אותם אם מתקרבים).</li>
+        <li><b>טרמפ החוצה היה קשה:</b> הגעה בערב, חיילים במחסום הגבול עזרו לחכות אך בלי הצלחה; בסביבות 23:00 נהג משאית נתן לו לישון במשאית; טרמפ מהיר למחרת בבוקר עם חייל.</li>
+      </ul></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-star, #D4960A)">
+      <div class="knt-entry-head"><span class="knt-date">15.7 (לפני 21:20)</span><span class="knt-sender">Nimrod Mor</span><span class="knt-chip">אספקה — אזהרה</span><span class="knt-flag">מספור ישן</span></div>
+      <div class="knt-body-en"><p>Warning about the resupply after (old) section 12 in Kara-Say: the delivery guy couldn't find noodles so simply didn't bring them — be very explicit and give alternatives when ordering. Good to know: there's a small shop run by Chinese workers in Kara-Say with noodles, a bit of Snickers, and sweets as backup.</p></div>
+      <div class="knt-body-he"><p>אזהרה לגבי האספקה אחרי (מקטע 12 הישן) בקארה-סאי: מי שהביא את האספקה לא מצא אטריות אז פשוט לא הביא — צריך להיות מאוד ברור ולתת חלופות בהזמנה. טוב לדעת: יש חנות קטנה של פועלים סינים בקארה-סאי עם אטריות, קצת סניקרס וממתקים כגיבוי.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">18.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">אספקה</span></div>
+      <div class="knt-body-en"><p>Shop info / potential resupply confirmed at the shop right at the end of section 12 / start of section 13, in Kara-Say — <b>current numbering, boundary confirmed.</b></p></div>
+      <div class="knt-body-he"><p>מידע על חנות / אפשרות אספקה אושר בחנות ממש בסוף מקטע 12 / תחילת מקטע 13, בקארה-סאי — <b>מספור נוכחי, הגבול מאושר.</b></p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">20.7</span><span class="knt-sender">מיתר שובה</span><span class="knt-chip">היתרים</span></div>
+      <div class="knt-body-en"><p>Regarding Kara-Say (where the trail meets the A364 road): there is a military camp there, and they do request a permit — must be physically printed and signed, along with your passport.</p></div>
+      <div class="knt-body-he"><p>לגבי קארה-סאי (איפה שהשביל פוגש את כביש A364): יש שם מחנה צבאי, והם כן דורשים היתר — חייב להיות מודפס וחתום פיזית, יחד עם הדרכון.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">20.7</span><span class="knt-sender">Yuval</span><span class="knt-chip">היתרים</span></div>
+      <div class="knt-body-en"><p>Near Bosogo on the road there's a checkpoint. Walking the side trails, you'll probably not pass right through it — but there's a decent chance a patrol will still ask for your permit anyway.</p></div>
+      <div class="knt-body-he"><p>ליד בוסוגו על הכביש יש מחסום. בהליכה בשבילי הצד, כנראה שלא תעברו ממש דרכו — אבל יש סיכוי סביר שסיור עדיין יבקש את ההיתר בכל זאת.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--text-tertiary, #9A8E82)">
+      <div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Elli</span><span class="knt-chip">בטיחות — שאלה פתוחה</span></div>
+      <div class="knt-body-en"><p>Planning to hike section 12 from 30.7. Building an emergency plan and asking: which organisation Garmin InReach contacts in Kyrgyzstan on SOS; a mountain-rescue contact number to give family for check-in failures; and what emergency plans others use. <b>→ Answered by Yuval &amp; Richard — see the ★ General section → "חירום, SOS וחילוץ".</b></p></div>
+      <div class="knt-body-he"><p>מתכננת ללכת במקטע 12 מ-30.7. בונה תוכנית חירום ושואלת: לאיזה גוף גרמין InReach פונה בקירגיזסטן במקרה SOS; מספר קשר לחילוץ הרים לתת למשפחה למקרה שצ'ק-אין נכשל; ואילו תוכניות חירום אחרים משתמשים בהן. <b>→ נענתה ע"י יובל וריצ'רד — ר' מקטע ★ כללי ← "חירום, SOS וחילוץ".</b></p></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SEGMENT 13 -->
+<section class="knt-segment" id="knt-s13">
+  <div class="knt-seg-head">
+    <div class="knt-seg-num">13</div>
+    <div class="knt-seg-name">Arabel · ארבל</div>
+    <div class="knt-seg-meta">108km · לשעבר מקטע 12 הישן; מתחיל בקארה-סאי</div>
+  </div>
+
+  <details class="knt-refbox">
+    <summary>נקודות ציון (מתוך גיליון יובל)</summary>
+    <div class="knt-reftable">
+      <div class="knt-refrow"><div class="knt-ref-name">Juuku-Chak Hot Springs</div><div class="knt-ref-detail">5 ק"מ מהשביל, בתי הארחה.</div></div>
+      <div class="knt-refrow"><div class="knt-ref-name">Saruu</div><div class="knt-ref-detail">בגבול מקטע 13/14. Guesthouse "Baitur" — <b>Nurzhamal +996 550 887 826</b>. שימו לב: לפי עדכון מ-20.7, מסלול הסיום השתנה ויוצא כעת דרך Kyzyl-Suu ולא דרך Saruu (ר' למטה).</div></div>
+    </div>
+  </details>
+
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">18.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">גישה/תחבורה</span></div>
+      <div class="knt-body-en"><p>Hitchhiking to the start of section 13: sometimes drivers want money, sometimes not — compare to Marshrutka or Yandex-taxi prices and decide what you're willing to pay.</p></div>
+      <div class="knt-body-he"><p>טרמפים לתחילת מקטע 13: לפעמים הנהגים רוצים כסף, לפעמים לא — אפשר להשוות למחירי מרשרוטקה או מונית יאנדקס ולהחליט כמה מוכנים לשלם.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-dusk, #7B5EA7)">
+      <div class="knt-entry-head"><span class="knt-date">20.7</span><span class="knt-sender">Josha → Yuval/Sviat</span><span class="knt-chip">שינוי מסלול</span></div>
+      <div class="knt-body-en"><p>Noticed the route near the end of section 13 changed — an extra climb to the next valley on the right was added. It now exits at <b>Kyzyl-Suu</b> instead of Saruu. Asked whether there's a specific reason; from the map it looks like an unnecessary extra climb, but it appears to route around a hazard at a thermal-bath location (flagged "red flag" — see below).</p></div>
+      <div class="knt-body-he"><p>שם לב שהמסלול קרוב לסוף מקטע 13 השתנה — נוספה עלייה נוספת לעמק הבא מימין. הוא יוצא עכשיו ב<b>קיזיל-סו</b> במקום בסארו. שאל אם יש סיבה מסוימת; מהמפה זה נראה כמו עלייה מיותרת, אבל נראה שזה עוקף סכנה במיקום של אמבטיה תרמית (מסומן כ"דגל אדום" — ראו למטה).</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">מעבר קשה — סכנה</span></div>
+      <div class="knt-body-en"><p><b>Full section 13 report:</b></p><ul>
+        <li>Starts easy through a big plateau; many swampy areas make it hard to keep dry feet.</li>
+        <li>Passes a (Kyrgyz-owned) goldmine — entry forbidden, marked by white signs every 50m, staff strict about it. The trail can be routed to avoid their space but stays far from any oversight there.</li>
+        <li>The pass itself: easy climb, big descent after, leaving the high plateaus that have continued since section 7. Crosses a glacier around 4000m — microspikes optional, not required. Mostly rocky with many route choices; stay mid-slope in the afternoon to reduce rockfall risk from melting ice.</li>
+        <li><b>The descent was notably harder than previous KNT passes</b> — "maybe the most difficult one." Took over 2 hours through a steep, rocky scrambling field; had to bivouac partway down using a headlamp. Recommends doing this descent in the morning instead, and says high mountaineering boots would have helped.</li>
+        <li>Rest of the section: easy and beautiful, landscape changes quickly — forest stretches with rugged walls, "Yosemite vibes."</li>
+      </ul></div>
+      <div class="knt-body-he"><p><b>דוח מקטע 13 מלא:</b></p><ul>
+        <li>מתחיל בקלות דרך רמה גדולה; הרבה אזורים ביצתיים מקשים לשמור על רגליים יבשות.</li>
+        <li>עובר ליד מכרה זהב (בבעלות קירגיזית) — כניסה אסורה, מסומן בשלטים לבנים כל 50 מ', הצוות שם מחמיר לגבי זה. אפשר לתכנן את השביל כדי להימנע מהשטח שלהם אך הוא נשאר רחוק מכל השגחה שם.</li>
+        <li>המעבר עצמו: עלייה קלה, ירידה גדולה אחרי, עוזב את הרמות הגבוהות שנמשכות מאז מקטע 7. חוצה קרחון בסביבות 4000 מ' — מיקרוספייקס אופציונליים, לא הכרחיים. רובו סלעי עם הרבה אפשרויות מסלול; להישאר באמצע המדרון אחר הצהריים כדי להפחית סיכון נפילת אבנים מהקרח הנמס.</li>
+        <li><b>הירידה הייתה משמעותית קשה יותר ממעברים קודמים ב-KNT</b> — "אולי הקשה ביותר". לקח יותר משעתיים דרך שדה טיפוס סלעי תלול; נאלץ לבצע לינת חירום (ביוואק) באמצע הירידה עם פנס ראש. ממליץ לעשות את הירידה הזו בבוקר במקום, ואומר שמגפי הרים גבוהים היו עוזרים.</li>
+        <li>שאר המקטע: קל ויפה, הנוף משתנה מהר — קטעי יער עם קירות משוננים, "תחושת יוסמיטי".</li>
+      </ul></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">בטיחות — תזמון מעבר</span></div>
+      <div class="knt-body-en"><p><b>Safety recommendations for crossing in less-than-ideal conditions (reply to a safety question):</b></p><ul>
+        <li>Cross the pass early in the morning, ideally before sunrise. A major landslide is unlikely, but on the former glacier, loose rocks can come down — especially on steep terrain.</li>
+        <li>In a group: don't walk directly above one another; avoid the steepest sections; stay in the middle of the valley away from potential stonefall.</li>
+        <li>Stones can fall even on a fully dry day — most likely in the evening, as the ice/frost holding things together melts.</li>
+        <li>Past the scree slopes, the forest is safe. River crossings on section 13 are not difficult, even with more water — cross under the glacier early and stay on the left side before the river gets bigger.</li>
+        <li>If worried about landslide risk, camp in the woods and cross in the morning. The second pass can be skipped entirely if it's raining heavily.</li>
+      </ul></div>
+      <div class="knt-body-he"><p><b>המלצות בטיחות למעבר בתנאים לא אופטימליים (תגובה לשאלת בטיחות):</b></p><ul>
+        <li>לחצות את המעבר מוקדם בבוקר, רצוי לפני הזריחה. מפולת גדולה לא סבירה, אבל על הקרחון לשעבר אבנים משוחררות יכולות ליפול — במיוחד בשטח תלול.</li>
+        <li>בקבוצה: לא ללכת ישירות אחד מעל השני; להימנע מהקטעים התלולים ביותר; להישאר באמצע העמק הרחק מנפילת אבנים פוטנציאלית.</li>
+        <li>אבנים יכולות ליפול גם ביום יבש לגמרי — סביר יותר בערב, כשהקרח/כפור שמחזיקים הכל ביחד נמסים.</li>
+        <li>אחרי מדרוני האבנים, היער בטוח. מעברי נהר במקטע 13 אינם קשים, גם עם יותר מים — לחצות מתחת לקרחון מוקדם ולהישאר בצד שמאל לפני שהנהר גדל.</li>
+        <li>אם מודאגים מסכנת מפולת, לחנות ביער ולחצות בבוקר. אפשר לדלג לגמרי על המעבר השני אם יורד גשם חזק.</li>
+      </ul></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SEGMENT 14 -->
+<section class="knt-segment" id="knt-s14">
+  <div class="knt-seg-head">
+    <div class="knt-seg-num">14</div>
+    <div class="knt-seg-name">Karakol · קаراكول</div>
+    <div class="knt-seg-meta">137km · אזור Issyk-Kul / Ala-Kul / Altyn-Arashan</div>
+  </div>
+
+  <details class="knt-refbox">
+    <summary>נקודות ציון ואנשי קשר (מתוך גיליון יובל)</summary>
+    <div class="knt-reftable">
+      <div class="knt-refrow"><div class="knt-ref-name">Karakol (עיר)</div><div class="knt-ref-detail">עיר גדולה — הרבה אכסניות ומלונות (זמין אונליין). גז זמין. <b>4Rent</b> — איזובוטאן. עיר הבסיס למקטע 14 (הגעה מבישקק).</div></div>
+      <div class="knt-refrow"><div class="knt-ref-name">Chon-Kyzyl-Suu gorge</div><div class="knt-ref-detail">מעיינות חמים <b>Jiluu-Suu</b> — 10 חדרים (~30 אנשים), 1300c/אדם. 3 בריכות (36–42°), 250c לבריכה. ארוחות 200–600c (להזמין מראש). ג'יפ 60c/ק"מ. <b>+996 705 098 088</b>. גז בכפר Kyzyl-Suu.</div></div>
+      <div class="knt-refrow"><div class="knt-ref-name">Kok-Jaiyk / Jeti-Oguz</div><div class="knt-ref-detail">מ-Kok-Jaiyk (החלק העליון של Jeti-Oguz) והלאה — בכל ערוץ יש יורט קמפים של <b>Kyrgyzlife</b> (לינה+אוכל עם מקומיים). הזמנה: kyrgyzlife.com/yurt-camps · <b>+996 707 044 144</b>.</div></div>
+      <div class="knt-refrow"><div class="knt-ref-name">Altyn-Arashan</div><div class="knt-ref-detail">(גבול 14/15) מעיינות חמים; חנות קטנה (דווח 21.7). Boz-Beshik ו-Saruu גם באזור.</div></div>
+    </div>
+  </details>
+
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-dusk, #7B5EA7)">
+      <div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Josha / Valentin Henri</span><span class="knt-chip">שינוי מסלול — כניסה</span></div>
+      <div class="knt-body-en"><p>The section 13 route was changed to exit at Kyzyl-Suu instead of Saruu (see segment 13). Valentin explains the reason: it's to <b>avoid road walking and to include a pass with a rewarding view over Issyk-Kul</b> — i.e. a nicer entry into the Karakol area.</p></div>
+      <div class="knt-body-he"><p>מסלול מקטע 13 שונה כך שיוצא ב-Kyzyl-Suu במקום ב-Saruu (ר' מקטע 13). ולנטין מסביר את הסיבה: כדי <b>להימנע מהליכה על כביש ולכלול מעבר עם נוף מתגמל על Issyk-Kul</b> — כלומר כניסה יפה יותר לאזור קاراקول.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">20–21.7</span><span class="knt-sender">Josha / Yuval</span><span class="knt-chip">מנוחה / לינה על האגם</span></div>
+      <div class="knt-body-en"><p>Josha asked for a nice place to rest along the beach on section 14 (Issyk-Kul lakeshore). Yuval: <b>"Hippohea camp is really nice on the lake"</b> — plus "one more beautiful valley with a less traveled road."</p></div>
+      <div class="knt-body-he"><p>Josha ביקש המלצה למקום מנוחה נחמד לאורך החוף במקטע 14 (חוף אגם Issyk-Kul). יובל: <b>"מחנה Hippohea מאוד נחמד על האגם"</b> — ובנוסף "עוד עמק יפה עם דרך פחות סואנת."</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-star, #D4960A)">
+      <div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Nimrod Mor</span><span class="knt-chip">אספקה</span></div>
+      <div class="knt-body-en"><p>There's a small shop in Altyn-Arashan (photo shared). Useful resupply/snack point on the Karakol–Jyrgalan stretch.</p></div>
+      <div class="knt-body-he"><p>יש חנות קטנה ב-Altyn-Arashan (צורפה תמונה). נקודת אספקה/חטיפים שימושית במקטע קاراקول–ג'ירגלן.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-rose, #C95E6A)">
+      <div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Armaan / Yuval</span><span class="knt-chip">תנאי שטח — Ala-Kul</span></div>
+      <div class="knt-body-en"><p>Armaan asked whether a shared conditions warning (photo) would be a major problem for sections 13–14 around <b>Ala-Kul</b> from Fri 24 July onwards. Valentin gave detailed pass-safety advice (see segment 13). Yuval's caution: <b>"these messages show up often, you never know how it will actually look on the ground — be extra careful."</b> Check current conditions on the spot.</p></div>
+      <div class="knt-body-he"><p>Armaan שאל אם אזהרת תנאים ששותפה (תמונה) תהיה בעיה משמעותית למקטעים 13–14 באזור <b>Ala-Kul</b> מיום שישי 24.7 והלאה. ולנטין נתן עצות בטיחות מפורטות למעבר (ר' מקטע 13). אזהרת יובל: <b>"ההודעות האלה מופיעות לעתים קרובות, אף פעם לא יודעים איך זה באמת ייראה בשטח — להיזהר במיוחד."</b> לבדוק את התנאים העדכניים במקום.</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--accent-emerald, #0D9E72)">
+      <div class="knt-entry-head"><span class="knt-date">16–19.7</span><span class="knt-sender">Michel</span><span class="knt-chip">גישה / סטטוס</span></div>
+      <div class="knt-body-en"><p>Michel started section 14 on 18.7 (planning the last sections over ~3 weeks). Karakol is the access town — he needed a ride Bishkek→Karakol and was also looking to buy/rent a satellite phone before starting. (A reminder that sections 14+ still need an emergency satellite device.)</p></div>
+      <div class="knt-body-he"><p>Michel התחיל את מקטע 14 ב-18.7 (מתכנן את המקטעים האחרונים על פני ~3 שבועות). קاراكول היא עיר הגישה — הוא חיפש טרמפ בישקק→קاراكول, וגם רצה לקנות/לשכור טלפון לוויני לפני ההתחלה. (תזכורת שמקטעים 14+ עדיין דורשים מכשיר לוויני לחירום.)</p></div>
+    </div>
+
+    <div class="knt-entry" style="--knt-cat:var(--text-tertiary, #9A8E82)">
+      <div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">דוח בהמשך</span></div>
+      <div class="knt-body-en"><p>"About section 14 I have to worry myself now, I can report in a few days." <b>No full section-14 field report exists in the current export yet</b> (up to 22.7.2026) — expected soon.</p></div>
+      <div class="knt-body-he"><p>"לגבי מקטע 14 אני צריך לדאוג לעצמי עכשיו, אוכל לדווח בעוד כמה ימים." <b>עדיין אין דוח שטח מלא למקטע 14 בייצוא הנוכחי</b> (עד 22.7.2026) — צפוי בקרוב.</p></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SEGMENT 15 -->
+<section class="knt-segment" id="knt-s15">
+  <div class="knt-seg-head">
+    <div class="knt-seg-num">15</div>
+    <div class="knt-seg-name">Jyrgalan · ג'ירגלן</div>
+    <div class="knt-seg-meta">72km · Altyn-Arashan → Jyrgalan</div>
+  </div>
+
+  <details class="knt-refbox">
+    <summary>נקודות ציון ואנשי קשר (מתוך גיליון יובל)</summary>
+    <div class="knt-reftable">
+      <div class="knt-refrow"><div class="knt-ref-name">Jyrgalan (כפר)</div><div class="knt-ref-detail"><b>Destination Jyrgalan</b> (ה-DMO של העמק) — לינה, אוכל, מדריכים, תחבורה, מפות, השכרת ציוד וגז, ותוכניות תרבות. המשרד ב-Alakol-Jyrgalan guesthouse. <b>Gulmira +996 551 916 924</b> · jyrgalan.com · חנויות מזון; גז זמין.</div></div>
+      <div class="knt-refrow"><div class="knt-ref-name">Altyn-Arashan</div><div class="knt-ref-detail">(גבול 14/15) מעיינות חמים; חנות קטנה.</div></div>
+      <div class="knt-refrow"><div class="knt-ref-name">Ak-Suu</div><div class="knt-ref-detail">כפר במקטע.</div></div>
+      <div class="knt-refrow"><div class="knt-ref-name">Echkili-Tash</div><div class="knt-ref-detail">(גבול 15/16) אספקה מקاراكول דרך ecotrek.kg. <b>Tashtanbek +996 772 370 519</b>.</div></div>
+    </div>
+  </details>
+
+  <div class="knt-entries">
+
+    <div class="knt-entry" style="--knt-cat:var(--text-tertiary, #9A8E82)">
+      <div class="knt-entry-head"><span class="knt-date">עד 22.7</span><span class="knt-sender">—</span><span class="knt-chip">אין עדיין דוחות שטח</span></div>
+      <div class="knt-body-en"><p><b>No detailed field reports for section 15 exist in the current export</b> (up to 22.7.2026). Only passing mentions: Nimrod is hiking sections 12–15; Michel planned to start at section 14 or 15. The landmark/contact info above (from Yuval's spreadsheet) is the main resource for now. This section will fill in as hikers reach it and report.</p></div>
+      <div class="knt-body-he"><p><b>אין עדיין דוחות שטח מפורטים למקטע 15 בייצוא הנוכחי</b> (עד 22.7.2026). רק אזכורים חולפים: נמרוד מטייל במקטעים 12–15; Michel תכנן להתחיל במקטע 14 או 15. מידע נקודות הציון ואנשי הקשר למעלה (מגיליון יובל) הוא המשאב העיקרי בינתיים. המקטע הזה יתמלא ככל שמטיילים יגיעו אליו וידווחו.</p></div>
+    </div>
+
+  </div>
+</section>
+
+<div class="knt-footer">
+  מבוסס על סריקת export של קבוצת "KNT Hikers 2026" (601 הודעות, 18.6–22.7.2026) שהצטלבה עם קובצי ה-GPX, גיליון נקודות היישוב, ומפות המקטעים ששיתף יובל. מכסה מקטעים <b>8–15</b>; מקטעים 14–15 עדיין דלים בדיווחי שטח (בעיקר נקודות ציון ואנשי קשר) והם יתמלאו ככל שיגיעו עדכונים. מקטע <b>★ כללי</b> בראש הדף מרכז מידע כלל-שבילי (היתרים, אספקה, ציוד, ניווט, בטיחות, חירום) שלא משויך למקטע בודד. הודעות שסומנו ב־<span class="knt-flag">מספור ישן</span> נכתבו לפני הבהרת המספור מחדש של יובל ב-15.7 בשעה 21:20 — התוכן שלהן שימושי אך שיוך המקטע המדויק פחות ודאי. כל הודעה מוצגת במקור (משמאל, LTR) ובתרגום לעברית (מימין) — ניתן להסתיר את התרגום עם הכפתור למעלה.
+</div>
         </div>
     </div>
 </div>
