@@ -86,6 +86,10 @@
                     <i class="fas fa-download"></i>
                     <span>גיבוי ושחזור</span>
                 </button>
+                <button class="btn-outline" id="btn-knt-trail" title="עדכוני שביל KNT 2026 — מקטעים 8-13" onclick="document.getElementById('knt-modal').classList.add('active')" style="border-color: rgba(255,255,255,0.3); color: white; background: rgba(255,255,255,0.07); transition: all var(--transition);">
+                    <i class="fas fa-mountain"></i>
+                    <span>KNT Trail</span>
+                </button>
                 <button class="header-btn" id="btn-toggle-places" title="מקומות מומלצים">
                     <i class="fas fa-list-ul"></i>
                 </button>
@@ -956,5 +960,630 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
     <script type="module" src="js/app.js"></script>
+
+<!-- KNT Modal -->
+<!-- ============ KNT Trail Updates Modal ============ -->
+<div id="knt-modal" class="knt-modal-overlay" role="dialog" aria-modal="true" aria-label="עדכוני שביל KNT">
+    <div class="knt-modal-container">
+        <div class="knt-modal-header">
+            <div class="knt-modal-title-wrap">
+                <span class="knt-modal-icon">🏔️</span>
+                <div>
+                    <div class="knt-modal-title">KNT · S8–S13</div>
+                    <div class="knt-modal-subtitle">עדכוני שביל מקובצים מקבוצת הוואטסאפ — מקטעים 8 עד 13</div>
+                </div>
+            </div>
+            <div class="knt-modal-controls">
+                <label class="knt-he-toggle"><input type="checkbox" id="kntHeToggle" checked /> הצג תרגום</label>
+                <button class="knt-close-btn" id="knt-close-btn" title="סגור"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+        <div class="knt-topbar">
+            <div class="knt-tabs">
+                <a class="knt-tab knt-tab-general" href="#knt-general">★ <span class="knt-tab-n">כללי</span></a>
+                <a class="knt-tab" href="#knt-s8">08 <span class="knt-tab-n">Tash Rabat</span></a>
+                <a class="knt-tab" href="#knt-s9">09 <span class="knt-tab-n">At-Bashi</span></a>
+                <a class="knt-tab" href="#knt-s10">10 <span class="knt-tab-n">Kel-Suu</span></a>
+                <a class="knt-tab" href="#knt-s11">11 <span class="knt-tab-n">Ak-Sai</span></a>
+                <a class="knt-tab" href="#knt-s12">12 <span class="knt-tab-n">Naryn River</span></a>
+                <a class="knt-tab" href="#knt-s13">13 <span class="knt-tab-n">Arabel</span></a>
+            </div>
+            <input id="knt-search" type="text" class="knt-search" placeholder="חיפוש… bridge, water, Kel Suu, Kara Say…" />
+        </div>
+        <div class="knt-modal-body" id="knt-modal-body">
+            <div class="knt-notice">
+                <b>⚠ שינוי מספור מקטעים ב-15.7.2026:</b> יובל הודיע שמקטע <code>11</code> הישן פוצל לשני מקטעים — <code>11</code> ו-<code>12</code> — ומה שהיה <code>12</code> הישן נקרא כעת <code>13</code>. מקטעים 8, 9, 10 לא הושפעו. הודעות לפני 15.7 21:20 מסומנות <span class="knt-flag">מספור ישן</span>.
+            </div>
+
+            <!-- GENERAL -->
+            <section class="knt-segment" id="knt-general">
+                <div class="knt-seg-head"><div class="knt-seg-num knt-gen">★ כללי</div><div class="knt-seg-name">מידע כלל-שבילי</div><div class="knt-seg-meta">היתרים · אספקה · ציוד · ניווט · בטיחות</div></div>
+                <div class="knt-seg-topic">ניווט, GPX ומפות · בטיחות ‼️</div>
+                <div class="knt-entries">
+                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">29.6 · 5.7</span><span class="knt-sender">Yuval</span><span class="knt-chip">אזהרת GPX — קריטי</span></div><div class="knt-body-en"><p>The GPX tracks are NOT exact instructions. The trail in Kyrgyzstan changes very often — read the land in front of you. Never fully trust the GPX.</p></div><div class="knt-body-he"><p>מסלולי ה-GPX <b>אינם</b> הוראה מדויקת. השביל משתנה תכופות. לעולם אל תסמכו על ה-GPX במלואו.</p></div></div>
+                    <div class="knt-entry" style="--knt-cat:#7B5EA7"><div class="knt-entry-head"><span class="knt-date">5.7 · 9.7</span><span class="knt-sender">Valentin Henri / Grégoire</span><span class="knt-chip">שיטת ניווט</span></div><div class="knt-body-en"><ul><li>Valentin: uses printed Soviet topo maps + RussianTopoMaps app. GPX efficient but <b>not safer</b>. In fog — GPX is important.</li><li><b>OSMand</b> — best in Central Asia (Grégoire). Mapy.cz shares same path data.</li></ul></div><div class="knt-body-he"><ul><li>ניווט עם מפות טופו מודפסות + RussianTopoMaps. GPX לא בטוח יותר.</li><li><b>OSMand</b> — הכי טוב במרכז אסיה.</li></ul></div></div>
+                </div>
+                <div class="knt-seg-topic">היתרים ובירוקרטיה</div>
+                <div class="knt-entries">
+                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">22.6</span><span class="knt-sender">Greg Carter</span><span class="knt-chip">עדכון היתרים</span></div><div class="knt-body-en"><p>CBT Naryn won't issue back-to-back 2-month multi-region permits. 4 months = 2-month permit (€35) + 2×1-month (€30 each). Segments 8,10,11,12,13 require a border permit. Military checkpoint at Kara-Say (A364) — printed+signed permit + passport required.</p></div><div class="knt-body-he"><p>CBT נארין לא מנפיקה היתרים חוזרים לחודשיים. מקטעים 8,10,11,12,13 דורשים היתר גבול. נקודת ביקורת צבאית בקארה-סאי — היתר מודפס+חתום ודרכון.</p></div></div>
+                </div>
+                <div class="knt-seg-topic">אספקה, משלוחים ואנשי קשר</div>
+                <div class="knt-entries">
+                    <div class="knt-entry" style="--knt-cat:#D4960A"><div class="knt-entry-head"><span class="knt-date">23.6 · 4.7</span><span class="knt-sender">Josha / Clémence</span><span class="knt-chip">אספקה לאורך השביל</span></div><div class="knt-body-en"><ul><li>Resupply to Osh: <b>Yldam Express</b>. Coordinate with <b>Timur / Visit Alay Osh</b> (backup: CBT Osh, Baiysh Toobaev).</li><li><b>Kel Suu:</b> via CBT Naryn — give box, agree on yurt camp. "Very reliable and cheap."</li><li><b>Kara-Say:</b> <b>Zholdosh +996 706 596 956</b> (also spelled Dzuldush).</li><li><b>Karakol:</b> isobutane at <b>4Rent</b>. Gas in Naryn/Karakol/Kazarman.</li></ul></div><div class="knt-body-he"><ul><li>אוש: <b>Yldam Express</b> + <b>Visit Alay Timur</b>. ציוד: <b>Gergert Sport בישקק</b>.</li><li><b>קל-סו:</b> CBT נארין — אמין וזול.</li><li><b>קארה-סאי:</b> <b>Zholdosh +996 706 596 956</b>.</li><li>גז: <b>4Rent קاראקול</b> / נארין / קזרמן.</li></ul></div></div>
+                    <div class="knt-entry" style="--knt-cat:#D4960A"><div class="knt-entry-head"><span class="knt-date">30.6</span><span class="knt-sender">Greg Carter</span><span class="knt-chip">גז מתוברג</span></div><div class="knt-body-en"><p>Threaded canisters in Osh: <b>Destination Osh</b> (Bek) — Large 1,500 SOM, Small 1,000. <b>Visit Alay</b> also has smalls. Check stove-canister thread fit before buying. Bishkek: <b>Gergert Sport</b>.</p></div><div class="knt-body-he"><p>גז מתוברג באוש: <b>Destination Osh</b> (Bek) גדול 1,500 / קטן 1,000 סום. לבדוק תבריג לפני קנייה. בישקק: <b>Gergert Sport</b>.</p></div></div>
+                </div>
+                <div class="knt-seg-topic">מים · מזג אוויר · אקלום</div>
+                <div class="knt-entries">
+                    <div class="knt-entry" style="--knt-cat:#2E5480"><div class="knt-entry-head"><span class="knt-date">23–24.6</span><span class="knt-sender">דיון קבוצתי</span><span class="knt-chip">מים וטיהור</span></div><div class="knt-body-en"><ul><li>Filters: Sawyer Squeeze/Mini, Katadyn BeFree, Platypus QuickDraw.</li><li>Glacial silt: prefilter through buff/bandana.</li><li><b>Always purify</b> — even clear side-streams can be contaminated (livestock everywhere).</li></ul></div><div class="knt-body-he"><ul><li>מסננים: Sawyer, BeFree, Platypus. סחף קרחוני: לסנן דרך באף.</li><li><b>תמיד לטהר</b> — גם נחלי צד צלולים עלולים להיות מזוהמים.</li></ul></div></div>
+                    <div class="knt-entry" style="--knt-cat:#2E5480"><div class="knt-entry-head"><span class="knt-date">23.6</span><span class="knt-sender">Richard / Grüs</span><span class="knt-chip">תחזיות מזג אוויר</span></div><div class="knt-body-en"><p>Best: <b>Windy</b> + <b>YR.no</b>. Garmin good same/next day only — "always sunny" 2+ days out. Government SMS rain warnings arrive even when currently sunny.</p></div><div class="knt-body-he"><p>הכי טוב: <b>Windy</b> + <b>YR.no</b>. גרמין — טוב ליום-יומיים בלבד. התראות SMS ממשלתיות מגיעות גם כשכרגע שמשי.</p></div></div>
+                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">11.7</span><span class="knt-sender">Josha</span><span class="knt-chip">אקלום לפני מקטע 8</span></div><div class="knt-body-en"><p>First night 3,500–3,600m then 4,000m pass. Struggled with altitude even at 3,400m after Kazarman. Consider starting altitude pills already in Kazarman.</p></div><div class="knt-body-he"><p>לילה ראשון 3,500 מ', מעבר 4,000 מ'. שקלו גלולות גובה כבר בקזרמן.</p></div></div>
+                </div>
+                <div class="knt-seg-topic">כלבי רועים · ערים</div>
+                <div class="knt-entries">
+                    <div class="knt-entry" style="--knt-cat:#0D9E72"><div class="knt-entry-head"><span class="knt-date">5.7 · 27.6</span><span class="knt-sender">Léon / Yuval / Ryan</span><span class="knt-chip">כלבים + לינה + מזומן</span></div><div class="knt-body-en"><ul><li>Dogs mostly bark. Hit poles together; shepherd calls them. Pretend to pick up a stone.</li><li>Bishkek hostels: <b>Meeting Place, Koisha, Ololo Yurt, Sakura, Compass</b>.</li><li>Yuval recommends ~<b>15,000 som / week</b>.</li></ul></div><div class="knt-body-he"><ul><li>כלבים בעיקר נובחים. להקיש מקלות. להעמיד פנים שמרימים אבן.</li><li>אכסניות בישקק: <b>Meeting Place, Koisha, Ololo Yurt, Sakura, Compass</b>.</li><li>יובל ממליץ ~<b>15,000 סום לשבוע</b>.</li></ul></div></div>
+                </div>
+            </section>
+
+            <!-- SEGMENT 8 -->
+            <section class="knt-segment" id="knt-s8">
+                <div class="knt-seg-head"><div class="knt-seg-num">08</div><div class="knt-seg-name">Tash Rabat · טאש-רבאט</div><div class="knt-seg-meta">44km</div></div>
+                <details class="knt-refbox"><summary>נקודות ציון ואנשי קשר (יובל)</summary><div class="knt-reftable"><div class="knt-refrow"><div class="knt-ref-name">Tash Rabat</div><div class="knt-ref-detail">יורט קמפ Nazar — לינה 1800c, ארוחת ערב 800c. <b>Nazar +996 557 060 494</b></div></div><div class="knt-refrow"><div class="knt-ref-name">Kazybek</div><div class="knt-ref-detail">2 ק"מ מהשביל. Jyparkul Guest House — לינה 1000c. <b>Jypara +996 703 230 591, Ermek 0701 485 688</b>. בית מרקחת ובית חולים בכפר.</div></div></div></details>
+                <div class="knt-entries">
+                    <div class="knt-entry" style="--knt-cat:#0D9E72"><div class="knt-entry-head"><span class="knt-date">5–20.7</span><span class="knt-sender">Yuval / Josha / Clémence / Laurent / Lotteke</span><span class="knt-chip">גישה / תחבורה</span></div><div class="knt-body-en"><ul><li>Kazarman→Turugart: split via Naryn. Josha found taxi Naryn→S8 for <b>€100</b> (CBT quoted €150).</li><li>Driver: <b>Sapar +996 558 222 273</b>. Gulira at CBT Naryn has driver connections.</li><li>Laurent: CBT Baktygul Kazarman quoted €300 — too expensive.</li><li>Hitchhiking Turugart→Naryn works. Taxis to Tash Rabat itself may be cheaper (more tourist traffic).</li><li>Hitchhiking S8+S9 area worked well for group of 3 (Laurent, 20.7).</li></ul></div><div class="knt-body-he"><ul><li>מקזרמן לטורוגארט — לפצל דרך נארין. מונית נארין→מ8 <b>€100</b>. נהג: <b>Sapar +996 558 222 273</b>.</li><li>טרמפים מטורוגארט לנארין עבדו. מוניות לטאש-רבאט לעיתים זולות יותר.</li></ul></div></div>
+                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">16.7</span><span class="knt-sender">Josha</span><span class="knt-chip">מים / מסלול</span></div><div class="knt-body-en"><ul><li>Camp in shallow cave just below Panda Pass — by the only running stream before the pass.</li><li><b>Two other hikers found even that stream dry.</b> In dry spell, Chatyr-Kul lake = only water source until the pass.</li><li>Tash Rabat caravanserai: "underwhelming" — hidden under corrugated iron roof. Nazar yurt camp: nice family.</li></ul></div><div class="knt-body-he"><ul><li>מחנאות במערה מתחת למעבר פנדה — ליד הנחל היחיד לפני המעבר.</li><li><b>שני מטיילים מצאו גם אותו יבש.</b> ביובש — אגם צ'אטיר-קול = מקור מים יחיד עד המעבר.</li></ul></div></div>
+                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">19.7</span><span class="knt-sender">Grégoire</span><span class="knt-chip">הליכה הפוכה — מים</span></div><div class="knt-body-en"><p>S8 in reverse: only water source was the lake + one generous family. Avoid walking close to shore — swarming bugs. Big construction zone at end of S7.</p></div><div class="knt-body-he"><p>הליכה הפוכה: מים — רק האגם. להתרחק מחוף (חרקים). אזור בנייה גדול בסוף מקטע 7.</p></div></div>
+                </div>
+            </section>
+
+            <!-- SEGMENT 9 -->
+            <section class="knt-segment" id="knt-s9">
+                <div class="knt-seg-head"><div class="knt-seg-num">09</div><div class="knt-seg-name">At-Bashi · אט-באשי</div><div class="knt-seg-meta">85–88km</div></div>
+                <details class="knt-refbox"><summary>נקודות ציון ואנשי קשר (יובל)</summary><div class="knt-reftable"><div class="knt-refrow"><div class="knt-ref-name">At-Bashi</div><div class="knt-ref-detail">5 ק"מ מהשביל. Murat guesthouse — לינה+ב.בוקר+ערב 2000c. <b>Murat +996 772 842 858 (WhatsApp)</b>. מרשרוטקה נארין→אט-באשי 100 סום.</div></div></div></details>
+                <div class="knt-entries">
+                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">14.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">מעבר נהר קשה מאוד</span></div><div class="knt-body-en"><p>Difficult river crossing "in the valley after the resupply" — failed to cross, had to climb steep hillside with no holds. Detour on map is much bigger than it looked — "probably a good idea to use the GPX." Spiky bushwhacking. Described as the hardest day of the trip so far.</p></div><div class="knt-body-he"><p>מעבר נהר קשה "בעמק שאחרי האספקה" — נכשל, עלייה תלולה בלי אחיזות. עקיפה גדולה ממה שנראה במפה — "כדאי להשתמש ב-GPX". צמחייה קוצנית. היום הקשה ביותר עד כה.</p></div></div>
+                    <div class="knt-entry" style="--knt-cat:#D4960A"><div class="knt-entry-head"><span class="knt-date">15.7</span><span class="knt-sender">Lotteke</span><span class="knt-chip">גשר</span><span class="knt-flag">פרטים בהודעה קולית</span></div><div class="knt-body-en"><p>Bridge update in S9 delivered as voice message (~14–15.7 by Valentin Henri) — not transcribed. Check original audio files if details needed (files 00003277, 00003560).</p></div><div class="knt-body-he"><p>עדכון על גשר במקטע 9 — נמסר כהודעה קולית, לא מתומלל. לבדוק אודיו מקורי לפרטים.</p></div></div>
+                    <div class="knt-entry" style="--knt-cat:#D4960A"><div class="knt-entry-head"><span class="knt-date">16.7</span><span class="knt-sender">Josha</span><span class="knt-chip">מסלול / אספקה</span></div><div class="knt-body-en"><ul><li>Path to Kazybek fine; small shop with basics.</li><li>After Kazybek: knee-deep lilac flowers + bushwhacking through hard-branched hedgerow plants.</li><li>Trail becomes "find the trail" — faint, vanishes, reappears.</li><li>Stayed at <b>Ulukhaus guesthouse</b> in Acha-Kaindy — saves 5km extra to At-Bashi. Small shop there too.</li></ul></div><div class="knt-body-he"><ul><li>שביל לקזיבק תקין. לאחר מכן: בקיעה דרך פרחי לילך + צמחי גדר קשים.</li><li>שביל "מתחבא" — נעלם ומופיע.</li><li><b>אכסניית אולוחאוס</b> באצ'ה-קאינדי — חוסכת 5 ק"מ לאט-באשי.</li></ul></div></div>
+                </div>
+            </section>
+
+            <!-- SEGMENT 10 -->
+            <section class="knt-segment" id="knt-s10">
+                <div class="knt-seg-head"><div class="knt-seg-num">10</div><div class="knt-seg-name">Kel-Suu · קל-סו</div><div class="knt-seg-meta">129–134km</div></div>
+                <details class="knt-refbox"><summary>נקודות ציון ואנשי קשר (יובל)</summary><div class="knt-reftable"><div class="knt-refrow"><div class="knt-ref-name">Bash-Kaindi</div><div class="knt-ref-detail">על השביל. Zhumagul guesthouse — 3 חדרים, 8 אנשים, אוכל חם.</div></div><div class="knt-refrow"><div class="knt-ref-name">Biricnhi May (1 Mai)</div><div class="knt-ref-detail">יורט קמפ Jol-Bogushtu — לינה+ב.בוקר 3000c. <b>Ainura +996 507 608 609</b>. Nargiza guesthouse: <b>+996 702 903 090</b>.</div></div></div></details>
+                <div class="knt-entries">
+                    <div class="knt-entry" style="--knt-cat:#7B5EA7"><div class="knt-entry-head"><span class="knt-date">14.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">חוות דעת: לא כדאי</span></div><div class="knt-body-en"><ul><li>"Not one of my favorites" — lots of road walking. "Yurt camp" = "yurt city."</li><li><b>His take: not worth the detour</b> — cut through plateau at S11 junction, saving 2–3 days.</li><li>Edelweiß flowers everywhere (highlight). Lake shores vertical — camp in valley below.</li></ul></div><div class="knt-body-he"><ul><li>הרבה הליכה על כביש, "עיר יורטות".</li><li><b>לדעתו: לא שווה</b> — לחתוך לצומת עם מקטע 11, חיסכון 2–3 ימים.</li><li>פרחי אדלווייס. חופי האגם תלולים — לחנות בעמק שמתחת.</li></ul></div></div>
+                    <div class="knt-entry" style="--knt-cat:#0D9E72"><div class="knt-entry-head"><span class="knt-date">19.7</span><span class="knt-sender">Josha</span><span class="knt-chip">חוות דעת: כדאי מאוד! ⭐</span></div><div class="knt-body-en"><ul><li><b>Opposite opinion</b> — "the detour to Kel Suu is SO worth it!! The lake really is one of a kind."</li><li>"A few decent camp spots right at the lake — potentially best camping of the entire KNT!!"</li><li>Skipped waterfall, took taxi Acha-Kaindy→1 Mai (Ulukhaus husband can drive).</li></ul></div><div class="knt-body-he"><ul><li><b>דעה הפוכה</b> — "שווה לגמרי! האגם יוצא דופן."</li><li>"אולי מחנאות הטובות ביותר ב-KNT!!" ממש ליד האגם.</li></ul></div></div>
+                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">19.7</span><span class="knt-sender">Josha</span><span class="knt-chip">מעבר נהר — סכנה ⚠</span></div><div class="knt-body-en"><p><b>Big river at Ak-Sai valley (S10/S11 boundary) can be deep.</b> Got locals on horses to help with first braid — assumed next braid was same — walked in — belly-button deep. Phone water damage. Take crossing point selection seriously even if previous braid seemed easy.</p></div><div class="knt-body-he"><p><b>נהר גדול בגבול מקטעים 10/11 עלול להיות עמוק.</b> הניחו שהזרוע השנייה כמו הראשונה — התברר עמוק עד הטבור. טלפון ניזוק. לקחת ברצינות בחירת נקודת מעבר.</p></div></div>
+                    <div class="knt-entry" style="--knt-cat:#D4960A"><div class="knt-entry-head"><span class="knt-date">18–19.7</span><span class="knt-sender">Clémence / Josha</span><span class="knt-chip">אספקה קל-סו</span></div><div class="knt-body-en"><ul><li>Clémence: kids at yurt camp ate almost everything from their CBT Naryn drop bag — had to wait for replacement.</li><li>Josha: CBT Naryn resupply worked well. Tip: wrap package in lots of tape.</li></ul></div><div class="knt-body-he"><ul><li>ילדים פתחו שקיות האספקה ואכלו כמעט הכל — נאלצו להמתין.</li><li>אספקה CBT נארין עבדה. טיפ: הרבה נייר דבק.</li></ul></div></div>
+                </div>
+            </section>
+
+            <!-- SEGMENT 11 -->
+            <section class="knt-segment" id="knt-s11">
+                <div class="knt-seg-head"><div class="knt-seg-num">11</div><div class="knt-seg-name">Ak-Sai · אק-סאי</div><div class="knt-seg-meta">80km · נוצר מפיצול מקטע 11 הישן ב-15.7</div></div>
+                <div class="knt-entries">
+                    <div class="knt-entry" style="--knt-cat:#D4960A"><div class="knt-entry-head"><span class="knt-date">15.7</span><span class="knt-sender">Yuval</span><span class="knt-chip">הודעת המספור מחדש</span></div><div class="knt-body-en"><p>"Section 11 was split into 11 and 12. What used to be section 12 is now section 13. The new route has a better path and less bushwhacking."</p></div><div class="knt-body-he"><p>מקטע 11 הישן פוצל ל-11 ו-12. מה שהיה 12 הוא עכשיו 13. למסלול החדש שביל טוב יותר ופחות בקיעה.</p></div></div>
+                    <div class="knt-entry" style="--knt-cat:#9A8E82"><div class="knt-entry-head"><span class="knt-date">4–15.7 (לפני 21:20)</span><span class="knt-sender">עידו פרבר / Valentin Henri</span><span class="knt-chip">מספור ישן</span><span class="knt-flag">גבול 11/12 לא ודאי</span></div><div class="knt-body-en"><ul><li>Ido: resupply at Kel Suu via CBT Naryn. "End of section 11" = Kara-Say via Zholdosh.</li><li>Valentin: "Section 11 felt magical — flat, vast landscapes, Kymyz/tea, played cards with locals. Mineral springs: sparkling water from the ground, safe to drink. Detour to peak (3,642m) recommended."</li></ul></div><div class="knt-body-he"><ul><li>עידו: אספקה קל-סו CBT נארין. "סוף מקטע 11" = קארה-סאי דרך Zholdosh.</li><li>ולנטין: "מקטע 11 קסום — נוף רחב, קימיז. מעיינות מינרלים — מים תוססים מהאדמה, בטוח לשתות. לסטות לפסגה 3,642 מ'."</li></ul></div></div>
+                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">22.7</span><span class="knt-sender">Josha</span><span class="knt-chip">מים דלים — חשוב ⚠</span></div><div class="knt-body-en"><ul><li>No technical difficulties — "just a very long slog through Ak-Sai."</li><li>View of river + glaciers from climb out of Kel Suu valley — "KNT Top 3."</li><li><b>Water is sparse:</b> streams on Russian Topo may be dry. <b>No water for 20–25km</b> until just before the mineral spring. Plan accordingly.</li></ul></div><div class="knt-body-he"><ul><li>בלי קשיים טכניים — "הליכה ארוכה מאוד בעמק אק-סאי".</li><li>נוף קרחונים מהמעלה — "KNT Top 3".</li><li><b>מים דלים מאוד:</b> <b>20–25 ק"מ ללא מים</b> עד לפני המעיין המינרלי. לתכנן בהתאם.</li></ul></div></div>
+                </div>
+            </section>
+
+            <!-- SEGMENT 12 -->
+            <section class="knt-segment" id="knt-s12">
+                <div class="knt-seg-head"><div class="knt-seg-num">12</div><div class="knt-seg-name">Naryn River · נהר נארין</div><div class="knt-seg-meta">183km · מקטע חדש מפיצול 15.7</div></div>
+                <details class="knt-refbox"><summary>נקודות ציון ואנשי קשר (יובל)</summary><div class="knt-reftable"><div class="knt-refrow"><div class="knt-ref-name">Kara-Say</div><div class="knt-ref-detail">ביקורת צבאית — היתר מודפס+חתום ודרכון. <b>Zholdosh +996 706 596 956</b> לאספקה.</div></div></div></details>
+                <div class="knt-entries">
+                    <div class="knt-entry" style="--knt-cat:#9A8E82"><div class="knt-entry-head"><span class="knt-date">לפני 15.7</span><span class="knt-sender">הודעות שונות</span><span class="knt-chip">מספור ישן</span><span class="knt-flag">שיוך לא ודאי</span></div><div class="knt-body-en"><p>Messages before 15.7 mentioning "section 12" may refer to old numbering (now section 13). Content is relevant — exact segment assignment uncertain. The new segment 12 has limited separate field reports at this time.</p></div><div class="knt-body-he"><p>הודעות לפני 15.7 שמזכירות "מקטע 12" עשויות להתייחס למספור הישן (שהוא עכשיו מקטע 13). התוכן רלוונטי — שיוך לא ודאי. למקטע 12 החדש יש דיווחים שטח מוגבלים כרגע.</p></div></div>
+                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Elli</span><span class="knt-chip">שאלת SOS / חילוץ</span></div><div class="knt-body-en"><p>Question about mountain-rescue / SOS procedures for segment 12 — no documented answer found in scanned range. Consider: Garmin InReach, local emergency contacts via CBT Naryn, or helicopter evacuation arrangements.</p></div><div class="knt-body-he"><p>שאלה על נהלי חילוץ / SOS במקטע 12 — לא נמצאה תשובה מתועדת. שקלו: Garmin InReach, CBT נארין לאנשי קשר חירום.</p></div></div>
+                </div>
+            </section>
+
+            <!-- SEGMENT 13 -->
+            <section class="knt-segment" id="knt-s13">
+                <div class="knt-seg-head"><div class="knt-seg-num">13</div><div class="knt-seg-name">Arabel · ארבל</div><div class="knt-seg-meta">108km · מה שהיה מקטע 12 הישן</div></div>
+                <div class="knt-entries">
+                    <div class="knt-entry" style="--knt-cat:#0D9E72"><div class="knt-entry-head"><span class="knt-date">18.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">גישה / תחבורה</span></div><div class="knt-body-en"><p>Hitchhiking to start of S13: sometimes drivers want money, sometimes not — compare to Marshrutka/Yandex-taxi and decide.</p></div><div class="knt-body-he"><p>טרמפים לתחילת מקטע 13: לפעמים הנהגים רוצים כסף. להשוות למרשרוטקה/יאנדקס.</p></div></div>
+                    <div class="knt-entry" style="--knt-cat:#7B5EA7"><div class="knt-entry-head"><span class="knt-date">20.7</span><span class="knt-sender">Josha → Yuval/Sviat</span><span class="knt-chip">שינוי מסלול</span></div><div class="knt-body-en"><p>Route near end of S13 changed — extra climb to next valley added. Now exits at <b>Kyzyl-Suu</b> instead of Saruu. Appears to route around a hazard at a thermal-bath location (flagged "red flag").</p></div><div class="knt-body-he"><p>מסלול קרוב לסוף מקטע 13 השתנה — עלייה נוספת. יוצא ב-<b>קיזיל-סו</b> במקום סארו. עוקף סכנה ליד אמבטיה תרמית.</p></div></div>
+                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">דוח מלא מקטע 13 ⚠ קשה</span></div><div class="knt-body-en"><ul><li>Starts easy — big plateau, many swampy areas.</li><li>Goldmine: entry forbidden, white signs every 50m, staff strict.</li><li>Pass: easy climb. Glacier ~4,000m — microspikes optional. Stay mid-slope afternoon (rockfall from melting ice).</li><li><b>Descent notably harder than all previous KNT passes — "maybe the most difficult."</b> 2+ hours steep rocky scrambling; bivouac partway down with headlamp. <b>Do descent in morning.</b> High mountaineering boots would have helped.</li><li>Rest of section: easy + beautiful — "Yosemite vibes."</li></ul></div><div class="knt-body-he"><ul><li>מתחיל בקלות. רמה גדולה, אזורים ביצתיים.</li><li>מכרה זהב — כניסה אסורה. מעבר: קרחון ~4,000 מ', מיקרוספייקס אופציונליים. להישאר באמצע המדרון אחה"צ.</li><li><b>הירידה קשה מאוד — "אולי הקשה ביותר ב-KNT."</b> יותר משעתיים סלעי תלול. ביוואק עם פנס ראש. <b>לרדת בבוקר.</b> מגפי הרים גבוהים יועילו.</li><li>המשך: קל ויפה, "תחושת יוסמיטי".</li></ul></div></div>
+                    <div class="knt-entry" style="--knt-cat:#C95E6A"><div class="knt-entry-head"><span class="knt-date">21.7</span><span class="knt-sender">Valentin Henri</span><span class="knt-chip">בטיחות — תזמון מעבר ⚠</span></div><div class="knt-body-en"><ul><li>Cross the pass early, ideally before sunrise. Loose rocks from former glacier — don't walk above one another in a group.</li><li>Stones fall most likely in the evening (melting ice/frost).</li><li>River crossings S13: not difficult even with more water — cross under glacier early, stay left bank.</li><li>If worried about landslide: camp in woods, cross in morning. Second pass can be skipped in heavy rain.</li></ul></div><div class="knt-body-he"><ul><li>לחצות לפני הזריחה. אבנים משוחררות — לא ללכת אחד מעל השני.</li><li>אבנים נופלות בעיקר בערב.</li><li>מעברי נהר מקטע 13: לא קשים — לחצות מוקדם מתחת לקרחון, להישאר בצד שמאל.</li><li>אם מודאגים ממפולת: לחנות ביער ולחצות בבוקר.</li></ul></div></div>
+                </div>
+            </section>
+
+            <div class="knt-footer">מבוסס על 601 הודעות מקבוצת "KNT Hikers 2026" (18.6–22.7.2026). <b>★ כללי</b> = מידע כלל-שבילי. כרטיסים עם <span class="knt-flag">מספור ישן</span> נכתבו לפני שינוי המספור ב-15.7. עודכן לאחרונה: 22.7.2026.</div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ============ KNT Trail Modal Styles (Bialik's Travels Theme) ============ */
+.knt-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(15, 32, 53, 0.82);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    direction: rtl;
+}
+.knt-modal-overlay.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.knt-modal-container {
+    display: flex;
+    flex-direction: column;
+    width: 94%;
+    max-width: 960px;
+    height: 90vh;
+    max-height: 850px;
+    background: var(--surface, #FFFDF8);
+    border-radius: var(--radius-lg, 24px 10px 24px 10px / 10px 24px 10px 24px);
+    border: 1px solid var(--border, #D4C5A9);
+    overflow: hidden;
+    box-shadow: var(--shadow-xl, 0 16px 56px rgba(30, 58, 95, 0.22));
+}
+.knt-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: var(--primary, #1E3A5F);
+    color: var(--text-on-primary, #FFFDF8);
+    gap: 16px;
+    flex-shrink: 0;
+    border-bottom: 2px solid var(--accent-star, #D4960A);
+}
+.knt-modal-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.knt-modal-icon {
+    font-size: 28px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+.knt-modal-title {
+    font-family: 'Varela Round', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #FFFDF8;
+}
+.knt-modal-subtitle {
+    font-size: 12px;
+    color: var(--border-light, #E6DAC4);
+    margin-top: 2px;
+}
+.knt-modal-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.knt-he-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--border-light, #E6DAC4);
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+}
+.knt-he-toggle input {
+    accent-color: var(--accent-star, #D4960A);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+}
+.knt-close-btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: white;
+    border-radius: var(--radius-sm, 10px);
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+.knt-close-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: scale(1.05);
+}
+
+/* Top bar with tabs & search */
+.knt-topbar {
+    background: var(--surface-warm, #FFF8EE);
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--border-light, #E6DAC4);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.knt-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.knt-tab {
+    font-size: 12.5px;
+    padding: 6px 13px;
+    border-radius: var(--radius-sm, 8px);
+    border: 1px solid var(--border, #D4C5A9);
+    background: var(--surface, #FFFDF8);
+    color: var(--text-secondary, #5A5048);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: 'Varela Round', sans-serif;
+    font-weight: 500;
+}
+.knt-tab:hover {
+    border-color: var(--primary, #1E3A5F);
+    color: var(--primary, #1E3A5F);
+    background: var(--primary-bg, #EEF4FB);
+}
+.knt-tab-general {
+    background: var(--primary, #1E3A5F);
+    color: var(--text-on-primary, #FFFDF8);
+    border-color: var(--primary, #1E3A5F);
+}
+.knt-tab-general:hover {
+    background: var(--primary-light, #2E5480);
+    color: white;
+}
+.knt-tab-n {
+    font-size: 11px;
+    opacity: 0.8;
+    margin-right: 4px;
+}
+.knt-search {
+    width: 100%;
+    padding: 9px 14px;
+    border: 1px solid var(--border, #D4C5A9);
+    border-radius: var(--radius-sm, 10px);
+    background: var(--surface, #FFFDF8);
+    color: var(--text-primary, #2C2820);
+    font-size: 13.5px;
+    font-family: inherit;
+    direction: rtl;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+}
+.knt-search:focus {
+    outline: 2px solid var(--primary-lighter, #5B8DB8);
+    outline-offset: 0;
+    border-color: var(--primary, #1E3A5F);
+}
+
+/* Modal Scrollable Body */
+.knt-modal-body {
+    overflow-y: auto;
+    flex: 1;
+    padding: 24px;
+    direction: rtl;
+    background: var(--background, #F7F2E8);
+}
+
+/* Renumbering Notice */
+.knt-notice {
+    background: var(--surface-warm, #FFF8EE);
+    color: var(--text-primary, #2C2820);
+    border: 1px solid var(--accent-star-light, #E8B930);
+    border-right: 4px solid var(--accent-star, #D4960A);
+    border-radius: var(--radius-sm, 10px);
+    padding: 14px 18px;
+    font-size: 13.5px;
+    margin-bottom: 24px;
+    line-height: 1.6;
+    box-shadow: var(--shadow-sm);
+}
+.knt-notice code {
+    font-family: monospace;
+    background: rgba(212, 150, 10, 0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* Segments Structure */
+.knt-segment {
+    margin-top: 36px;
+    scroll-margin-top: 20px;
+}
+.knt-segment:first-child { margin-top: 0; }
+
+.knt-seg-head {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    flex-wrap: wrap;
+    border-bottom: 2px solid var(--primary, #1E3A5F);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}
+.knt-seg-num {
+    font-family: 'Amatic SC', cursive;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 0.9;
+    color: var(--primary, #1E3A5F);
+}
+.knt-gen { font-size: 30px; }
+.knt-seg-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary, #2C2820);
+    padding-bottom: 4px;
+}
+.knt-seg-meta {
+    margin-right: auto;
+    font-size: 12px;
+    color: var(--text-tertiary, #9A8E82);
+    padding-bottom: 6px;
+}
+.knt-seg-topic {
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-secondary, #5A5048);
+    font-family: 'Varela Round', sans-serif;
+    font-weight: 700;
+    margin: 20px 0 10px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-light, #E6DAC4);
+}
+
+/* Reference Box */
+.knt-refbox {
+    background: var(--primary-bg, #EEF4FB);
+    border: 1px solid var(--border-light, #E6DAC4);
+    border-radius: var(--radius-sm, 10px);
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+.knt-refbox summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--primary, #1E3A5F);
+    list-style: none;
+}
+.knt-refbox summary::-webkit-details-marker { display: none; }
+.knt-reftable {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.knt-refrow {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border, #D4C5A9);
+}
+.knt-refrow:first-child { border-top: none; padding-top: 0; }
+.knt-ref-name { font-weight: 700; color: var(--text-primary, #2C2820); font-size: 12.5px; }
+.knt-ref-detail { color: var(--text-secondary, #5A5048); font-size: 12px; }
+
+/* Entry Cards */
+.knt-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.knt-entry {
+    background: var(--surface, #FFFDF8);
+    border-radius: var(--radius-sm, 10px);
+    border: 1px solid var(--border-light, #E6DAC4);
+    border-right: 4px solid var(--knt-cat, var(--primary, #1E3A5F));
+    padding: 14px 16px;
+    box-shadow: var(--shadow-sm);
+}
+.knt-entry.knt-hidden { display: none; }
+.knt-entry-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--text-tertiary, #9A8E82);
+    margin-bottom: 8px;
+}
+.knt-date {
+    font-family: 'Varela Round', sans-serif;
+    color: var(--text-primary, #2C2820);
+    font-weight: 700;
+}
+.knt-sender { font-weight: 600; color: var(--text-secondary, #5A5048); }
+.knt-chip {
+    font-size: 10.5px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    background: var(--primary-bg, #EEF4FB);
+    color: var(--knt-cat, var(--primary, #1E3A5F));
+    border: 1px solid color-mix(in srgb, var(--knt-cat, #1E3A5F) 30%, transparent);
+    font-weight: 600;
+}
+.knt-flag {
+    font-size: 10.5px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    background: var(--surface-warm, #FFF8EE);
+    color: var(--accent-star, #D4960A);
+    border: 1px solid var(--accent-star-light, #E8B930);
+    font-weight: 600;
+}
+.knt-body-en {
+    font-size: 13.5px;
+    direction: ltr;
+    text-align: left;
+    unicode-bidi: plaintext;
+    color: var(--text-primary, #2C2820);
+    line-height: 1.55;
+}
+.knt-body-en ul, .knt-body-he ul { margin: 6px 0; padding-inline-start: 20px; }
+.knt-body-en li, .knt-body-he li { margin-bottom: 4px; }
+.knt-body-en p, .knt-body-he p { margin: 0 0 6px; }
+.knt-body-he {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-light, #E6DAC4);
+    direction: rtl;
+    text-align: right;
+    color: var(--text-secondary, #5A5048);
+    font-size: 13px;
+    line-height: 1.55;
+}
+.knt-modal-overlay.hide-he .knt-body-he { display: none; }
+.knt-footer {
+    margin-top: 36px;
+    font-size: 12px;
+    color: var(--text-tertiary, #9A8E82);
+    border-top: 1px solid var(--border-light, #E6DAC4);
+    padding-top: 14px;
+    direction: rtl;
+    line-height: 1.6;
+}
+
+@media (max-width: 650px) {
+    .knt-modal-container {
+        width: 100%;
+        height: 100vh;
+        max-height: 100vh;
+        margin: 0;
+        border-radius: 0;
+    }
+    .knt-modal-subtitle { display: none; }
+    .knt-modal-header { padding: 12px 16px; }
+    .knt-topbar { padding: 10px 16px; }
+    .knt-modal-body { padding: 16px; }
+}
+
+/* Dark Mode Adaptations */
+[data-theme="dark"] .knt-modal-container {
+    background: #151A24;
+    border-color: #2A3245;
+}
+[data-theme="dark"] .knt-modal-header {
+    background: #0F1722;
+}
+[data-theme="dark"] .knt-topbar, 
+[data-theme="dark"] .knt-modal-body {
+    background: #151A24;
+}
+[data-theme="dark"] .knt-entry {
+    background: #1E2536;
+    border-color: #2A3245;
+}
+[data-theme="dark"] .knt-notice {
+    background: #282215;
+    color: #E8B930;
+    border-color: #594410;
+}
+[data-theme="dark"] .knt-search {
+    background: #1E2536;
+    color: #E0E8F5;
+    border-color: #2A3245;
+}
+[data-theme="dark"] .knt-tab {
+    background: #1E2536;
+    color: #A0B0C8;
+    border-color: #2A3245;
+}
+[data-theme="dark"] .knt-tab:hover {
+    border-color: #5B8DB8;
+    color: white;
+}
+[data-theme="dark"] .knt-tab-general {
+    background: #2E5480;
+    color: white;
+}
+[data-theme="dark"] .knt-refbox {
+    background: #1E2536;
+    border-color: #2A3245;
+}
+[data-theme="dark"] .knt-body-en { color: #E0E8F5; }
+[data-theme="dark"] .knt-body-he { color: #A0A0B0; }
+[data-theme="dark"] .knt-seg-num { color: #5B8DB8; }
+[data-theme="dark"] .knt-seg-head { border-color: #5B8DB8; }
+
+</style>
+<script>
+(function() {
+    function initKntModal() {
+        var closeBtn = document.getElementById('knt-close-btn');
+        var modal = document.getElementById('knt-modal');
+        var searchInput = document.getElementById('knt-search');
+        var heToggle = document.getElementById('kntHeToggle');
+        var modalBody = document.getElementById('knt-modal-body');
+
+        if (closeBtn && modal) {
+            closeBtn.addEventListener('click', function() {
+                modal.classList.remove('active');
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                var q = this.value.trim().toLowerCase();
+                document.querySelectorAll('.knt-entry').forEach(function(e) {
+                    if (!q) {
+                        e.classList.remove('knt-hidden');
+                        return;
+                    }
+                    var text = e.textContent.toLowerCase();
+                    e.classList.toggle('knt-hidden', !text.includes(q));
+                });
+            });
+        }
+
+        if (heToggle && modal) {
+            heToggle.addEventListener('change', function() {
+                modal.classList.toggle('hide-he', !this.checked);
+            });
+        }
+
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('active');
+            });
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
+                modal.classList.remove('active');
+            }
+        });
+
+        // Tab smooth scroll within modal
+        document.querySelectorAll('.knt-tab').forEach(function(tab) {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                var href = this.getAttribute('href');
+                if (!href) return;
+                var target = document.querySelector(href);
+                if (target && modalBody) {
+                    var targetTop = target.offsetTop - modalBody.offsetTop - 10;
+                    modalBody.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' });
+                }
+            });
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initKntModal);
+    } else {
+        initKntModal();
+    }
+})();
+
+</script>
 </body>
 </html>
