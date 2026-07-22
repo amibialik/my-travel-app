@@ -1576,6 +1576,8 @@ export function closeGooglePlacePanel() {
     const panel = document.getElementById('google-place-panel');
     if (panel) panel.classList.remove('active');
 }
+window.showGooglePlaceDetails = showGooglePlaceDetails;
+window.closeGooglePlacePanel = closeGooglePlacePanel;
 
 export function openModalFromGooglePlace(googlePlace) {
     closeGooglePlacePanel();

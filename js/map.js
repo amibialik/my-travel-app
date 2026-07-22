@@ -101,11 +101,9 @@ export function initMap() {
 
     // Click on map to show rich Google Place details for POIs
     newMap.addListener('click', (e) => {
-        if (e.placeId) {
-            e.stop();
+        if (e && e.placeId) {
+            if (typeof e.stop === 'function') e.stop();
             showGooglePlaceDetails(e.placeId);
-        } else {
-            closeGooglePlacePanel();
         }
     });
 
