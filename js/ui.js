@@ -1418,10 +1418,20 @@ export function showGooglePlaceDetails(placeId) {
     panel.classList.add('loading');
     panel.classList.add('active');
 
-    const service = new google.maps.places.PlacesService(map);
+    // Immediate loading UI feedback
+    panel.innerHTML = `
+        <div style="position:relative; padding:40px 20px; text-align:center; color:var(--text-secondary); min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <button class="panel-close-btn" id="btn-google-panel-close-loading" style="position:absolute; top:16px; left:16px; width:32px; height:32px; border-radius:50%; border:none; background:rgba(0,0,0,0.08); color:var(--text-primary); display:flex; align-items:center; justify-content:center; cursor:pointer;"><i class="fas fa-times"></i></button>
+            <i class="fas fa-spinner fa-spin" style="font-size:32px; color:var(--primary); margin-bottom:14px;"></i>
+            <div style="font-size:14.5px; font-weight:600; color:var(--text-primary);">טוען פרטי מקום בגוגל מפות...</div>
+        </div>
+    `;
+    panel.querySelector('#btn-google-panel-close-loading')?.addEventListener('click', closeGooglePlacePanel);
+
+    const service = new google.maps.places.PlacesService(map || window.miniMap || document.createElement('div'));
     service.getDetails({
         placeId: placeId,
-        fields: ['name', 'formatted_address', 'formatted_phone_number', 'website', 'rating', 'user_ratings_total', 'photos', 'reviews', 'url']
+        fields: ['name', 'formatted_address', 'formatted_phone_number', 'website', 'rating', 'user_ratings_total', 'photos', 'reviews', 'url', 'geometry', 'place_id', 'opening_hours', 'vicinity', 'types']
     }, (place, status) => {
         panel.classList.remove('loading');
         if (status === google.maps.places.PlacesServiceStatus.OK && place) {
@@ -1429,48 +1439,135 @@ export function showGooglePlaceDetails(placeId) {
 
             let photoUrl = '';
             if (place.photos && place.photos.length > 0) {
-                photoUrl = place.photos[0].getUrl({ maxWidth: 400, maxHeight: 220 });
+                photoUrl = place.photos[0].getUrl({ maxWidth: 600, maxHeight: 320 });
             }
 
             let ratingHtml = '';
             if (place.rating) {
+                const fullStars = Math.floor(place.rating);
+                const hasHalf = (place.rating % 1) >= 0.5;
+                let starsSvg = '';
+                for (let i = 0; i < 5; i++) {
+                    if (i < fullStars) {
+                        starsSvg += '<i class="fas fa-star" style="color:#F59E0B; font-size:12px;"></i>';
+                    } else if (i === fullStars && hasHalf) {
+                        starsSvg += '<i class="fas fa-star-half-alt" style="color:#F59E0B; font-size:12px;"></i>';
+                    } else {
+                        starsSvg += '<i class="far fa-star" style="color:#CBD5E1; font-size:12px;"></i>';
+                    }
+                }
+
                 ratingHtml = `
-                    <div class="google-rating" style="display:flex; align-items:center; gap:4px; margin-top:4px;">
-                        <span class="rating-num" style="font-weight:bold; font-size:13.5px; color:#F59E0B;">${place.rating}</span>
-                        <div class="stars-outer" style="position:relative; display:inline-block; font-family:'Font Awesome 5 Free'; font-weight:900; color:#E2E8F0;">
-                            <span style="color:#F59E0B;"><i class="fas fa-star"></i></span>
+                    <div class="google-rating" style="display:flex; align-items:center; gap:6px; margin-top:6px;">
+                        <span class="rating-num" style="font-weight:bold; font-size:14px; color:#F59E0B;">${place.rating}</span>
+                        <div class="stars-wrap" style="display:inline-flex; gap:2px;">
+                            ${starsSvg}
                         </div>
-                        <span class="reviews-count" style="font-size:12px; color:var(--text-muted);">(${place.user_ratings_total} חוות דעת)</span>
+                        <span class="reviews-count" style="font-size:12px; color:var(--text-muted);">(${place.user_ratings_total ? place.user_ratings_total.toLocaleString() : 0} חוות דעת)</span>
+                    </div>
+                `;
+            }
+
+            let isOpenHtml = '';
+            if (place.opening_hours && typeof place.opening_hours.isOpen === 'function') {
+                const openNow = place.opening_hours.isOpen();
+                isOpenHtml = openNow 
+                    ? `<span style="display:inline-block; padding:2px 8px; border-radius:12px; background:#D1FAE5; color:#065F46; font-size:11px; font-weight:bold; margin-top:6px;">פתוח עכשיו</span>`
+                    : `<span style="display:inline-block; padding:2px 8px; border-radius:12px; background:#FEE2E2; color:#991B1B; font-size:11px; font-weight:bold; margin-top:6px;">סגור כעת</span>`;
+            }
+
+            let lat = null, lng = null;
+            if (place.geometry && place.geometry.location) {
+                lat = place.geometry.location.lat();
+                lng = place.geometry.location.lng();
+            }
+
+            let wazeUrl = '';
+            if (lat && lng) {
+                wazeUrl = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
+            }
+
+            let reviewsHtml = '';
+            if (place.reviews && place.reviews.length > 0) {
+                const topReviews = place.reviews.slice(0, 2);
+                reviewsHtml = `
+                    <div style="margin-top:18px; border-top:1px solid var(--border-light); padding-top:14px;">
+                        <div style="font-size:13px; font-weight:bold; color:var(--primary-dark); margin-bottom:8px;"><i class="fas fa-comment-alt" style="margin-left:6px; color:var(--primary-lighter);"></i>ביקורות גוגל:</div>
+                        ${topReviews.map(r => `
+                            <div style="background:var(--primary-bg); padding:10px 12px; border-radius:var(--radius-sm); margin-bottom:8px; font-size:12px; line-height:1.4;">
+                                <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:600; color:var(--text-primary);">
+                                    <span>${escapeHtml(r.author_name)}</span>
+                                    <span style="color:#F59E0B;">★ ${r.rating}</span>
+                                </div>
+                                <div style="color:var(--text-secondary); max-height:60px; overflow:hidden; text-overflow:ellipsis;">"${escapeHtml(r.text)}"</div>
+                            </div>
+                        `).join('')}
                     </div>
                 `;
             }
 
             panel.innerHTML = `
-                <div class="panel-header-image" style="position:relative; width:100%; height:150px; background-color:#E2E8F0; overflow:hidden;">
-                    ${photoUrl ? `<img src="${photoUrl}" style="width:100%; height:100%; object-fit:cover;">` : '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:24px;"><i class="fas fa-image"></i></div>'}
-                    <button class="panel-close-btn" id="btn-google-panel-close" style="position:absolute; top:12px; left:12px; width:28px; height:28px; border-radius:50%; border:none; background:rgba(0,0,0,0.5); color:white; display:flex; align-items:center; justify-content:center; cursor:pointer;"><i class="fas fa-times"></i></button>
+                <div class="panel-header-image" style="position:relative; width:100%; height:180px; background-color:#E2E8F0; overflow:hidden;">
+                    ${photoUrl ? `<img src="${photoUrl}" style="width:100%; height:100%; object-fit:cover;">` : '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:32px; background:var(--primary-bg);"><i class="fas fa-map-marked-alt"></i></div>'}
+                    <button class="panel-close-btn" id="btn-google-panel-close" style="position:absolute; top:12px; left:12px; width:32px; height:32px; border-radius:50%; border:none; background:rgba(0,0,0,0.55); color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; transition:background 0.2s;"><i class="fas fa-times"></i></button>
+                    ${place.photos && place.photos.length > 1 ? `<span style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.6); color:white; font-size:11px; padding:3px 8px; border-radius:10px;"><i class="fas fa-camera" style="margin-left:4px;"></i>${place.photos.length} תמונות</span>` : ''}
                 </div>
-                <div class="panel-content" style="padding:16px; direction:rtl; text-align:right;">
-                    <h2 class="panel-title" style="font-size:18px; font-weight:bold; color:var(--primary-dark); margin:0 0 4px 0;">${escapeHtml(place.name)}</h2>
+                <div class="panel-content" style="padding:18px; direction:rtl; text-align:right; overflow-y:auto; flex:1;">
+                    <h2 class="panel-title" style="font-size:19px; font-weight:bold; color:var(--primary-dark); margin:0 0 4px 0; line-height:1.3;">${escapeHtml(place.name)}</h2>
                     ${ratingHtml}
-                    <div class="panel-address" style="font-size:12.5px; color:var(--text-secondary); margin-top:8px;"><i class="fas fa-map-marker-alt" style="color:var(--text-muted); margin-left:6px;"></i>${escapeHtml(place.formatted_address || 'אין כתובת')}</div>
+                    ${isOpenHtml}
 
-                    ${place.formatted_phone_number ? `<div class="panel-phone" style="font-size:12.5px; color:var(--text-secondary); margin-top:6px;"><i class="fas fa-phone-alt" style="color:var(--text-muted); margin-left:6px;"></i>${escapeHtml(place.formatted_phone_number)}</div>` : ''}
-
-                    <div style="display:flex; gap:8px; margin-top:16px;">
-                        <button class="panel-btn" id="btn-add-google-place" style="flex:1; height:34px; background:#10B981; border:none; color:white; font-family:inherit; font-size:12.5px; font-weight:bold; border-radius:var(--radius-sm); cursor:pointer;"><i class="fas fa-plus" style="margin-left:4px;"></i>שמור למפת החלומות</button>
-                        ${place.website ? `<a href="${place.website}" target="_blank" class="panel-btn-outline" style="text-decoration:none; display:flex; align-items:center; justify-content:center; width:34px; height:34px; border:1.5px solid var(--border); border-radius:var(--radius-sm); color:var(--text-secondary);"><i class="fas fa-globe"></i></a>` : ''}
-                        <a href="${place.url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}&query_place_id=${placeId}`}" target="_blank" class="panel-btn-outline" style="text-decoration:none; display:flex; align-items:center; justify-content:center; width:34px; height:34px; border:1.5px solid var(--border); border-radius:var(--radius-sm); color:#4285F4;"><i class="fab fa-google"></i></a>
+                    <div class="panel-address" style="font-size:13px; color:var(--text-secondary); margin-top:12px; line-height:1.4;">
+                        <i class="fas fa-map-marker-alt" style="color:var(--accent-rose); margin-left:8px; font-size:14px;"></i>${escapeHtml(place.formatted_address || place.vicinity || 'אין כתובת')}
                     </div>
+
+                    ${place.formatted_phone_number ? `
+                        <div class="panel-phone" style="font-size:13px; color:var(--text-secondary); margin-top:8px;">
+                            <i class="fas fa-phone-alt" style="color:var(--primary-lighter); margin-left:8px; font-size:14px;"></i>
+                            <a href="tel:${place.formatted_phone_number}" style="color:inherit; text-decoration:none; font-weight:500;">${escapeHtml(place.formatted_phone_number)}</a>
+                        </div>
+                    ` : ''}
+
+                    <div style="display:flex; flex-direction:column; gap:8px; margin-top:20px;">
+                        <button class="panel-btn" id="btn-add-google-place" style="width:100%; height:40px; background:var(--accent-emerald, #0D9E72); border:none; color:white; font-family:inherit; font-size:13.5px; font-weight:bold; border-radius:var(--radius-sm); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:var(--shadow-sm);">
+                            <i class="fas fa-plus-circle" style="font-size:15px;"></i>שמור למפת החלומות
+                        </button>
+
+                        <div style="display:flex; gap:8px;">
+                            ${wazeUrl ? `
+                                <a href="${wazeUrl}" target="_blank" style="flex:1; height:36px; background:#33CCFF; color:#002244; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:var(--radius-sm); font-size:12.5px; font-weight:bold;">
+                                    <i class="fas fa-route"></i>ניווט Waze
+                                </a>
+                            ` : ''}
+                            ${place.website ? `
+                                <a href="${place.website}" target="_blank" style="flex:1; height:36px; border:1.5px solid var(--border); border-radius:var(--radius-sm); color:var(--text-primary); text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px; font-size:12.5px; font-weight:500; background:var(--surface);">
+                                    <i class="fas fa-globe" style="color:var(--primary-lighter);"></i>אתר אינטרנט
+                                </a>
+                            ` : ''}
+                            <a href="${place.url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}&query_place_id=${placeId}`}" target="_blank" style="width:36px; height:36px; border:1.5px solid var(--border); border-radius:var(--radius-sm); color:#4285F4; text-decoration:none; display:flex; align-items:center; justify-content:center; font-size:14px; background:var(--surface);" title="פתח בגוגל מפות">
+                                <i class="fab fa-google"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    ${reviewsHtml}
                 </div>
             `;
 
-            panel.querySelector('#btn-google-panel-close').addEventListener('click', closeGooglePlacePanel);
-            panel.querySelector('#btn-add-google-place').addEventListener('click', () => {
+            panel.querySelector('#btn-google-panel-close')?.addEventListener('click', closeGooglePlacePanel);
+            panel.querySelector('#btn-add-google-place')?.addEventListener('click', () => {
                 openModalFromGooglePlace(place);
             });
         } else {
-            panel.innerHTML = `<div style="padding:20px; text-align:center; color:var(--text-secondary);">פרטי המקום לא נמצאו</div>`;
+            panel.innerHTML = `
+                <div style="position:relative; padding:40px 20px; text-align:center; color:var(--text-secondary);">
+                    <button class="panel-close-btn" id="btn-google-panel-close-err" style="position:absolute; top:14px; left:14px; width:30px; height:30px; border-radius:50%; border:none; background:rgba(0,0,0,0.08); color:var(--text-primary); display:flex; align-items:center; justify-content:center; cursor:pointer;"><i class="fas fa-times"></i></button>
+                    <i class="fas fa-exclamation-circle" style="font-size:36px; color:var(--accent-rose, #C95E6A); margin-bottom:12px;"></i>
+                    <div style="font-size:15px; font-weight:bold; color:var(--text-primary);">פרטי המקום לא נמצאו</div>
+                    <div style="font-size:12.5px; margin-top:6px; color:var(--text-muted);">לא ניתן להציג פרטים מלאים מתוך גוגל מפות עבור מיקום זה.</div>
+                </div>
+            `;
+            panel.querySelector('#btn-google-panel-close-err')?.addEventListener('click', closeGooglePlacePanel);
         }
     });
 }

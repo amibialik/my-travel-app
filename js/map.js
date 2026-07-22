@@ -54,6 +54,7 @@ export function initMap() {
         mapTypeControl: false,
         streetViewControl: !isMobile,
         fullscreenControl: false,
+        clickableIcons: true,
         styles: isDark ? darkMapStyle : customMapStyle
     };
 

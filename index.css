@@ -2840,7 +2840,7 @@ body {
     background: var(--surface);
     border-left: 3px double var(--border);
     box-shadow: var(--shadow-xl);
-    z-index: 1050;
+    z-index: 2500;
     transform: translateX(100%);
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
