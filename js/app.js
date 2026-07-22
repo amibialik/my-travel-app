@@ -53,7 +53,8 @@ import {
     checkAdminMode,
     initAdminEvents,
     initOfflineEvents,
-    initResizablePanels
+    initResizablePanels,
+    updateMiniMap
 } from './ui.js';
 
 import {
@@ -261,30 +262,48 @@ window.handleImageUpload = handleImageUpload;
 
 // ============= Import Google Maps link coordinates =============
 async function handleGmapsLinkImport() {
-    const linkInput = document.getElementById('place-search');
-    if (!linkInput) return;
+    const gmapsInput = document.getElementById('place-gmaps-link');
+    const searchInput = document.getElementById('place-search');
+    const statusEl = document.getElementById('gmaps-link-status');
 
-    const urlText = linkInput.value.trim();
+    let urlText = '';
+
+    if (gmapsInput && gmapsInput.value.trim()) {
+        urlText = gmapsInput.value.trim();
+    } else if (searchInput && searchInput.value.trim()) {
+        urlText = searchInput.value.trim();
+    }
+
+    if (!urlText) {
+        showToast('אנא הזן או הדבק קישור תקין של Google Maps', 'error');
+        if (statusEl) statusEl.innerHTML = '<span style="color:var(--accent-rose);">אנא הזן קישור בתיבה</span>';
+        return;
+    }
+
     if (!urlText.startsWith('http://') && !urlText.startsWith('https://')) {
-        showToast('אנא הזן קישור תקין של Google Maps', 'error');
+        showToast('אנא הזן קישור שמתחיל ב-http:// או https://', 'error');
+        if (statusEl) statusEl.innerHTML = '<span style="color:var(--accent-rose);">הקישור חייב להתחיל ב-http:// או https://</span>';
         return;
     }
 
     showToast('מפענח את הקישור...', 'info');
+    if (statusEl) statusEl.innerHTML = '<span style="color:var(--primary);"><i class="fas fa-spinner fa-spin"></i> מפענח את הקישור מול גוגל מפות...</span>';
 
     try {
         let longUrl = urlText;
 
-        // Resolve short url
+        // Resolve shortened URLs (maps.app.goo.gl or goo.gl/maps)
         if (urlText.includes('maps.app.goo.gl') || urlText.includes('goo.gl/maps')) {
-            const apiEndpoint = `${window.location.origin}/api/resolve-link?url=${encodeURIComponent(urlText)}`;
-            const res = await fetch(apiEndpoint);
-            const data = await res.json();
+            try {
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(urlText)}`;
+                const res = await fetch(proxyUrl);
+                const data = await res.json();
 
-            if (data.success && data.resolvedUrl) {
-                longUrl = data.resolvedUrl;
-            } else {
-                throw new Error(data.error || 'נכשל בפענוח הקישור המקוצר');
+                if (data && data.status && data.status.url) {
+                    longUrl = data.status.url;
+                }
+            } catch (err) {
+                console.warn('Proxy unshorten failed, attempting direct parsing:', err);
             }
         }
 
@@ -292,29 +311,42 @@ async function handleGmapsLinkImport() {
         let lng = null;
         let queryName = null;
 
-        // Extract Coordinates
+        // Extract Coordinates via multiple patterns
+        // Pattern 1: @lat,lng
         const atCoordsMatch = longUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
         if (atCoordsMatch) {
             lat = parseFloat(atCoordsMatch[1]);
             lng = parseFloat(atCoordsMatch[2]);
         }
 
-        const placeSegmentMatch = longUrl.match(/\/place\/([^/]+)/);
-        if (placeSegmentMatch) {
-            try {
-                const rawSegment = placeSegmentMatch[1];
-                queryName = decodeURIComponent(rawSegment.replace(/\+/g, ' '));
-                if (queryName.match(/^-?\d+\.\d+,\s*-?\d+\.\d+$/)) {
-                    const parts = queryName.split(',');
-                    lat = parseFloat(parts[0]);
-                    lng = parseFloat(parts[1]);
-                    queryName = null;
-                }
-            } catch (err) {
-                console.error("Failed to decode place segment:", err);
+        // Pattern 2: ?q=lat,lng or &query=lat,lng or &ll=lat,lng
+        if (!lat || !lng) {
+            const queryCoordsMatch = longUrl.match(/[?&](?:q|query|ll|sll|center)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+            if (queryCoordsMatch) {
+                lat = parseFloat(queryCoordsMatch[1]);
+                lng = parseFloat(queryCoordsMatch[2]);
             }
         }
 
+        // Pattern 3: /place/lat,lng
+        if (!lat || !lng) {
+            const placeCoordsMatch = longUrl.match(/\/place\/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
+            if (placeCoordsMatch) {
+                lat = parseFloat(placeCoordsMatch[1]);
+                lng = parseFloat(placeCoordsMatch[2]);
+            }
+        }
+
+        // Pattern 4: !3dLAT!4dLNG or 3dLAT...4dLNG
+        if (!lat || !lng) {
+            const dataEmbedMatch = longUrl.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/) || longUrl.match(/3d(-?\d+\.\d+).*?4d(-?\d+\.\d+)/);
+            if (dataEmbedMatch) {
+                lat = parseFloat(dataEmbedMatch[1]);
+                lng = parseFloat(dataEmbedMatch[2]);
+            }
+        }
+
+        // Pattern 5: /lat,lng in path
         if (!lat || !lng) {
             const pathCoordsMatch = longUrl.match(/\/(-?\d+\.\d+),\s*(-?\d+\.\d+)/);
             if (pathCoordsMatch) {
@@ -323,63 +355,109 @@ async function handleGmapsLinkImport() {
             }
         }
 
-        if (!lat && !lng && !queryName) {
-            throw new Error('לא נמצאו קואורדינטות או שם מיקום בקישור המפוענח');
+        // Extract place name segment if available (/place/Place+Name/)
+        const placeSegmentMatch = longUrl.match(/\/place\/([^/@?#]+)/);
+        if (placeSegmentMatch) {
+            try {
+                const rawSegment = placeSegmentMatch[1];
+                queryName = decodeURIComponent(rawSegment.replace(/\+/g, ' '));
+                if (queryName.match(/^-?\d+\.\d+,\s*-?\d+\.\d+$/)) {
+                    queryName = null;
+                }
+            } catch (err) {
+                console.error("Failed to decode place segment:", err);
+            }
         }
 
-        document.getElementById('place-google-url').value = urlText;
+        if (!lat && !lng && !queryName) {
+            throw new Error('לא נמצאו קואורדינטות או שם מיקום בקישור המפוענח. וודא שהקישור הועתק מ-Google Maps');
+        }
 
-        if (queryName) {
+        // Fill Google URL input
+        const googleUrlInput = document.getElementById('place-google-url');
+        if (googleUrlInput) googleUrlInput.value = urlText;
+
+        // If coordinates found, set lat/lng and update miniMap
+        if (lat && lng) {
+            const latInput = document.getElementById('place-lat');
+            const lngInput = document.getElementById('place-lng');
+            if (latInput) latInput.value = lat.toFixed(6);
+            if (lngInput) lngInput.value = lng.toFixed(6);
+
+            updateMiniMap(lat, lng);
+        }
+
+        // Query PlacesService or Reverse Geocode to complete place name & address & photos
+        if (queryName && typeof google !== 'undefined' && google.maps && google.maps.places) {
             const service = new google.maps.places.PlacesService(document.createElement('div'));
             service.findPlaceFromQuery({
                 query: queryName,
-                fields: ['name', 'geometry', 'formatted_address']
+                fields: ['name', 'geometry', 'formatted_address', 'photos', 'rating', 'user_ratings_total', 'website', 'url']
             }, (results, status) => {
-                if (status === 'OK' && results[0]) {
+                if (status === 'OK' && results && results[0]) {
                     const place = results[0];
-                    const placeLat = place.geometry.location.lat();
-                    const placeLng = place.geometry.location.lng();
+                    const placeLat = place.geometry ? place.geometry.location.lat() : lat;
+                    const placeLng = place.geometry ? place.geometry.location.lng() : lng;
 
                     document.getElementById('place-name').value = place.name;
-                    document.getElementById('place-description').value = place.formatted_address || '';
-                    document.getElementById('place-lat').value = placeLat.toFixed(6);
-                    document.getElementById('place-lng').value = placeLng.toFixed(6);
-
-                    if (window.miniMap) {
-                        window.miniMap.setCenter({ lat: placeLat, lng: placeLng });
-                        if (window.miniMapMarker) {
-                            window.miniMapMarker.setPosition({ lat: placeLat, lng: placeLng });
-                        }
+                    if (place.formatted_address) {
+                        document.getElementById('place-description').value = place.formatted_address;
+                    }
+                    if (placeLat && placeLng) {
+                        document.getElementById('place-lat').value = placeLat.toFixed(6);
+                        document.getElementById('place-lng').value = placeLng.toFixed(6);
+                        updateMiniMap(placeLat, placeLng);
+                    }
+                    if (place.photos && place.photos.length > 0) {
+                        const photoUrl = place.photos[0].getUrl({ maxWidth: 600, maxHeight: 400 });
+                        setPendingImages([photoUrl]);
+                        renderImagePreviews();
                     }
 
-                    showToast('המיקום נטען בהצלחה!', 'success');
-                    linkInput.value = '';
+                    showToast('המיקום ופרטיו נטענו בהצלחה!', 'success');
+                    if (statusEl) statusEl.innerHTML = '<span style="color:var(--accent-emerald, #10B981); font-weight:bold;"><i class="fas fa-check-circle"></i> המיקום נטען בהצלחה!</span>';
+                    if (gmapsInput) gmapsInput.value = '';
+                } else if (lat && lng) {
+                    reverseGeocodeAndFill(lat, lng, queryName, urlText, statusEl, gmapsInput);
                 } else {
-                    if (lat && lng) {
-                        reverseGeocodeCoords(lat, lng, (address) => {
-                            document.getElementById('place-name').value = queryName;
-                            document.getElementById('place-description').value = address;
-                            document.getElementById('place-lat').value = lat.toFixed(6);
-                            document.getElementById('place-lng').value = lng.toFixed(6);
-                            showToast('המיקום נטען לפי קואורדינטות', 'success');
-                            linkInput.value = '';
-                        });
-                    } else {
-                        showToast(`לא נמצאו תוצאות בגוגל עבור "${queryName}"`, 'error');
-                    }
+                    showToast(`נטענו קואורדינטות בלבד עבור "${queryName}"`, 'info');
+                    if (statusEl) statusEl.innerHTML = '<span style="color:var(--primary);"><i class="fas fa-check"></i> נטענו קואורדינטות</span>';
                 }
             });
         } else if (lat && lng) {
-            reverseGeocodeCoords(lat, lng, (address) => {
-                document.getElementById('place-name').value = address;
-                document.getElementById('place-lat').value = lat.toFixed(6);
-                document.getElementById('place-lng').value = lng.toFixed(6);
-                showToast('המיקום נטען בהצלחה!', 'success');
-                linkInput.value = '';
-            });
+            reverseGeocodeAndFill(lat, lng, queryName, urlText, statusEl, gmapsInput);
         }
+
     } catch (error) {
         showToast(`שגיאה בפענוח הקישור: ${error.message}`, 'error');
+        if (statusEl) statusEl.innerHTML = `<span style="color:var(--accent-rose);"><i class="fas fa-exclamation-triangle"></i> ${error.message}</span>`;
+    }
+}
+
+function reverseGeocodeAndFill(lat, lng, queryName, urlText, statusEl, gmapsInput) {
+    if (typeof google !== 'undefined' && google.maps && google.maps.Geocoder) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            if (status === 'OK' && results && results[0]) {
+                const address = results[0].formatted_address;
+                const name = queryName || results[0].address_components[0]?.long_name || 'מקום חדש';
+
+                document.getElementById('place-name').value = name;
+                document.getElementById('place-description').value = address;
+                showToast('המיקום וכתובתו נטענו בהצלחה!', 'success');
+                if (statusEl) statusEl.innerHTML = '<span style="color:var(--accent-emerald, #10B981); font-weight:bold;"><i class="fas fa-check-circle"></i> המיקום נטען לפי קואורדינטות!</span>';
+            } else {
+                if (queryName) document.getElementById('place-name').value = queryName;
+                showToast('נטענו קואורדינטות המקום!', 'success');
+                if (statusEl) statusEl.innerHTML = '<span style="color:var(--accent-emerald, #10B981);"><i class="fas fa-check"></i> נטענו קואורדינטות המקום</span>';
+            }
+            if (gmapsInput) gmapsInput.value = '';
+        });
+    } else {
+        if (queryName) document.getElementById('place-name').value = queryName;
+        showToast('נטענו קואורדינטות המקום!', 'success');
+        if (statusEl) statusEl.innerHTML = '<span style="color:var(--accent-emerald, #10B981);"><i class="fas fa-check"></i> נטענו קואורדינטות</span>';
+        if (gmapsInput) gmapsInput.value = '';
     }
 }
 
@@ -1057,6 +1135,15 @@ function initEvents() {
     const loadGmapsLinkBtn = document.getElementById('btn-load-gmaps-link');
     if (loadGmapsLinkBtn) {
         loadGmapsLinkBtn.addEventListener('click', handleGmapsLinkImport);
+    }
+    const placeGmapsLinkInput = document.getElementById('place-gmaps-link');
+    if (placeGmapsLinkInput) {
+        placeGmapsLinkInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleGmapsLinkImport();
+            }
+        });
     }
 
     const roadbookModal = document.getElementById('roadbook-modal');
