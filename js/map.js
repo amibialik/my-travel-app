@@ -33,6 +33,7 @@ import { customMapStyle, darkMapStyle } from './map-styles.js';
 
 import {
     showGooglePlaceDetails,
+    showGooglePlaceDetailsByLocation,
     closeGooglePlacePanel,
     renderPlaces,
     getPlaceColor,
@@ -99,11 +100,13 @@ export function initMap() {
     // Export globally for compatibility or local state
     window.placesService = placesService;
 
-    // Click on map to show rich Google Place details for POIs
+    // Click on map to show rich Google Place details for POIs or any clicked map point
     newMap.addListener('click', (e) => {
         if (e && e.placeId) {
             if (typeof e.stop === 'function') e.stop();
             showGooglePlaceDetails(e.placeId);
+        } else if (e && e.latLng) {
+            showGooglePlaceDetailsByLocation(e.latLng.lat(), e.latLng.lng());
         }
     });
 

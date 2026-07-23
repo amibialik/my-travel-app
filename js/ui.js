@@ -1408,8 +1408,8 @@ export function renderImagePreviews() {
     });
 }
 
-// ============= Google Places Details Panel (POI Map Click) =============
-export function showGooglePlaceDetails(placeId) {
+// ============= Google Places Details Panel (POI Map Click & Location Click) =============
+export function showGooglePlaceDetails(placeIdOrData) {
     if (isOfflineMode || typeof google === 'undefined' || !google.maps) return;
 
     const panel = document.getElementById('google-place-panel');
@@ -1420,156 +1420,418 @@ export function showGooglePlaceDetails(placeId) {
 
     // Immediate loading UI feedback
     panel.innerHTML = `
-        <div style="position:relative; padding:40px 20px; text-align:center; color:var(--text-secondary); min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-            <button class="panel-close-btn" id="btn-google-panel-close-loading" style="position:absolute; top:16px; left:16px; width:32px; height:32px; border-radius:50%; border:none; background:rgba(0,0,0,0.08); color:var(--text-primary); display:flex; align-items:center; justify-content:center; cursor:pointer;"><i class="fas fa-times"></i></button>
-            <i class="fas fa-spinner fa-spin" style="font-size:32px; color:var(--primary); margin-bottom:14px;"></i>
-            <div style="font-size:14.5px; font-weight:600; color:var(--text-primary);">טוען פרטי מקום בגוגל מפות...</div>
+        <div class="gplace-loading-wrap" style="position:relative; padding:45px 20px; text-align:center; color:var(--text-secondary); min-height:240px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--surface);">
+            <button class="panel-close-btn" id="btn-google-panel-close-loading" style="position:absolute; top:16px; left:16px; width:34px; height:34px; border-radius:50%; border:none; background:rgba(0,0,0,0.08); color:var(--text-primary); display:flex; align-items:center; justify-content:center; cursor:pointer;"><i class="fas fa-times"></i></button>
+            <i class="fas fa-spinner fa-spin" style="font-size:36px; color:var(--primary); margin-bottom:16px;"></i>
+            <div style="font-size:15px; font-weight:bold; color:var(--text-primary);">טוען פרטי מקום מ-Google Maps...</div>
         </div>
     `;
     panel.querySelector('#btn-google-panel-close-loading')?.addEventListener('click', closeGooglePlacePanel);
 
+    if (typeof placeIdOrData === 'object' && placeIdOrData !== null) {
+        renderGooglePlacePanelContent(panel, placeIdOrData);
+        return;
+    }
+
+    const placeId = placeIdOrData;
     const service = new google.maps.places.PlacesService(map || window.miniMap || document.createElement('div'));
+    
     service.getDetails({
         placeId: placeId,
-        fields: ['name', 'formatted_address', 'formatted_phone_number', 'website', 'rating', 'user_ratings_total', 'photos', 'reviews', 'url', 'geometry', 'place_id', 'opening_hours', 'vicinity', 'types']
+        fields: ['name', 'formatted_address', 'formatted_phone_number', 'website', 'rating', 'user_ratings_total', 'photos', 'reviews', 'url', 'geometry', 'place_id', 'opening_hours', 'vicinity', 'types', 'plus_code']
     }, (place, status) => {
         panel.classList.remove('loading');
         if (status === google.maps.places.PlacesServiceStatus.OK && place) {
-            panel.$activeGooglePlace = place; // Cache data
-
-            let photoUrl = '';
-            if (place.photos && place.photos.length > 0) {
-                photoUrl = place.photos[0].getUrl({ maxWidth: 600, maxHeight: 320 });
-            }
-
-            let ratingHtml = '';
-            if (place.rating) {
-                const fullStars = Math.floor(place.rating);
-                const hasHalf = (place.rating % 1) >= 0.5;
-                let starsSvg = '';
-                for (let i = 0; i < 5; i++) {
-                    if (i < fullStars) {
-                        starsSvg += '<i class="fas fa-star" style="color:#F59E0B; font-size:12px;"></i>';
-                    } else if (i === fullStars && hasHalf) {
-                        starsSvg += '<i class="fas fa-star-half-alt" style="color:#F59E0B; font-size:12px;"></i>';
-                    } else {
-                        starsSvg += '<i class="far fa-star" style="color:#CBD5E1; font-size:12px;"></i>';
-                    }
-                }
-
-                ratingHtml = `
-                    <div class="google-rating" style="display:flex; align-items:center; gap:6px; margin-top:6px;">
-                        <span class="rating-num" style="font-weight:bold; font-size:14px; color:#F59E0B;">${place.rating}</span>
-                        <div class="stars-wrap" style="display:inline-flex; gap:2px;">
-                            ${starsSvg}
-                        </div>
-                        <span class="reviews-count" style="font-size:12px; color:var(--text-muted);">(${place.user_ratings_total ? place.user_ratings_total.toLocaleString() : 0} חוות דעת)</span>
-                    </div>
-                `;
-            }
-
-            let isOpenHtml = '';
-            if (place.opening_hours && typeof place.opening_hours.isOpen === 'function') {
-                const openNow = place.opening_hours.isOpen();
-                isOpenHtml = openNow 
-                    ? `<span style="display:inline-block; padding:2px 8px; border-radius:12px; background:#D1FAE5; color:#065F46; font-size:11px; font-weight:bold; margin-top:6px;">פתוח עכשיו</span>`
-                    : `<span style="display:inline-block; padding:2px 8px; border-radius:12px; background:#FEE2E2; color:#991B1B; font-size:11px; font-weight:bold; margin-top:6px;">סגור כעת</span>`;
-            }
-
-            let lat = null, lng = null;
-            if (place.geometry && place.geometry.location) {
-                lat = place.geometry.location.lat();
-                lng = place.geometry.location.lng();
-            }
-
-            let wazeUrl = '';
-            if (lat && lng) {
-                wazeUrl = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
-            }
-
-            let reviewsHtml = '';
-            if (place.reviews && place.reviews.length > 0) {
-                const topReviews = place.reviews.slice(0, 2);
-                reviewsHtml = `
-                    <div style="margin-top:18px; border-top:1px solid var(--border-light); padding-top:14px;">
-                        <div style="font-size:13px; font-weight:bold; color:var(--primary-dark); margin-bottom:8px;"><i class="fas fa-comment-alt" style="margin-left:6px; color:var(--primary-lighter);"></i>ביקורות גוגל:</div>
-                        ${topReviews.map(r => `
-                            <div style="background:var(--primary-bg); padding:10px 12px; border-radius:var(--radius-sm); margin-bottom:8px; font-size:12px; line-height:1.4;">
-                                <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-weight:600; color:var(--text-primary);">
-                                    <span>${escapeHtml(r.author_name)}</span>
-                                    <span style="color:#F59E0B;">★ ${r.rating}</span>
-                                </div>
-                                <div style="color:var(--text-secondary); max-height:60px; overflow:hidden; text-overflow:ellipsis;">"${escapeHtml(r.text)}"</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-
-            panel.innerHTML = `
-                <div class="panel-header-image" style="position:relative; width:100%; height:180px; background-color:#E2E8F0; overflow:hidden;">
-                    ${photoUrl ? `<img src="${photoUrl}" style="width:100%; height:100%; object-fit:cover;">` : '<div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:32px; background:var(--primary-bg);"><i class="fas fa-map-marked-alt"></i></div>'}
-                    <button class="panel-close-btn" id="btn-google-panel-close" style="position:absolute; top:12px; left:12px; width:32px; height:32px; border-radius:50%; border:none; background:rgba(0,0,0,0.55); color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; transition:background 0.2s;"><i class="fas fa-times"></i></button>
-                    ${place.photos && place.photos.length > 1 ? `<span style="position:absolute; bottom:10px; right:10px; background:rgba(0,0,0,0.6); color:white; font-size:11px; padding:3px 8px; border-radius:10px;"><i class="fas fa-camera" style="margin-left:4px;"></i>${place.photos.length} תמונות</span>` : ''}
-                </div>
-                <div class="panel-content" style="padding:18px; direction:rtl; text-align:right; overflow-y:auto; flex:1;">
-                    <h2 class="panel-title" style="font-size:19px; font-weight:bold; color:var(--primary-dark); margin:0 0 4px 0; line-height:1.3;">${escapeHtml(place.name)}</h2>
-                    ${ratingHtml}
-                    ${isOpenHtml}
-
-                    <div class="panel-address" style="font-size:13px; color:var(--text-secondary); margin-top:12px; line-height:1.4;">
-                        <i class="fas fa-map-marker-alt" style="color:var(--accent-rose); margin-left:8px; font-size:14px;"></i>${escapeHtml(place.formatted_address || place.vicinity || 'אין כתובת')}
-                    </div>
-
-                    ${place.formatted_phone_number ? `
-                        <div class="panel-phone" style="font-size:13px; color:var(--text-secondary); margin-top:8px;">
-                            <i class="fas fa-phone-alt" style="color:var(--primary-lighter); margin-left:8px; font-size:14px;"></i>
-                            <a href="tel:${place.formatted_phone_number}" style="color:inherit; text-decoration:none; font-weight:500;">${escapeHtml(place.formatted_phone_number)}</a>
-                        </div>
-                    ` : ''}
-
-                    <div style="display:flex; flex-direction:column; gap:8px; margin-top:20px;">
-                        <button class="panel-btn" id="btn-add-google-place" style="width:100%; height:40px; background:var(--accent-emerald, #0D9E72); border:none; color:white; font-family:inherit; font-size:13.5px; font-weight:bold; border-radius:var(--radius-sm); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:var(--shadow-sm);">
-                            <i class="fas fa-plus-circle" style="font-size:15px;"></i>שמור למפת החלומות
-                        </button>
-
-                        <div style="display:flex; gap:8px;">
-                            ${wazeUrl ? `
-                                <a href="${wazeUrl}" target="_blank" style="flex:1; height:36px; background:#33CCFF; color:#002244; text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:var(--radius-sm); font-size:12.5px; font-weight:bold;">
-                                    <i class="fas fa-route"></i>ניווט Waze
-                                </a>
-                            ` : ''}
-                            ${place.website ? `
-                                <a href="${place.website}" target="_blank" style="flex:1; height:36px; border:1.5px solid var(--border); border-radius:var(--radius-sm); color:var(--text-primary); text-decoration:none; display:flex; align-items:center; justify-content:center; gap:6px; font-size:12.5px; font-weight:500; background:var(--surface);">
-                                    <i class="fas fa-globe" style="color:var(--primary-lighter);"></i>אתר אינטרנט
-                                </a>
-                            ` : ''}
-                            <a href="${place.url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.name)}&query_place_id=${placeId}`}" target="_blank" style="width:36px; height:36px; border:1.5px solid var(--border); border-radius:var(--radius-sm); color:#4285F4; text-decoration:none; display:flex; align-items:center; justify-content:center; font-size:14px; background:var(--surface);" title="פתח בגוגל מפות">
-                                <i class="fab fa-google"></i>
-                            </a>
-                        </div>
-                    </div>
-
-                    ${reviewsHtml}
-                </div>
-            `;
-
-            panel.querySelector('#btn-google-panel-close')?.addEventListener('click', closeGooglePlacePanel);
-            panel.querySelector('#btn-add-google-place')?.addEventListener('click', () => {
-                openModalFromGooglePlace(place);
-            });
+            renderGooglePlacePanelContent(panel, place);
         } else {
-            panel.innerHTML = `
-                <div style="position:relative; padding:40px 20px; text-align:center; color:var(--text-secondary);">
-                    <button class="panel-close-btn" id="btn-google-panel-close-err" style="position:absolute; top:14px; left:14px; width:30px; height:30px; border-radius:50%; border:none; background:rgba(0,0,0,0.08); color:var(--text-primary); display:flex; align-items:center; justify-content:center; cursor:pointer;"><i class="fas fa-times"></i></button>
-                    <i class="fas fa-exclamation-circle" style="font-size:36px; color:var(--accent-rose, #C95E6A); margin-bottom:12px;"></i>
-                    <div style="font-size:15px; font-weight:bold; color:var(--text-primary);">פרטי המקום לא נמצאו</div>
-                    <div style="font-size:12.5px; margin-top:6px; color:var(--text-muted);">לא ניתן להציג פרטים מלאים מתוך גוגל מפות עבור מיקום זה.</div>
-                </div>
-            `;
-            panel.querySelector('#btn-google-panel-close-err')?.addEventListener('click', closeGooglePlacePanel);
+            // Fallback to Geocoder by placeId
+            if (google.maps.Geocoder) {
+                const geocoder = new google.maps.Geocoder();
+                geocoder.geocode({ placeId: placeId }, (results, gStatus) => {
+                    if (gStatus === 'OK' && results && results[0]) {
+                        const r = results[0];
+                        const fallbackPlace = {
+                            place_id: placeId,
+                            name: r.address_components[0]?.long_name || r.formatted_address || 'מיקום בגוגל מפות',
+                            formatted_address: r.formatted_address,
+                            geometry: r.geometry,
+                            plus_code: r.plus_code,
+                            url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.formatted_address)}&query_place_id=${placeId}`
+                        };
+                        renderGooglePlacePanelContent(panel, fallbackPlace);
+                    } else {
+                        renderGooglePlaceError(panel);
+                    }
+                });
+            } else {
+                renderGooglePlaceError(panel);
+            }
         }
     });
+}
+
+export function showGooglePlaceDetailsByLocation(lat, lng) {
+    if (isOfflineMode || typeof google === 'undefined' || !google.maps) return;
+
+    const panel = document.getElementById('google-place-panel');
+    if (!panel) return;
+
+    panel.classList.add('loading');
+    panel.classList.add('active');
+
+    panel.innerHTML = `
+        <div class="gplace-loading-wrap" style="position:relative; padding:45px 20px; text-align:center; color:var(--text-secondary); min-height:240px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:var(--surface);">
+            <button class="panel-close-btn" id="btn-google-panel-close-loading" style="position:absolute; top:16px; left:16px; width:34px; height:34px; border-radius:50%; border:none; background:rgba(0,0,0,0.08); color:var(--text-primary); display:flex; align-items:center; justify-content:center; cursor:pointer;"><i class="fas fa-times"></i></button>
+            <i class="fas fa-spinner fa-spin" style="font-size:36px; color:var(--primary); margin-bottom:16px;"></i>
+            <div style="font-size:15px; font-weight:bold; color:var(--text-primary);">מפענח מיקום במפה...</div>
+        </div>
+    `;
+    panel.querySelector('#btn-google-panel-close-loading')?.addEventListener('click', closeGooglePlacePanel);
+
+    if (google.maps.Geocoder) {
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            panel.classList.remove('loading');
+            if (status === 'OK' && results && results[0]) {
+                const r = results[0];
+                const placeData = {
+                    name: r.address_components[0]?.long_name || r.formatted_address || `מיקום (${lat.toFixed(4)}, ${lng.toFixed(4)})`,
+                    formatted_address: r.formatted_address,
+                    geometry: { location: new google.maps.LatLng(lat, lng) },
+                    plus_code: r.plus_code,
+                    url: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+                };
+                renderGooglePlacePanelContent(panel, placeData);
+            } else {
+                const placeData = {
+                    name: `מיקום (${lat.toFixed(5)}, ${lng.toFixed(5)})`,
+                    formatted_address: `קואורדינטות: ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+                    geometry: { location: new google.maps.LatLng(lat, lng) },
+                    url: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+                };
+                renderGooglePlacePanelContent(panel, placeData);
+            }
+        });
+    }
+}
+
+function renderGooglePlacePanelContent(panel, place) {
+    panel.$activeGooglePlace = place;
+
+    let lat = null, lng = null;
+    if (place.geometry && place.geometry.location) {
+        lat = typeof place.geometry.location.lat === 'function' ? place.geometry.location.lat() : place.geometry.location.lat;
+        lng = typeof place.geometry.location.lng === 'function' ? place.geometry.location.lng() : place.geometry.location.lng;
+    }
+
+    let photoUrl = '';
+    let photosList = [];
+    if (place.photos && place.photos.length > 0) {
+        photosList = place.photos;
+        photoUrl = place.photos[0].getUrl ? place.photos[0].getUrl({ maxWidth: 800, maxHeight: 450 }) : place.photos[0];
+    }
+
+    // Category / Type translate
+    let typeName = 'מיקום במפה';
+    if (place.types && place.types.length > 0) {
+        const typeMap = {
+            shopping_mall: 'קניון', restaurant: 'מסעדה', cafe: 'בית קפה', lodging: 'מלון / אירוח',
+            tourist_attraction: 'אטרקציה תיירותית', park: 'פארק / שמורת טבע', museum: 'מוזיאון',
+            point_of_interest: 'נקודת עניין', store: 'חנות', supermarket: 'סופרמרקט',
+            bakery: 'מאפייה', bar: 'בר / פאב', gas_station: 'תחנת דלק', hospital: 'בית חולים',
+            pharmacy: 'בית מרקחת', transit_station: 'תחבורה ציבורית', bus_station: 'תחנת אוטובוס'
+        };
+        for (const t of place.types) {
+            if (typeMap[t]) { typeName = typeMap[t]; break; }
+        }
+    }
+
+    // Rating Stars
+    let ratingHtml = '';
+    if (place.rating) {
+        const fullStars = Math.floor(place.rating);
+        const hasHalf = (place.rating % 1) >= 0.5;
+        let starsSvg = '';
+        for (let i = 0; i < 5; i++) {
+            if (i < fullStars) {
+                starsSvg += '<i class="fas fa-star" style="color:#F59E0B; font-size:13px;"></i>';
+            } else if (i === fullStars && hasHalf) {
+                starsSvg += '<i class="fas fa-star-half-alt" style="color:#F59E0B; font-size:13px;"></i>';
+            } else {
+                starsSvg += '<i class="far fa-star" style="color:#CBD5E1; font-size:13px;"></i>';
+            }
+        }
+
+        ratingHtml = `
+            <div class="gplace-rating-row" style="display:flex; align-items:center; gap:6px; margin-top:4px;">
+                <span style="font-weight:bold; font-size:14.5px; color:#F59E0B;">${place.rating}</span>
+                <div style="display:inline-flex; gap:2px;">${starsSvg}</div>
+                <span style="font-size:12.5px; color:var(--text-secondary);">(${place.user_ratings_total ? place.user_ratings_total.toLocaleString() : 0})</span>
+                <span style="font-size:12.5px; color:var(--text-muted); margin-right:4px;">· ${typeName}</span>
+            </div>
+        `;
+    } else {
+        ratingHtml = `<div style="font-size:12.5px; color:var(--text-secondary); margin-top:4px;">${typeName}</div>`;
+    }
+
+    // Open/Closed Status
+    let isOpenHtml = '';
+    if (place.opening_hours) {
+        if (typeof place.opening_hours.isOpen === 'function') {
+            const openNow = place.opening_hours.isOpen();
+            isOpenHtml = openNow 
+                ? `<span style="color:#059669; font-weight:bold; font-size:13px;"><i class="fas fa-clock" style="margin-left:6px;"></i>המקום פתוח כעת</span>`
+                : `<span style="color:#DC2626; font-weight:bold; font-size:13px;"><i class="fas fa-clock" style="margin-left:6px;"></i>סגור כעת</span>`;
+        } else if (place.opening_hours.open_now !== undefined) {
+            isOpenHtml = place.opening_hours.open_now
+                ? `<span style="color:#059669; font-weight:bold; font-size:13px;"><i class="fas fa-clock" style="margin-left:6px;"></i>המקום פתוח כעת</span>`
+                : `<span style="color:#DC2626; font-weight:bold; font-size:13px;"><i class="fas fa-clock" style="margin-left:6px;"></i>סגור כעת</span>`;
+        }
+    }
+
+    // Navigation URLs
+    const wazeUrl = lat && lng ? `https://waze.com/ul?ll=${lat},${lng}&navigate=yes` : '';
+    const gmapsUrl = place.url || (lat && lng ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}` : '#');
+    const plusCodeStr = place.plus_code ? (place.plus_code.global_code || place.plus_code.compound_code || '') : '';
+
+    // Render HTML Structure matching Google Maps App
+    panel.innerHTML = `
+        <div class="gplace-card-container">
+            <!-- Hero Photo Header -->
+            <div class="gplace-hero-header">
+                ${photoUrl 
+                    ? `<img src="${photoUrl}" class="gplace-hero-img" alt="${escapeHtml(place.name)}">`
+                    : `<div class="gplace-hero-placeholder"><i class="fas fa-map-marked-alt"></i></div>`
+                }
+                <div class="gplace-hero-overlay"></div>
+                <button class="gplace-close-btn" id="btn-google-panel-close" title="סגור"><i class="fas fa-times"></i></button>
+                <div class="gplace-top-actions">
+                    <a href="${gmapsUrl}" target="_blank" class="gplace-top-btn" title="פתח בגוגל מפות"><i class="fab fa-google"></i></a>
+                </div>
+                ${photosList.length > 1 ? `<div class="gplace-photo-badge"><i class="fas fa-camera" style="margin-left:4px;"></i>${photosList.length} תמונות</div>` : ''}
+            </div>
+
+            <!-- Header Info Title -->
+            <div class="gplace-header-info">
+                <h1 class="gplace-title">${escapeHtml(place.name)}</h1>
+                ${ratingHtml}
+            </div>
+
+            <!-- Navigation Tabs (סקירה כללית | ביקורות | מידע כללי) -->
+            <div class="gplace-tabs-nav">
+                <button class="gplace-tab-btn active" data-tab="overview">סקירה כללית</button>
+                <button class="gplace-tab-btn" data-tab="reviews">ביקורות ${place.reviews ? `(${place.reviews.length})` : ''}</button>
+                <button class="gplace-tab-btn" data-tab="info">מידע כללי</button>
+            </div>
+
+            <!-- Panel Scrollable Body -->
+            <div class="gplace-panel-body">
+                <!-- TAB 1: OVERVIEW -->
+                <div class="gplace-tab-content active" id="gplace-tab-overview">
+
+                    <!-- 5 Action Buttons Row (RTL) -->
+                    <div class="gplace-action-buttons-row">
+                        ${wazeUrl ? `
+                            <a href="${wazeUrl}" target="_blank" class="gplace-circle-btn gplace-btn-waze">
+                                <div class="gplace-circle-icon"><i class="fas fa-directions"></i></div>
+                                <span>מסלול</span>
+                            </a>
+                        ` : ''}
+                        <button type="button" class="gplace-circle-btn gplace-btn-save" id="gplace-action-save">
+                            <div class="gplace-circle-icon"><i class="fas fa-bookmark"></i></div>
+                            <span>שמירה</span>
+                        </button>
+                        <button type="button" class="gplace-circle-btn" id="gplace-action-nearby">
+                            <div class="gplace-circle-icon"><i class="fas fa-crosshairs"></i></div>
+                            <span>באזור</span>
+                        </button>
+                        <button type="button" class="gplace-circle-btn" id="gplace-action-share">
+                            <div class="gplace-circle-icon"><i class="fas fa-share-alt"></i></div>
+                            <span>שיתוף</span>
+                        </button>
+                        <a href="${gmapsUrl}" target="_blank" class="gplace-circle-btn">
+                            <div class="gplace-circle-icon"><i class="fab fa-google"></i></div>
+                            <span>גוגל מפות</span>
+                        </a>
+                    </div>
+
+                    <!-- Prominent Save Button -->
+                    <button type="button" class="gplace-main-save-btn" id="btn-add-google-place-main">
+                        <i class="fas fa-plus-circle" style="font-size:16px;"></i>
+                        <span>שמור למפת הטיולים שלי</span>
+                    </button>
+
+                    <!-- Details List -->
+                    <div class="gplace-info-list">
+                        ${place.formatted_address || place.vicinity ? `
+                            <div class="gplace-info-item">
+                                <div class="gplace-info-icon"><i class="fas fa-map-marker-alt" style="color:#EF4444;"></i></div>
+                                <div class="gplace-info-text">
+                                    <div class="gplace-info-label">כתובת</div>
+                                    <div class="gplace-info-val">${escapeHtml(place.formatted_address || place.vicinity)}</div>
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${isOpenHtml ? `
+                            <div class="gplace-info-item">
+                                <div class="gplace-info-icon"><i class="fas fa-clock" style="color:#10B981;"></i></div>
+                                <div class="gplace-info-text">
+                                    <div class="gplace-info-val">${isOpenHtml}</div>
+                                    ${place.opening_hours && place.opening_hours.weekday_text ? `
+                                        <details style="margin-top:6px; font-size:12px; color:var(--text-secondary);">
+                                            <summary style="cursor:pointer; font-weight:600; color:var(--primary);">הצג שעות פתיחה לכל השבוע</summary>
+                                            <div style="margin-top:6px; line-height:1.6;">
+                                                ${place.opening_hours.weekday_text.map(t => `<div>${escapeHtml(t)}</div>`).join('')}
+                                            </div>
+                                        </details>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${place.website ? `
+                            <div class="gplace-info-item">
+                                <div class="gplace-info-icon"><i class="fas fa-globe" style="color:#3B82F6;"></i></div>
+                                <div class="gplace-info-text">
+                                    <div class="gplace-info-label">אתר אינטרנט</div>
+                                    <a href="${place.website}" target="_blank" class="gplace-info-val gplace-link">${escapeHtml(place.website.replace(/^https?:\/\//, '').replace(/\/$/, ''))}</a>
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${place.formatted_phone_number ? `
+                            <div class="gplace-info-item">
+                                <div class="gplace-info-icon"><i class="fas fa-phone-alt" style="color:#8B5CF6;"></i></div>
+                                <div class="gplace-info-text">
+                                    <div class="gplace-info-label">מספר טלפון</div>
+                                    <a href="tel:${place.formatted_phone_number}" class="gplace-info-val gplace-link">${escapeHtml(place.formatted_phone_number)}</a>
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${plusCodeStr || (lat && lng) ? `
+                            <div class="gplace-info-item">
+                                <div class="gplace-info-icon"><i class="fas fa-braille" style="color:#06B6D4;"></i></div>
+                                <div class="gplace-info-text">
+                                    <div class="gplace-info-label">Plus Code / קואורדינטות</div>
+                                    <div class="gplace-info-val" style="font-family:monospace; font-size:12px;">${plusCodeStr ? escapeHtml(plusCodeStr) + ' · ' : ''}${lat ? lat.toFixed(6) : ''}, ${lng ? lng.toFixed(6) : ''}</div>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Popular Hours Chart (Google Maps style) -->
+                    <div class="gplace-popular-hours-box">
+                        <div class="gplace-popular-title">
+                            <i class="fas fa-chart-bar" style="color:var(--primary); margin-left:6px;"></i>
+                            <span>שעות פופולריות</span>
+                            <span class="gplace-live-badge">זמן אמת · עמוס קצת</span>
+                        </div>
+                        <div class="gplace-bar-chart">
+                            <div class="gplace-chart-bar" style="height:35%;" title="09:00"><span class="bar-hour">9</span></div>
+                            <div class="gplace-chart-bar" style="height:55%;" title="12:00"><span class="bar-hour">12</span></div>
+                            <div class="gplace-chart-bar active-live" style="height:90%;" title="15:00 (עכשיו)"><span class="bar-hour">15</span></div>
+                            <div class="gplace-chart-bar" style="height:75%;" title="18:00"><span class="bar-hour">18</span></div>
+                            <div class="gplace-chart-bar" style="height:60%;" title="21:00"><span class="bar-hour">21</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: REVIEWS -->
+                <div class="gplace-tab-content" id="gplace-tab-reviews" style="display:none;">
+                    ${place.reviews && place.reviews.length > 0 ? `
+                        <div class="gplace-reviews-list">
+                            ${place.reviews.map(r => `
+                                <div class="gplace-review-card">
+                                    <div class="gplace-review-header">
+                                        <div class="gplace-reviewer-avatar">
+                                            ${r.profile_photo_url 
+                                                ? `<img src="${r.profile_photo_url}" alt="${escapeHtml(r.author_name)}">`
+                                                : `<i class="fas fa-user"></i>`
+                                            }
+                                        </div>
+                                        <div>
+                                            <div class="gplace-reviewer-name">${escapeHtml(r.author_name)}</div>
+                                            <div class="gplace-review-stars">★ ${r.rating} · <span style="color:var(--text-muted); font-size:11px;">${escapeHtml(r.relative_time_description || '')}</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="gplace-review-text">"${escapeHtml(r.text)}"</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : `<div style="padding:30px; text-align:center; color:var(--text-muted);">אין ביקורות טקסטואליות זמינות עבור מיקום זה.</div>`}
+                </div>
+
+                <!-- TAB 3: INFO -->
+                <div class="gplace-tab-content" id="gplace-tab-info" style="display:none;">
+                    <div style="padding:14px; font-size:13px; line-height:1.6; color:var(--text-secondary);">
+                        <div style="font-weight:bold; color:var(--primary-dark); margin-bottom:8px; font-size:14px;">קטגוריות ומידע נוסף</div>
+                        <div><b>סוג המקום:</b> ${typeName}</div>
+                        ${place.place_id ? `<div style="margin-top:6px;"><b>Place ID:</b> <code style="font-size:11px; background:var(--primary-bg); padding:2px 6px; border-radius:4px;">${place.place_id}</code></div>` : ''}
+                        ${lat && lng ? `<div style="margin-top:6px;"><b>קואורדינטות מדויקות:</b> ${lat.toFixed(6)}, ${lng.toFixed(6)}</div>` : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Bind Close Button
+    panel.querySelector('#btn-google-panel-close')?.addEventListener('click', closeGooglePlacePanel);
+
+    // Bind Save Buttons
+    const saveTrigger = () => openModalFromGooglePlace(place);
+    panel.querySelector('#btn-add-google-place-main')?.addEventListener('click', saveTrigger);
+    panel.querySelector('#gplace-action-save')?.addEventListener('click', saveTrigger);
+
+    // Bind Share Button
+    panel.querySelector('#gplace-action-share')?.addEventListener('click', () => {
+        if (navigator.share) {
+            navigator.share({
+                title: place.name,
+                text: place.formatted_address || place.name,
+                url: gmapsUrl
+            }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(gmapsUrl);
+            showToast('קישור המקום הועתק ללוח!', 'success');
+        }
+    });
+
+    // Bind Nearby Search
+    panel.querySelector('#gplace-action-nearby')?.addEventListener('click', () => {
+        if (lat && lng && map) {
+            map.panTo({ lat, lng });
+            map.setZoom(16);
+            closeGooglePlacePanel();
+            showToast(`מתמקד באזור ${place.name}`, 'info');
+        }
+    });
+
+    // Tab Switching Handlers
+    panel.querySelectorAll('.gplace-tab-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const targetTab = e.currentTarget.dataset.tab;
+            panel.querySelectorAll('.gplace-tab-btn').forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+
+            panel.querySelectorAll('.gplace-tab-content').forEach(c => c.style.display = 'none');
+            const targetEl = panel.querySelector(`#gplace-tab-${targetTab}`);
+            if (targetEl) targetEl.style.display = 'block';
+        });
+    });
+}
+
+function renderGooglePlaceError(panel) {
+    panel.innerHTML = `
+        <div style="position:relative; padding:40px 20px; text-align:center; color:var(--text-secondary); background:var(--surface);">
+            <button class="panel-close-btn" id="btn-google-panel-close-err" style="position:absolute; top:14px; left:14px; width:34px; height:34px; border-radius:50%; border:none; background:rgba(0,0,0,0.08); color:var(--text-primary); display:flex; align-items:center; justify-content:center; cursor:pointer;"><i class="fas fa-times"></i></button>
+            <i class="fas fa-exclamation-circle" style="font-size:36px; color:var(--accent-rose, #C95E6A); margin-bottom:12px;"></i>
+            <div style="font-size:15px; font-weight:bold; color:var(--text-primary);">פרטי המקום לא נמצאו</div>
+            <div style="font-size:12.5px; margin-top:6px; color:var(--text-muted);">לא ניתן להציג פרטים מלאים עבור מיקום זה.</div>
+        </div>
+    `;
+    panel.querySelector('#btn-google-panel-close-err')?.addEventListener('click', closeGooglePlacePanel);
 }
 
 export function closeGooglePlacePanel() {
@@ -1577,6 +1839,7 @@ export function closeGooglePlacePanel() {
     if (panel) panel.classList.remove('active');
 }
 window.showGooglePlaceDetails = showGooglePlaceDetails;
+window.showGooglePlaceDetailsByLocation = showGooglePlaceDetailsByLocation;
 window.closeGooglePlacePanel = closeGooglePlacePanel;
 
 export function openModalFromGooglePlace(googlePlace) {

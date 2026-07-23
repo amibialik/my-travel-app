@@ -5663,4 +5663,427 @@ body.mobile-view-itinerary .itinerary-panel {
     border-color: var(--accent-gold);
 }
 
+/* ============ Google Maps Place Details Card & Drawer (Matching Screenshot) ============ */
+.gplace-card-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--surface, #FFFDF8);
+    direction: rtl;
+    text-align: right;
+    font-family: 'Varela Round', sans-serif;
+    overflow: hidden;
+}
+
+.gplace-hero-header {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    background: var(--primary-bg, #EEF4FB);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.gplace-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gplace-hero-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    color: var(--primary-lighter);
+    background: linear-gradient(135deg, var(--primary-bg) 0%, var(--surface-warm) 100%);
+}
+
+.gplace-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 40%, rgba(0,0,0,0.6) 100%);
+}
+
+.gplace-close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.55);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    z-index: 10;
+    transition: transform 0.2s, background 0.2s;
+}
+.gplace-close-btn:hover {
+    background: rgba(0,0,0,0.8);
+    transform: scale(1.05);
+}
+
+.gplace-top-actions {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+
+.gplace-top-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.55);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background 0.2s;
+}
+.gplace-top-btn:hover {
+    background: rgba(0,0,0,0.8);
+}
+
+.gplace-photo-badge {
+    position: absolute;
+    bottom: 12px;
+    right: 14px;
+    background: rgba(0,0,0,0.65);
+    color: white;
+    font-size: 11.5px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    backdrop-filter: blur(4px);
+    z-index: 5;
+}
+
+.gplace-header-info {
+    padding: 16px 20px 12px;
+    background: var(--surface, #FFFDF8);
+    border-bottom: 1px solid var(--border-light, #E6DAC4);
+    flex-shrink: 0;
+}
+
+.gplace-title {
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--primary-dark, #0F2035);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.gplace-tabs-nav {
+    display: flex;
+    background: var(--surface-warm, #FFF8EE);
+    border-bottom: 1px solid var(--border, #D4C5A9);
+    padding: 0 16px;
+    flex-shrink: 0;
+}
+
+.gplace-tab-btn {
+    flex: 1;
+    padding: 10px 0;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.gplace-tab-btn.active {
+    color: var(--primary, #1E3A5F);
+    border-bottom-color: var(--primary, #1E3A5F);
+}
+
+.gplace-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 20px;
+}
+
+/* Action Buttons Row */
+.gplace-action-buttons-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.gplace-circle-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.15s;
+}
+
+.gplace-circle-btn:hover {
+    transform: translateY(-2px);
+}
+
+.gplace-circle-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--primary-bg, #EEF4FB);
+    color: var(--primary, #1E3A5F);
+    border: 1.5px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+}
+
+.gplace-btn-waze .gplace-circle-icon {
+    background: #33CCFF;
+    color: #002244;
+    border-color: #00BBE6;
+}
+
+.gplace-btn-save .gplace-circle-icon {
+    background: var(--accent-star-light, #E8B930);
+    color: var(--primary-dark);
+    border-color: var(--accent-star);
+}
+
+.gplace-main-save-btn {
+    width: 100%;
+    height: 44px;
+    background: var(--accent-emerald, #0D9E72);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm, 10px);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-md);
+    transition: background 0.2s, transform 0.15s;
+}
+
+.gplace-main-save-btn:hover {
+    background: #0B8762;
+    transform: scale(1.01);
+}
+
+/* Info List Items */
+.gplace-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.gplace-info-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.gplace-info-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--primary-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.gplace-info-text {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.gplace-info-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.gplace-info-val {
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.gplace-link {
+    color: var(--primary);
+    text-decoration: none;
+}
+.gplace-link:hover {
+    text-decoration: underline;
+}
+
+/* Popular Hours Box */
+.gplace-popular-hours-box {
+    background: var(--surface-warm, #FFF8EE);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm, 10px);
+    padding: 14px;
+    margin-top: 10px;
+}
+
+.gplace-popular-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 12px;
+}
+
+.gplace-live-badge {
+    margin-right: auto;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    background: #FEE2E2;
+    color: #991B1B;
+    font-weight: 700;
+}
+
+.gplace-bar-chart {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: 70px;
+    padding-top: 10px;
+    border-bottom: 1.5px solid var(--border);
+    gap: 6px;
+}
+
+.gplace-chart-bar {
+    flex: 1;
+    background: var(--primary-lighter, #5B8DB8);
+    border-radius: 3px 3px 0 0;
+    position: relative;
+    transition: height 0.3s ease;
+}
+
+.gplace-chart-bar.active-live {
+    background: #EF4444;
+}
+
+.bar-hour {
+    position: absolute;
+    bottom: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 10px;
+    color: var(--text-tertiary);
+}
+
+/* Reviews Cards */
+.gplace-reviews-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.gplace-review-card {
+    background: var(--primary-bg, #EEF4FB);
+    border-radius: var(--radius-sm, 10px);
+    padding: 12px 14px;
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.gplace-review-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.gplace-reviewer-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: var(--text-muted);
+}
+.gplace-reviewer-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gplace-reviewer-name {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 13px;
+}
+
+.gplace-review-stars {
+    color: #F59E0B;
+    font-weight: 600;
+    font-size: 11.5px;
+}
+
+.gplace-review-text {
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Mobile Responsive Drawer Overlay */
+@media (max-width: 768px) {
+    .details-panel {
+        width: 100vw !important;
+        height: 100vh !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        border-left: none !important;
+        border-radius: 0 !important;
+        z-index: 10000 !important;
+    }
+}
+
+
 
