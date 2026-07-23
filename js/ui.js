@@ -1410,13 +1410,16 @@ export function renderImagePreviews() {
 
 // ============= Google Places Details Panel (POI Map Click & Location Click) =============
 export function showGooglePlaceDetails(placeIdOrData) {
-    if (isOfflineMode || typeof google === 'undefined' || !google.maps) return;
-
     const panel = document.getElementById('google-place-panel');
     if (!panel) return;
 
-    panel.classList.add('loading');
     panel.classList.add('active');
+
+    // If passed a direct data object
+    if (typeof placeIdOrData === 'object' && placeIdOrData !== null) {
+        renderGooglePlacePanelContent(panel, placeIdOrData);
+        return;
+    }
 
     // Immediate loading UI feedback
     panel.innerHTML = `
@@ -1428,24 +1431,18 @@ export function showGooglePlaceDetails(placeIdOrData) {
     `;
     panel.querySelector('#btn-google-panel-close-loading')?.addEventListener('click', closeGooglePlacePanel);
 
-    if (typeof placeIdOrData === 'object' && placeIdOrData !== null) {
-        renderGooglePlacePanelContent(panel, placeIdOrData);
-        return;
-    }
-
     const placeId = placeIdOrData;
-    const service = new google.maps.places.PlacesService(map || window.miniMap || document.createElement('div'));
-    
-    service.getDetails({
-        placeId: placeId,
-        fields: ['name', 'formatted_address', 'formatted_phone_number', 'website', 'rating', 'user_ratings_total', 'photos', 'reviews', 'url', 'geometry', 'place_id', 'opening_hours', 'vicinity', 'types', 'plus_code']
-    }, (place, status) => {
-        panel.classList.remove('loading');
-        if (status === google.maps.places.PlacesServiceStatus.OK && place) {
-            renderGooglePlacePanelContent(panel, place);
-        } else {
-            // Fallback to Geocoder by placeId
-            if (google.maps.Geocoder) {
+
+    if (typeof google !== 'undefined' && google.maps && google.maps.places) {
+        const service = new google.maps.places.PlacesService(map || window.miniMap || document.createElement('div'));
+        
+        service.getDetails({
+            placeId: placeId,
+            fields: ['name', 'formatted_address', 'formatted_phone_number', 'website', 'rating', 'user_ratings_total', 'photos', 'reviews', 'url', 'geometry', 'place_id', 'opening_hours', 'vicinity', 'types', 'plus_code']
+        }, (place, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && place) {
+                renderGooglePlacePanelContent(panel, place);
+            } else if (google.maps.Geocoder) {
                 const geocoder = new google.maps.Geocoder();
                 geocoder.geocode({ placeId: placeId }, (results, gStatus) => {
                     if (gStatus === 'OK' && results && results[0]) {
@@ -1466,17 +1463,16 @@ export function showGooglePlaceDetails(placeIdOrData) {
             } else {
                 renderGooglePlaceError(panel);
             }
-        }
-    });
+        });
+    } else {
+        renderGooglePlaceError(panel);
+    }
 }
 
 export function showGooglePlaceDetailsByLocation(lat, lng) {
-    if (isOfflineMode || typeof google === 'undefined' || !google.maps) return;
-
     const panel = document.getElementById('google-place-panel');
     if (!panel) return;
 
-    panel.classList.add('loading');
     panel.classList.add('active');
 
     panel.innerHTML = `
@@ -1488,10 +1484,9 @@ export function showGooglePlaceDetailsByLocation(lat, lng) {
     `;
     panel.querySelector('#btn-google-panel-close-loading')?.addEventListener('click', closeGooglePlacePanel);
 
-    if (google.maps.Geocoder) {
+    if (typeof google !== 'undefined' && google.maps && google.maps.Geocoder) {
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-            panel.classList.remove('loading');
             if (status === 'OK' && results && results[0]) {
                 const r = results[0];
                 const placeData = {
@@ -1506,12 +1501,20 @@ export function showGooglePlaceDetailsByLocation(lat, lng) {
                 const placeData = {
                     name: `מיקום (${lat.toFixed(5)}, ${lng.toFixed(5)})`,
                     formatted_address: `קואורדינטות: ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
-                    geometry: { location: new google.maps.LatLng(lat, lng) },
+                    geometry: { location: { lat, lng } },
                     url: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
                 };
                 renderGooglePlacePanelContent(panel, placeData);
             }
         });
+    } else {
+        const placeData = {
+            name: `מיקום (${lat.toFixed(5)}, ${lng.toFixed(5)})`,
+            formatted_address: `קואורדינטות: ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+            geometry: { location: { lat, lng } },
+            url: `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+        };
+        renderGooglePlacePanelContent(panel, placeData);
     }
 }
 
@@ -1847,10 +1850,11 @@ export function openModalFromGooglePlace(googlePlace) {
 
     let latVal = 0;
     let lngVal = 0;
-    if (googlePlace.geometry && googlePlace.geometry.location) {
-        latVal = googlePlace.geometry.location.lat();
-        lngVal = googlePlace.geometry.location.lng();
-    } else if (map) {
+    if (googlePlace && googlePlace.geometry && googlePlace.geometry.location) {
+        const loc = googlePlace.geometry.location;
+        latVal = typeof loc.lat === 'function' ? loc.lat() : loc.lat;
+        lngVal = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
+    } else if (map && typeof map.getCenter === 'function') {
         latVal = map.getCenter().lat();
         lngVal = map.getCenter().lng();
     }

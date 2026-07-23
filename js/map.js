@@ -459,6 +459,7 @@ export function drawAllGpxTracks() {
                 strokeColor: isActive ? '#E5B23A' : placeColor,
                 strokeOpacity: isActive ? 1.0 : 0.5,
                 strokeWeight: isActive ? 5 : 2.5,
+                clickable: false,
                 map: map,
                 zIndex: isActive ? 1000 : 100
             });
@@ -876,6 +877,12 @@ export function initLeafletMap() {
     }, null, {
         position: 'topleft'
     }).addTo(newLeafletMap);
+
+    newLeafletMap.on('click', (e) => {
+        if (e && e.latlng) {
+            showGooglePlaceDetailsByLocation(e.latlng.lat, e.latlng.lng);
+        }
+    });
 }
 
 export function syncLeafletView() {
